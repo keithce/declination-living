@@ -1,5 +1,7 @@
 // Geoapify API client for city autocomplete and timezone lookup
 
+const GEOAPIFY_API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY
+
 export interface GeoapifyPlace {
   place_id: string
   name: string
@@ -49,14 +51,23 @@ export interface CityResult {
   displayName: string
 }
 
-// Call our server-side proxy to hide API key
+// Call Geoapify API directly (API key is safe for geocoding APIs)
 export async function searchCities(query: string): Promise<CityResult[]> {
   if (query.length < 2) return []
 
+  if (!GEOAPIFY_API_KEY) {
+    console.error('VITE_GEOAPIFY_API_KEY not configured')
+    return []
+  }
+
   try {
-    const response = await fetch(
-      `/api/geoapify/autocomplete?q=${encodeURIComponent(query)}`
-    )
+    const url = new URL('https://api.geoapify.com/v1/geocode/autocomplete')
+    url.searchParams.set('text', query)
+    url.searchParams.set('type', 'city')
+    url.searchParams.set('limit', '10')
+    url.searchParams.set('apiKey', GEOAPIFY_API_KEY)
+
+    const response = await fetch(url.toString())
 
     if (!response.ok) {
       console.error('Geoapify search failed:', response.statusText)
@@ -98,15 +109,23 @@ export async function getTimezone(
   lat: number,
   lon: number
 ): Promise<string | null> {
+  if (!GEOAPIFY_API_KEY) {
+    console.error('VITE_GEOAPIFY_API_KEY not configured')
+    return null
+  }
+
   try {
-    const response = await fetch(
-      `/api/geoapify/timezone?lat=${lat}&lon=${lon}`
-    )
+    const url = new URL('https://api.geoapify.com/v1/geocode/reverse')
+    url.searchParams.set('lat', lat.toString())
+    url.searchParams.set('lon', lon.toString())
+    url.searchParams.set('apiKey', GEOAPIFY_API_KEY)
+
+    const response = await fetch(url.toString())
 
     if (!response.ok) return null
 
     const data = await response.json()
-    return data.timezone?.name || null
+    return data.features?.[0]?.properties?.timezone?.name || null
   } catch {
     return null
   }
