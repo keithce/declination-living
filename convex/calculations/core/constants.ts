@@ -165,9 +165,6 @@ export const DERIVATIVE_STEP = 0.001
 /** Speed calculation step in days (for 3-point derivative) */
 export const SPEED_CALC_STEP = 0.5
 
-/** Speed calculation step in days (for 3-point derivative) */
-export const SPEED_CALC_STEP = 0.5
-
 // =============================================================================
 // Dignity Point Values
 // =============================================================================
@@ -247,7 +244,7 @@ export const SIGN_SYMBOLS = [
   "♓",
 ] as const
 
-export const SIGN_ELEMENTS = [
+export const ZODIAC_ELEMENT_SEQUENCE = [
   "fire",
   "earth",
   "air",

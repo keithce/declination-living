@@ -24,7 +24,7 @@ import type { PlanetId, EquatorialCoordinates, ACGLine, ZenithLine, ParanResult 
 import { PLANET_IDS } from "./core/types"
 import { getMeanObliquity, checkAllOOBStatus } from "./ephemeris/oob"
 import { calculateAllZenithLines, scoreLatitudeForZenith } from "./acg/zenith"
-import { calculateAllACGLines, findACGLinesNearLocation } from "./acg/line-solver"
+import { calculateAllACGLines, findACGLinesNearLocation } from "./acg/line_solver"
 import { calculateAllParans, getStrongestParans } from "./parans/solver"
 import { calculateAllDignities, longitudeToSignPosition, isDayChart } from "./dignity/calculator"
 import { matchVibeFromQuery, getVibeById, DEFAULT_WEIGHTS } from "./vibes/translator"

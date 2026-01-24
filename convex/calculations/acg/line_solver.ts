@@ -28,7 +28,7 @@ import {
   longitudeForMC,
   longitudeForIC,
   getGMST,
-} from "../coordinates/hour-angle"
+} from "../coordinates/hour_angle"
 import { calculateSDA, getRiseSetLatitudeRange } from "../coordinates/sda"
 import {
   normalizeDegrees,

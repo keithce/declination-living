@@ -57,7 +57,7 @@ const PLANET_NAMES: (keyof PlanetDeclinations)[] = [
  * The closer a latitude is to a planet's declination, the higher the score
  * Maximum possible score per planet (at exact match) = 1.0 * weight
  */
-function calculateAlignmentScore(
+export function calculateAlignmentScore(
   latitude: number,
   declination: number,
   weight: number

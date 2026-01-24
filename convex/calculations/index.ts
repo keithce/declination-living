@@ -17,7 +17,7 @@ export * from "./core/constants"
 export * from "./core/math"
 
 // Coordinate calculations
-export * from "./coordinates/hour-angle"
+export * from "./coordinates/hour_angle"
 export * from "./coordinates/sda"
 export * from "./coordinates/geocentric"
 
@@ -28,7 +28,7 @@ export * from "./ephemeris/oob"
 
 // ACG lines
 export * from "./acg/zenith"
-export * from "./acg/line-solver"
+export * from "./acg/line_solver"
 
 // Parans
 export * from "./parans/solver"

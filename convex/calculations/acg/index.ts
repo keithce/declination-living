@@ -3,4 +3,4 @@
  */
 
 export * from "./zenith"
-export * from "./line-solver"
+export * from "./line_solver"

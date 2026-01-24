@@ -3,8 +3,8 @@
  * Uses 3-point numerical differentiation to calculate daily motion.
  */
 
-import type { PlanetId, PlanetPositions } from "../core/types"
-import { PLANET_IDS, SPEED_CALC_STEP, EPSILON } from "../core/constants"
+import { type PlanetId, type PlanetPositions, PLANET_IDS } from "../core/types"
+import { SPEED_CALC_STEP, EPSILON } from "../core/constants"
 
 // =============================================================================
 // Types
