@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { ChevronLeft, ChevronRight, Loader2, Save, Sparkles, X } from 'lucide-react'
@@ -17,7 +17,34 @@ export const Route = createFileRoute('/calculator')({
   component: CalculatorPage,
 })
 
+// Loading component shown during SSR and initial hydration
+function CalculatorLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#050714] via-[#0a0f1f] to-[#0f172a] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
+    </div>
+  )
+}
+
+// Main page wrapper - handles SSR by only rendering content on client
 function CalculatorPage() {
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // During SSR and initial hydration, show loading state
+  // This prevents useLiveQuery from being called on the server
+  if (!isClient) {
+    return <CalculatorLoading />
+  }
+
+  return <CalculatorContent />
+}
+
+// Client-only content that uses useCalculatorState (which uses useLiveQuery)
+function CalculatorContent() {
   const navigate = useNavigate()
   const { isAuthenticated } = useConvexAuth()
   const {
@@ -141,11 +168,7 @@ function CalculatorPage() {
 
   // Show loading state while reading from localStorage
   if (isStateLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#050714] via-[#0a0f1f] to-[#0f172a] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400" />
-      </div>
-    )
+    return <CalculatorLoading />
   }
 
   return (

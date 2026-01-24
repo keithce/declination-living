@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { eq, useLiveQuery } from '@tanstack/react-db'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type {
@@ -19,14 +18,14 @@ const DEFAULT_STATE: Omit<CalculatorState, 'id'> = {
   updatedAt: Date.now(),
 }
 
+/**
+ * Calculator state hook using TanStack React DB with localStorage persistence.
+ *
+ * IMPORTANT: This hook uses useLiveQuery which doesn't support SSR.
+ * Components using this hook must ensure they only render on the client.
+ * See calculator.tsx for the client-only rendering pattern.
+ */
 export function useCalculatorState() {
-  // Hydration safety: prevent SSR/client mismatch with localStorage
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
   const { data, isLoading } = useLiveQuery((q) =>
     q.from({ state: calculatorStateCollection }).where(({ state }) => eq(state.id, 'current')),
   )
@@ -73,24 +72,6 @@ export function useCalculatorState() {
   const resetState = () => {
     if (currentState !== null) {
       calculatorStateCollection.delete('current')
-    }
-  }
-
-  // During SSR/hydration, return loading state with no-op actions
-  // This prevents hydration mismatch when localStorage has different state
-  if (!isMounted) {
-    return {
-      step: 'birth-data' as const,
-      birthData: null,
-      weights: DEFAULT_WEIGHTS,
-      result: null,
-      isLoading: true,
-      setStep: () => {},
-      setBirthData: () => {},
-      setWeights: () => {},
-      setResult: () => {},
-      updateResult: () => {},
-      resetState: () => {},
     }
   }
 
