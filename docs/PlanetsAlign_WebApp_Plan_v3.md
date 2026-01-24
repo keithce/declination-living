@@ -1,6 +1,6 @@
 # PlanetsAlign Web App Development Plan
 
-*TanStack Start + Convex + Three.js Globe Visualization*
+_TanStack Start + Convex + Three.js Globe Visualization_
 
 Version 3.0 - Updated with Geoapify Integration
 
@@ -12,10 +12,10 @@ Version 3.0 - Updated with Geoapify Integration
 
 To calculate a person's natal planet declinations, you need:
 
-| Input | Description |
-|-------|-------------|
-| Birth Date | Day, month, and year of birth |
-| Birth Time | Exact time (hour:minute) - critical for Moon position |
+| Input          | Description                                                   |
+| -------------- | ------------------------------------------------------------- |
+| Birth Date     | Day, month, and year of birth                                 |
+| Birth Time     | Exact time (hour:minute) - critical for Moon position         |
 | Birth Location | City name with autocomplete → latitude/longitude via Geoapify |
 
 > **ℹ️ Note:** Timezone is NOT a user input. It is automatically determined from the birth location coordinates using the Geoapify Reverse Geocoding API, which returns timezone data including IANA name, offsets, and DST information.
@@ -63,16 +63,16 @@ GET https://api.geoapify.com/v1/geocode/reverse
 
 ## Part 2: Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| Framework | TanStack Start | Full-stack React with SSR, routing, server functions |
-| Backend | Convex | Reactive database, serverless functions, real-time sync |
-| Authentication | Convex Auth | OAuth (Google, GitHub), email/password, sessions |
-| Forms | TanStack Form | Type-safe form state, validation with Zod schemas |
-| 3D Visualization | Three.js + three-globe | Interactive 3D globe showing optimal locations |
-| Location Services | Geoapify API | Autocomplete, reverse geocoding, timezone lookup |
-| Ephemeris | astronomia / sweph-wasm | Planet position calculations (Convex action) |
-| Styling | Tailwind CSS | Utility-first CSS, responsive design, dark mode |
+| Layer             | Technology              | Purpose                                                 |
+| ----------------- | ----------------------- | ------------------------------------------------------- |
+| Framework         | TanStack Start          | Full-stack React with SSR, routing, server functions    |
+| Backend           | Convex                  | Reactive database, serverless functions, real-time sync |
+| Authentication    | Convex Auth             | OAuth (Google, GitHub), email/password, sessions        |
+| Forms             | TanStack Form           | Type-safe form state, validation with Zod schemas       |
+| 3D Visualization  | Three.js + three-globe  | Interactive 3D globe showing optimal locations          |
+| Location Services | Geoapify API            | Autocomplete, reverse geocoding, timezone lookup        |
+| Ephemeris         | astronomia / sweph-wasm | Planet position calculations (Convex action)            |
+| Styling           | Tailwind CSS            | Utility-first CSS, responsive design, dark mode         |
 
 ### Convex Actions Architecture
 
@@ -80,8 +80,8 @@ All heavy calculations run as Convex Actions (serverless functions that can call
 
 ```typescript
 // convex/calculations.ts
-import { action } from "./_generated/server";
-import { v } from "convex/values";
+import { action } from './_generated/server'
+import { v } from 'convex/values'
 
 // Action 1: Calculate natal declinations
 export const calculateDeclinations = action({
@@ -94,34 +94,39 @@ export const calculateDeclinations = action({
   },
   handler: async (ctx, args) => {
     // Convert to Julian Day using timezone
-    const jd = toJulianDay(args.birthDate, args.birthTime, args.timezone);
+    const jd = toJulianDay(args.birthDate, args.birthTime, args.timezone)
 
     // Calculate declinations for all planets using Swiss Ephemeris
-    const declinations = await calculateAllPlanetDeclinations(jd);
+    const declinations = await calculateAllPlanetDeclinations(jd)
 
-    return declinations;
+    return declinations
   },
-});
+})
 
 // Action 2: Find optimal locations
 export const findOptimalLocations = action({
   args: {
-    declinations: v.object({ /* planet declinations */ }),
-    weights: v.optional(v.object({ /* planet weights */ })),
+    declinations: v.object({
+      /* planet declinations */
+    }),
+    weights: v.optional(
+      v.object({
+        /* planet weights */
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     // Calculate alignment scores for latitude bands
-    const latitudeScores = calculateLatitudeScores(args.declinations, args.weights);
+    const latitudeScores = calculateLatitudeScores(args.declinations, args.weights)
 
     // Query cities database for cities at optimal latitudes
-    const optimalCities = await ctx.runQuery(
-      internal.cities.findByLatitudes,
-      { latitudes: latitudeScores.top }
-    );
+    const optimalCities = await ctx.runQuery(internal.cities.findByLatitudes, {
+      latitudes: latitudeScores.top,
+    })
 
-    return { latitudeScores, optimalCities };
+    return { latitudeScores, optimalCities }
   },
-});
+})
 
 // Action 3: Lookup cities near coordinates
 export const findNearbyCities = action({
@@ -132,13 +137,10 @@ export const findNearbyCities = action({
   },
   handler: async (ctx, args) => {
     // Find major and minor cities within radius
-    const cities = await ctx.runQuery(
-      internal.cities.findNearCoordinates,
-      args
-    );
-    return cities;
+    const cities = await ctx.runQuery(internal.cities.findNearCoordinates, args)
+    return cities
   },
-});
+})
 ```
 
 ---
@@ -176,44 +178,42 @@ cities: defineTable({
 
 ```typescript
 // convex/cities.ts
-import { internalQuery } from "./_generated/server";
+import { internalQuery } from './_generated/server'
 
 export const findByLatitudes = internalQuery({
   args: {
-    latitudes: v.array(v.object({
-      lat: v.number(),
-      score: v.number(),
-    })),
+    latitudes: v.array(
+      v.object({
+        lat: v.number(),
+        score: v.number(),
+      }),
+    ),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const results = [];
+    const results = []
 
     for (const { lat, score } of args.latitudes) {
       // Find cities within ±1° of optimal latitude
       const cities = await ctx.db
-        .query("cities")
-        .withIndex("by_latitude", (q) =>
-          q.gte("latitude", lat - 1).lte("latitude", lat + 1)
-        )
-        .order("desc")
-        .take(args.limit ?? 20);
+        .query('cities')
+        .withIndex('by_latitude', (q) => q.gte('latitude', lat - 1).lte('latitude', lat + 1))
+        .order('desc')
+        .take(args.limit ?? 20)
 
       // Score each city based on exact latitude match
-      const scoredCities = cities.map(city => ({
+      const scoredCities = cities.map((city) => ({
         ...city,
         alignmentScore: score - Math.abs(city.latitude - lat) * 2,
-      }));
+      }))
 
-      results.push(...scoredCities);
+      results.push(...scoredCities)
     }
 
     // Sort by alignment score, return top results
-    return results
-      .sort((a, b) => b.alignmentScore - a.alignmentScore)
-      .slice(0, 50);
+    return results.sort((a, b) => b.alignmentScore - a.alignmentScore).slice(0, 50)
   },
-});
+})
 ```
 
 ### Step 4: Enrich with Nearby Cities
@@ -230,36 +230,32 @@ export const findNearCoordinates = internalQuery({
   },
   handler: async (ctx, args) => {
     // Approximate degree distance (1° ≈ 111km)
-    const latRange = args.radiusKm / 111;
-    const lngRange = args.radiusKm / (111 * Math.cos(args.latitude * Math.PI / 180));
+    const latRange = args.radiusKm / 111
+    const lngRange = args.radiusKm / (111 * Math.cos((args.latitude * Math.PI) / 180))
 
     const cities = await ctx.db
-      .query("cities")
-      .withIndex("by_latitude", (q) =>
-        q.gte("latitude", args.latitude - latRange)
-         .lte("latitude", args.latitude + latRange)
+      .query('cities')
+      .withIndex('by_latitude', (q) =>
+        q.gte('latitude', args.latitude - latRange).lte('latitude', args.latitude + latRange),
       )
       .filter((q) =>
         q.and(
-          q.gte(q.field("longitude"), args.longitude - lngRange),
-          q.lte(q.field("longitude"), args.longitude + lngRange)
-        )
+          q.gte(q.field('longitude'), args.longitude - lngRange),
+          q.lte(q.field('longitude'), args.longitude + lngRange),
+        ),
       )
-      .collect();
+      .collect()
 
     // Calculate actual distance and filter
     return cities
-      .map(city => ({
+      .map((city) => ({
         ...city,
-        distanceKm: haversineDistance(
-          args.latitude, args.longitude,
-          city.latitude, city.longitude
-        ),
+        distanceKm: haversineDistance(args.latitude, args.longitude, city.latitude, city.longitude),
       }))
-      .filter(city => city.distanceKm <= args.radiusKm)
-      .sort((a, b) => b.population - a.population);
+      .filter((city) => city.distanceKm <= args.radiusKm)
+      .sort((a, b) => b.population - a.population)
   },
-});
+})
 ```
 
 ---
@@ -279,7 +275,7 @@ export const findNearCoordinates = internalQuery({
 
 ```typescript
 // app/components/GlobeView.tsx
-import ThreeGlobe from 'three-globe';
+import ThreeGlobe from 'three-globe'
 
 export function GlobeView({ locations, birthLocation }) {
   const globe = new ThreeGlobe()
@@ -287,21 +283,23 @@ export function GlobeView({ locations, birthLocation }) {
 
     // City points with altitude based on score
     .pointsData(locations)
-    .pointAltitude(d => 0.01 + (d.score / 100) * 0.3)
-    .pointColor(d => scoreToColor(d.score))
-    .pointRadius(d => 0.3 + (d.score / 100) * 0.5)
-    .pointLabel(d => `${d.city}, ${d.country}: ${d.score.toFixed(1)}%`)
+    .pointAltitude((d) => 0.01 + (d.score / 100) * 0.3)
+    .pointColor((d) => scoreToColor(d.score))
+    .pointRadius((d) => 0.3 + (d.score / 100) * 0.5)
+    .pointLabel((d) => `${d.city}, ${d.country}: ${d.score.toFixed(1)}%`)
 
     // Arcs from birth location to top 5
-    .arcsData(locations.slice(0, 5).map(loc => ({
-      startLat: birthLocation.lat,
-      startLng: birthLocation.lng,
-      endLat: loc.lat,
-      endLng: loc.lng,
-    })))
+    .arcsData(
+      locations.slice(0, 5).map((loc) => ({
+        startLat: birthLocation.lat,
+        startLng: birthLocation.lng,
+        endLat: loc.lat,
+        endLng: loc.lng,
+      })),
+    )
     .arcColor(() => ['#00ff88', '#ffaa00'])
     .arcDashLength(0.5)
-    .arcDashAnimateTime(2000);
+    .arcDashAnimateTime(2000)
 
   // ... Three.js scene setup
 }
@@ -357,14 +355,14 @@ export function GlobeView({ locations, birthLocation }) {
 
 ### Timeline Summary
 
-| Phase | Duration | Week |
-|-------|----------|------|
-| Phase 1: Project Setup & Auth | 1 week | 1 |
-| Phase 2: Geoapify & Form Integration | 1 week | 2 |
-| Phase 3: Calculation Engine (Convex Actions) | 1 week | 3 |
-| Phase 4: Three.js Globe Visualization | 1 week | 4 |
-| Phase 5: Dashboard & Persistence | 1 week | 5 |
-| Phase 6: Polish & Deployment | 1 week | 6 |
+| Phase                                        | Duration | Week |
+| -------------------------------------------- | -------- | ---- |
+| Phase 1: Project Setup & Auth                | 1 week   | 1    |
+| Phase 2: Geoapify & Form Integration         | 1 week   | 2    |
+| Phase 3: Calculation Engine (Convex Actions) | 1 week   | 3    |
+| Phase 4: Three.js Globe Visualization        | 1 week   | 4    |
+| Phase 5: Dashboard & Persistence             | 1 week   | 5    |
+| Phase 6: Polish & Deployment                 | 1 week   | 6    |
 
 ---
 
@@ -454,16 +452,13 @@ export function getRouter() {
 
 ```typescript
 // convex/auth.config.ts
-import GitHub from "@auth/core/providers/github";
-import Google from "@auth/core/providers/google";
-import { convexAuth } from "@convex-dev/auth/server";
+import GitHub from '@auth/core/providers/github'
+import Google from '@auth/core/providers/google'
+import { convexAuth } from '@convex-dev/auth/server'
 
 export const { auth, signIn, signOut, store } = convexAuth({
-  providers: [
-    GitHub,
-    Google,
-  ],
-});
+  providers: [GitHub, Google],
+})
 ```
 
 ### Convex Query with TanStack Query

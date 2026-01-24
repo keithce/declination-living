@@ -12,21 +12,17 @@
  * events is the same.
  */
 
+import { ANGULAR_EVENT_NAMES, PLANET_IDS } from '../core/types'
+import { PARAN_BISECTION_TOL, PARAN_LATITUDE_STEP, PARAN_MAX_ITERATIONS } from '../core/constants'
+import { calculateSDA } from '../coordinates/sda'
+import { bisectionSolve, normalizeDegrees, normalizeDegreesSymmetric } from '../core/math'
 import type {
-  PlanetId,
   AngularEvent,
+  EquatorialCoordinates,
   ParanPoint,
   ParanResult,
-  EquatorialCoordinates,
-} from "../core/types"
-import { PLANET_IDS, ANGULAR_EVENT_NAMES } from "../core/types"
-import {
-  PARAN_LATITUDE_STEP,
-  PARAN_BISECTION_TOL,
-  PARAN_MAX_ITERATIONS,
-} from "../core/constants"
-import { calculateSDA } from "../coordinates/sda"
-import { bisectionSolve, normalizeDegrees, normalizeDegreesSymmetric } from "../core/math"
+  PlanetId,
+} from '../core/types'
 
 // =============================================================================
 // Types
@@ -67,22 +63,22 @@ export interface DetailedParanPoint extends ParanPoint {
 function getHourAngleForEvent(
   event: AngularEvent,
   declination: number,
-  latitude: number
+  latitude: number,
 ): number | null {
   switch (event) {
-    case "culminate":
+    case 'culminate':
       // Hour angle = 0 at upper culmination (MC)
       return 0
 
-    case "anti_culminate":
+    case 'anti_culminate':
       // Hour angle = 180 at lower culmination (IC)
       return 180
 
-    case "rise":
-    case "set": {
+    case 'rise':
+    case 'set': {
       const sda = calculateSDA(latitude, declination)
 
-      if (event === "rise") {
+      if (event === 'rise') {
         // Rising: negative hour angle
         return sda.riseHA ?? null
       } else {
@@ -132,7 +128,7 @@ function paranTimingDifference(
   event1: AngularEvent,
   dec2: number,
   ra2: number,
-  event2: AngularEvent
+  event2: AngularEvent,
 ): number | null {
   const ha1 = getHourAngleForEvent(event1, dec1, latitude)
   const ha2 = getHourAngleForEvent(event2, dec2, latitude)
@@ -173,19 +169,17 @@ export function findParanLatitudes(
   event1: AngularEvent,
   dec2: number,
   ra2: number,
-  event2: AngularEvent
-): number[] {
-  const parans: number[] = []
+  event2: AngularEvent,
+): Array<number> {
+  const parans: Array<number> = []
 
   // Sample latitudes to find sign changes
-  const latitudes: number[] = []
-  const differences: (number | null)[] = []
+  const latitudes: Array<number> = []
+  const differences: Array<number | null> = []
 
   for (let lat = -89; lat <= 89; lat += PARAN_LATITUDE_STEP) {
     latitudes.push(lat)
-    differences.push(
-      paranTimingDifference(lat, dec1, ra1, event1, dec2, ra2, event2)
-    )
+    differences.push(paranTimingDifference(lat, dec1, ra1, event1, dec2, ra2, event2))
   }
 
   // Find sign changes (potential paran locations)
@@ -200,28 +194,19 @@ export function findParanLatitudes(
 
     // Check for sign change (zero crossing)
     // Also check for wrap-around at ±180
-    const hasSignChange =
-      diff1 * diff2 < 0 && Math.abs(diff1) < 90 && Math.abs(diff2) < 90
+    const hasSignChange = diff1 * diff2 < 0 && Math.abs(diff1) < 90 && Math.abs(diff2) < 90
 
     if (hasSignChange) {
       // Use bisection to find the exact latitude
       const result = bisectionSolve(
         (lat) => {
-          const diff = paranTimingDifference(
-            lat,
-            dec1,
-            ra1,
-            event1,
-            dec2,
-            ra2,
-            event2
-          )
+          const diff = paranTimingDifference(lat, dec1, ra1, event1, dec2, ra2, event2)
           return diff ?? 1000 // Return large value if event doesn't occur
         },
         latitudes[i],
         latitudes[i + 1],
         PARAN_BISECTION_TOL,
-        PARAN_MAX_ITERATIONS
+        PARAN_MAX_ITERATIONS,
       )
 
       if (result.converged && result.root !== null) {
@@ -254,34 +239,19 @@ export function calculatePlanetPairParans(
   dec1: number,
   planet2: PlanetId,
   ra2: number,
-  dec2: number
-): ParanPoint[] {
-  const parans: ParanPoint[] = []
-  const events: AngularEvent[] = ["rise", "set", "culminate", "anti_culminate"]
+  dec2: number,
+): Array<ParanPoint> {
+  const parans: Array<ParanPoint> = []
+  const events: Array<AngularEvent> = ['rise', 'set', 'culminate', 'anti_culminate']
 
   // Check all combinations of events
   for (const event1 of events) {
     for (const event2 of events) {
-      const latitudes = findParanLatitudes(
-        dec1,
-        ra1,
-        event1,
-        dec2,
-        ra2,
-        event2
-      )
+      const latitudes = findParanLatitudes(dec1, ra1, event1, dec2, ra2, event2)
 
       for (const latitude of latitudes) {
         // Calculate strength based on how close to exact
-        const diff = paranTimingDifference(
-          latitude,
-          dec1,
-          ra1,
-          event1,
-          dec2,
-          ra2,
-          event2
-        )
+        const diff = paranTimingDifference(latitude, dec1, ra1, event1, dec2, ra2, event2)
         const strength = diff !== null ? 1 - Math.abs(diff) / 180 : 0
 
         parans.push({
@@ -313,9 +283,9 @@ export function calculatePlanetPairParans(
  * @returns Complete paran result
  */
 export function calculateAllParans(
-  positions: Record<PlanetId, EquatorialCoordinates>
+  positions: Record<PlanetId, EquatorialCoordinates>,
 ): ParanResult {
-  const points: ParanPoint[] = []
+  const points: Array<ParanPoint> = []
   let riseRise = 0
   let riseCulminate = 0
   let riseSet = 0
@@ -337,7 +307,7 @@ export function calculateAllParans(
         pos1.dec,
         planet2,
         pos2.ra,
-        pos2.dec
+        pos2.dec,
       )
 
       // Count by type
@@ -345,20 +315,12 @@ export function calculateAllParans(
         const e1 = paran.event1
         const e2 = paran.event2
 
-        if (e1 === "rise" && e2 === "rise") riseRise++
-        else if (
-          (e1 === "rise" && e2 === "culminate") ||
-          (e1 === "culminate" && e2 === "rise")
-        )
+        if (e1 === 'rise' && e2 === 'rise') riseRise++
+        else if ((e1 === 'rise' && e2 === 'culminate') || (e1 === 'culminate' && e2 === 'rise'))
           riseCulminate++
-        else if (
-          (e1 === "rise" && e2 === "set") ||
-          (e1 === "set" && e2 === "rise")
-        )
-          riseSet++
-        else if (e1 === "culminate" && e2 === "culminate")
-          culminateCulminate++
-        else if (e1 === "set" && e2 === "set") setSet++
+        else if ((e1 === 'rise' && e2 === 'set') || (e1 === 'set' && e2 === 'rise')) riseSet++
+        else if (e1 === 'culminate' && e2 === 'culminate') culminateCulminate++
+        else if (e1 === 'set' && e2 === 'set') setSet++
       }
 
       points.push(...pairParans)
@@ -394,10 +356,10 @@ export function calculateAllParans(
  * @returns Filtered parans
  */
 export function getParansNearLatitude(
-  parans: ParanPoint[],
+  parans: Array<ParanPoint>,
   latitude: number,
-  orb: number = 2
-): ParanPoint[] {
+  orb: number = 2,
+): Array<ParanPoint> {
   return parans.filter((p) => Math.abs(p.latitude - latitude) <= orb)
 }
 
@@ -408,10 +370,7 @@ export function getParansNearLatitude(
  * @param planet - Planet to filter by
  * @returns Filtered parans
  */
-export function getParansForPlanet(
-  parans: ParanPoint[],
-  planet: PlanetId
-): ParanPoint[] {
+export function getParansForPlanet(parans: Array<ParanPoint>, planet: PlanetId): Array<ParanPoint> {
   return parans.filter((p) => p.planet1 === planet || p.planet2 === planet)
 }
 
@@ -423,9 +382,9 @@ export function getParansForPlanet(
  * @returns Filtered parans where either planet has this event
  */
 export function getParansByEvent(
-  parans: ParanPoint[],
-  event: AngularEvent
-): ParanPoint[] {
+  parans: Array<ParanPoint>,
+  event: AngularEvent,
+): Array<ParanPoint> {
   return parans.filter((p) => p.event1 === event || p.event2 === event)
 }
 
@@ -437,12 +396,10 @@ export function getParansByEvent(
  * @returns Top N parans by strength
  */
 export function getStrongestParans(
-  parans: ParanPoint[],
-  topN: number = 10
-): ParanPoint[] {
-  return [...parans]
-    .sort((a, b) => (b.strength ?? 0) - (a.strength ?? 0))
-    .slice(0, topN)
+  parans: Array<ParanPoint>,
+  topN: number = 10,
+): Array<ParanPoint> {
+  return [...parans].sort((a, b) => (b.strength ?? 0) - (a.strength ?? 0)).slice(0, topN)
 }
 
 // =============================================================================
@@ -457,16 +414,16 @@ export function getStrongestParans(
  */
 export function describeParان(paran: ParanPoint): string {
   const planetNames: Record<PlanetId, string> = {
-    sun: "Sun",
-    moon: "Moon",
-    mercury: "Mercury",
-    venus: "Venus",
-    mars: "Mars",
-    jupiter: "Jupiter",
-    saturn: "Saturn",
-    uranus: "Uranus",
-    neptune: "Neptune",
-    pluto: "Pluto",
+    sun: 'Sun',
+    moon: 'Moon',
+    mercury: 'Mercury',
+    venus: 'Venus',
+    mars: 'Mars',
+    jupiter: 'Jupiter',
+    saturn: 'Saturn',
+    uranus: 'Uranus',
+    neptune: 'Neptune',
+    pluto: 'Pluto',
   }
 
   const p1 = planetNames[paran.planet1]
@@ -485,18 +442,18 @@ export function describeParان(paran: ParanPoint): string {
  * @param paran - Paran point
  * @returns Array of interpretation keywords
  */
-export function getParanKeywords(paran: ParanPoint): string[] {
-  const keywords: Record<PlanetId, string[]> = {
-    sun: ["identity", "vitality", "success", "leadership"],
-    moon: ["emotions", "intuition", "nurturing", "public"],
-    mercury: ["communication", "intellect", "travel", "commerce"],
-    venus: ["love", "beauty", "harmony", "values"],
-    mars: ["action", "energy", "courage", "competition"],
-    jupiter: ["expansion", "luck", "wisdom", "optimism"],
-    saturn: ["discipline", "structure", "responsibility", "mastery"],
-    uranus: ["innovation", "freedom", "sudden changes", "originality"],
-    neptune: ["spirituality", "imagination", "transcendence", "confusion"],
-    pluto: ["transformation", "power", "intensity", "rebirth"],
+export function getParanKeywords(paran: ParanPoint): Array<string> {
+  const keywords: Record<PlanetId, Array<string>> = {
+    sun: ['identity', 'vitality', 'success', 'leadership'],
+    moon: ['emotions', 'intuition', 'nurturing', 'public'],
+    mercury: ['communication', 'intellect', 'travel', 'commerce'],
+    venus: ['love', 'beauty', 'harmony', 'values'],
+    mars: ['action', 'energy', 'courage', 'competition'],
+    jupiter: ['expansion', 'luck', 'wisdom', 'optimism'],
+    saturn: ['discipline', 'structure', 'responsibility', 'mastery'],
+    uranus: ['innovation', 'freedom', 'sudden changes', 'originality'],
+    neptune: ['spirituality', 'imagination', 'transcendence', 'confusion'],
+    pluto: ['transformation', 'power', 'intensity', 'rebirth'],
   }
 
   return [...keywords[paran.planet1], ...keywords[paran.planet2]]
@@ -514,14 +471,13 @@ export function getParanKeywords(paran: ParanPoint): string[] {
  * @returns Map of band center to parans in that band
  */
 export function groupParansByLatitudeBand(
-  parans: ParanPoint[],
-  bandSize: number = 5
-): Map<number, ParanPoint[]> {
-  const bands = new Map<number, ParanPoint[]>()
+  parans: Array<ParanPoint>,
+  bandSize: number = 5,
+): Map<number, Array<ParanPoint>> {
+  const bands = new Map<number, Array<ParanPoint>>()
 
   for (const paran of parans) {
-    const bandCenter =
-      Math.round(paran.latitude / bandSize) * bandSize
+    const bandCenter = Math.round(paran.latitude / bandSize) * bandSize
 
     if (!bands.has(bandCenter)) {
       bands.set(bandCenter, [])

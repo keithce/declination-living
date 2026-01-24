@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Search, Loader2 } from 'lucide-react'
-import { searchCities, type CityResult } from '@/lib/geoapify'
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Loader2, MapPin, Search } from 'lucide-react'
+import type { CityResult } from '@/lib/geoapify'
+import { searchCities } from '@/lib/geoapify'
 
 interface CityAutocompleteProps {
   value: CityResult | null
@@ -17,7 +18,7 @@ export function CityAutocomplete({
   error,
 }: CityAutocompleteProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<CityResult[]>([])
+  const [results, setResults] = useState<Array<CityResult>>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
@@ -45,10 +46,7 @@ export function CityAutocomplete({
   // Close on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false)
       }
     }
@@ -91,12 +89,9 @@ export function CityAutocomplete({
         <div className="flex items-center gap-3 p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
           <MapPin className="w-5 h-5 text-amber-400 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="text-white font-medium truncate">
-              {value.displayName}
-            </div>
+            <div className="text-white font-medium truncate">{value.displayName}</div>
             <div className="text-sm text-slate-400">
-              {value.latitude.toFixed(4)}°, {value.longitude.toFixed(4)}° •{' '}
-              {value.timezone}
+              {value.latitude.toFixed(4)}°, {value.longitude.toFixed(4)}° • {value.timezone}
             </div>
           </div>
           <button
@@ -156,9 +151,7 @@ export function CityAutocomplete({
                       >
                         <MapPin className="w-4 h-4 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">
-                            {city.city}
-                          </div>
+                          <div className="font-medium truncate">{city.city}</div>
                           <div className="text-sm text-slate-500 truncate">
                             {city.state && `${city.state}, `}
                             {city.country}

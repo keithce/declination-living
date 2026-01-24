@@ -1,19 +1,11 @@
-"use node"
+'use node'
 
-import { action } from "../_generated/server"
-import { v } from "convex/values"
-import {
-  dateToJulianDay,
-  calculateDeclinations,
-  type PlanetDeclinations,
-} from "./ephemeris"
-import {
-  findOptimalLatitudes,
-  scoreCities,
-  getOptimalLatitudeBands,
-  type LatitudeScore,
-  type CityScore,
-} from "./optimizer"
+import { v } from 'convex/values'
+import { action } from '../_generated/server'
+import { calculateDeclinations, dateToJulianDay } from './ephemeris'
+import { findOptimalLatitudes, getOptimalLatitudeBands, scoreCities } from './optimizer'
+import type { PlanetDeclinations } from './ephemeris'
+import type { CityScore, LatitudeScore } from './optimizer'
 
 const planetWeightsValidator = v.object({
   sun: v.number(),
@@ -37,8 +29,8 @@ export const calculateBirthDeclinations = action({
     birthTime: v.string(), // HH:MM
     timezone: v.string(), // IANA timezone
   },
-  handler: async (_ctx, { birthDate, birthTime }): Promise<PlanetDeclinations> => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone }): Promise<PlanetDeclinations> => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     return calculateDeclinations(jd)
   },
 })
@@ -63,7 +55,7 @@ export const findOptimalLatitudesAction = action({
     weights: planetWeightsValidator,
     topN: v.optional(v.number()),
   },
-  handler: async (_ctx, { declinations, weights, topN }): Promise<LatitudeScore[]> => {
+  handler: async (_ctx, { declinations, weights, topN }): Promise<Array<LatitudeScore>> => {
     return findOptimalLatitudes(declinations, weights, topN ?? 10)
   },
 })
@@ -77,7 +69,7 @@ export const scoreCitiesAction = action({
       v.object({
         id: v.string(),
         latitude: v.number(),
-      })
+      }),
     ),
     declinations: v.object({
       sun: v.number(),
@@ -93,7 +85,7 @@ export const scoreCitiesAction = action({
     }),
     weights: planetWeightsValidator,
   },
-  handler: async (_ctx, { cities, declinations, weights }): Promise<CityScore[]> => {
+  handler: async (_ctx, { cities, declinations, weights }): Promise<Array<CityScore>> => {
     return scoreCities(cities, declinations, weights)
   },
 })
@@ -136,9 +128,9 @@ export const calculateComplete = action({
     timezone: v.string(),
     weights: planetWeightsValidator,
   },
-  handler: async (_ctx, { birthDate, birthTime, weights }) => {
-    // 1. Calculate declinations
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone, weights }) => {
+    // 1. Calculate declinations (with timezone conversion)
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const declinations = calculateDeclinations(jd)
 
     // 2. Find optimal latitudes (top 20)

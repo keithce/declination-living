@@ -6,32 +6,22 @@
  */
 
 // Original components
-export { GlobeView } from "./GlobeView"
-export { default as GlobeCanvas } from "./GlobeCanvas"
+export { GlobeView } from './GlobeView'
+export { default as GlobeCanvas } from './GlobeCanvas'
 
 // Enhanced globe canvas with layers
-export { EnhancedGlobeCanvas } from "./EnhancedGlobeCanvas"
+export { EnhancedGlobeCanvas } from './EnhancedGlobeCanvas'
 
 // Controls
-export { GlobeControls } from "./controls"
+export { GlobeControls } from './controls'
 
 // Hooks
-export {
-  useGlobeState,
-  getVisiblePlanetCount,
-  getVisibleACGLineTypeCount,
-} from "./hooks"
-export type {
-  GlobeState,
-  GlobeStateActions,
-  UseGlobeStateReturn,
-} from "./hooks"
+export { useGlobeState, getVisiblePlanetCount, getVisibleACGLineTypeCount } from './hooks'
+export type { GlobeState, GlobeStateActions, UseGlobeStateReturn } from './hooks'
 
 // Layer types
 export type {
   PlanetId,
-  ACGLineType,
-  AngularEvent,
   PlanetVisibility,
   ACGLineFilters,
   LayerVisibility,
@@ -40,17 +30,17 @@ export type {
   ParanPointData,
   LayerGroup,
   ExtendedGlobeCanvasProps,
-} from "./layers/types"
+} from './layers/types'
 
 // Layer constants
-export { PLANET_IDS, PLANET_COLORS_HEX, ANGULAR_EVENTS } from "./layers/types"
+export { PLANET_IDS, PLANET_COLORS_HEX } from './layers/types'
 
 // Layer creators (for advanced usage)
 export {
   createZenithBandLayer,
   updateZenithBandVisibility,
   highlightZenithBand,
-} from "./layers/ZenithBandLayer"
+} from './layers/ZenithBandLayer'
 
 export {
   createACGLineLayer,
@@ -58,18 +48,18 @@ export {
   highlightACGLines,
   getLineTypeDisplayName,
   getLineTypeDescription,
-} from "./layers/ACGLineLayer"
+} from './layers/ACGLineLayer'
 
 export {
   createParanPointLayer,
   updateParanPointVisibility,
   getParanTooltip,
   findParanAtPosition,
-} from "./layers/ParanPointLayer"
+} from './layers/ParanPointLayer'
 
 export {
   createHeatmapLayer,
   updateHeatmap,
   setHeatmapIntensity,
   setHeatmapSpread,
-} from "./layers/HeatmapLayer"
+} from './layers/HeatmapLayer'

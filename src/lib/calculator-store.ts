@@ -1,5 +1,4 @@
-import { createCollection } from '@tanstack/react-db'
-import { localStorageCollectionOptions } from '@tanstack/react-db'
+import { createCollection, localStorageCollectionOptions } from '@tanstack/react-db'
 import { z } from 'zod'
 
 // Schema for birth data
@@ -46,14 +45,14 @@ const calculationResultSchema = z.object({
       latitude: z.number(),
       score: z.number(),
       dominantPlanet: z.string(),
-    })
+    }),
   ),
   latitudeBands: z.array(
     z.object({
       min: z.number(),
       max: z.number(),
       dominantPlanet: z.string(),
-    })
+    }),
   ),
 })
 
@@ -77,5 +76,5 @@ export const calculatorStateCollection = createCollection(
     storageKey: 'declination-calculator-state',
     getKey: (item) => item.id,
     schema: calculatorStateSchema,
-  })
+  }),
 )

@@ -4,6 +4,7 @@
  */
 
 import { CalendarGregorianToJD } from 'astronomia/julian'
+import { fromZonedTime } from 'date-fns-tz'
 import * as base from 'astronomia/base'
 import { Planet } from 'astronomia/planetposition'
 import * as solar from 'astronomia/solar'
@@ -54,19 +55,32 @@ const toDeg = (rad: number) => (rad * 180) / Math.PI
 
 /**
  * Parse a date string and time string into a Julian Day
+ * Converts the local time in the specified timezone to UTC before calculation
  */
 export function dateToJulianDay(
   dateStr: string, // YYYY-MM-DD
-  timeStr: string // HH:MM
+  timeStr: string, // HH:MM
+  timezone: string = 'UTC', // IANA timezone
 ): number {
   const [year, month, day] = dateStr.split('-').map(Number)
   const [hours, minutes] = timeStr.split(':').map(Number)
 
-  // For now, treat time as UTC (timezone handling would require date-fns-tz)
-  // In production, convert local time to UTC first
-  const fractionalDay = day + (hours + minutes / 60) / 24
+  // Create a date representing the local time in the user's timezone
+  const localDate = new Date(year, month - 1, day, hours, minutes)
 
-  const jd = CalendarGregorianToJD(year, month, fractionalDay)
+  // Convert from the specified timezone to UTC
+  const utcDate = fromZonedTime(localDate, timezone)
+
+  // Extract UTC components for Julian Day calculation
+  const utcYear = utcDate.getUTCFullYear()
+  const utcMonth = utcDate.getUTCMonth() + 1
+  const utcDay = utcDate.getUTCDate()
+  const utcHours = utcDate.getUTCHours()
+  const utcMinutes = utcDate.getUTCMinutes()
+
+  const fractionalDay = utcDay + (utcHours + utcMinutes / 60) / 24
+
+  const jd = CalendarGregorianToJD(utcYear, utcMonth, fractionalDay)
   return jd
 }
 
@@ -87,7 +101,7 @@ function getObliquity(jd: number): number {
 function eclipticToEquatorial(
   longitude: number, // radians
   latitude: number, // radians
-  obliquity: number // radians
+  obliquity: number, // radians
 ): { ra: number; dec: number } {
   const eclCoord = new Ecliptic(longitude, latitude)
   const eq = eclCoord.toEquatorial(obliquity)
@@ -137,7 +151,7 @@ function getPlanetPosition(
   jd: number,
   obliquity: number,
   planetVsop: unknown,
-  _earthVsop: unknown
+  _earthVsop: unknown,
 ) {
   const planet = new Planet(planetVsop)
 
@@ -167,8 +181,7 @@ function getPlutoPosition(jd: number, obliquity: number) {
   const T = (jd - 2451545.0) / 36525.0 // Julian centuries from J2000
 
   // Simplified mean longitude calculation
-  const L =
-    238.96 + 144.96 * T + 0.01 * T * T // Approximate mean longitude in degrees
+  const L = 238.96 + 144.96 * T + 0.01 * T * T // Approximate mean longitude in degrees
 
   // Pluto has significant inclination and eccentricity
   // This is a rough approximation

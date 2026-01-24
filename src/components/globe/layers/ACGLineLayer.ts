@@ -8,15 +8,9 @@
  * - IC: Anti-culminating (opposite meridian)
  */
 
-import * as THREE from "three"
-import type {
-  ACGLineData,
-  PlanetVisibility,
-  ACGLineFilters,
-  LayerGroup,
-  PlanetId,
-} from "./types"
-import { PLANET_COLORS_HEX } from "./types"
+import * as THREE from 'three'
+import { PLANET_COLORS_HEX } from './types'
+import type { ACGLineData, ACGLineFilters, LayerGroup, PlanetId, PlanetVisibility } from './types'
 
 // =============================================================================
 // Constants
@@ -39,18 +33,14 @@ const GAP_SIZE = 0.05
 /**
  * Convert lat/lon to 3D position on sphere.
  */
-function latLonToVector3(
-  lat: number,
-  lon: number,
-  radius: number
-): THREE.Vector3 {
+function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector3 {
   const phi = ((90 - lat) * Math.PI) / 180
   const theta = ((lon + 180) * Math.PI) / 180
 
   return new THREE.Vector3(
     -radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    radius * Math.sin(phi) * Math.sin(theta),
   )
 }
 
@@ -64,11 +54,9 @@ function latLonToVector3(
 function createACGLine(
   points: Array<{ lat: number; lon: number }>,
   color: number,
-  isDashed: boolean
+  isDashed: boolean,
 ): THREE.Line {
-  const linePoints = points.map((p) =>
-    latLonToVector3(p.lat, p.lon, 1 + LINE_OFFSET)
-  )
+  const linePoints = points.map((p) => latLonToVector3(p.lat, p.lon, 1 + LINE_OFFSET))
 
   const geometry = new THREE.BufferGeometry().setFromPoints(linePoints)
 
@@ -109,7 +97,7 @@ function createACGLine(
 function createWrappedACGLine(
   points: Array<{ lat: number; lon: number }>,
   color: number,
-  isDashed: boolean
+  isDashed: boolean,
 ): THREE.Group {
   const lineGroup = new THREE.Group()
 
@@ -163,12 +151,12 @@ function createWrappedACGLine(
  * @returns LayerGroup with the line meshes
  */
 export function createACGLineLayer(
-  acgLines: ACGLineData[],
+  acgLines: Array<ACGLineData>,
   planetVisibility: PlanetVisibility,
-  typeFilters: ACGLineFilters
+  typeFilters: ACGLineFilters,
 ): LayerGroup {
   const group = new THREE.Group()
-  group.name = "acgLines"
+  group.name = 'acgLines'
 
   for (const line of acgLines) {
     // Skip if planet or type is not visible
@@ -176,7 +164,7 @@ export function createACGLineLayer(
     if (!typeFilters[line.lineType]) continue
 
     const color = PLANET_COLORS_HEX[line.planet]
-    const isDashed = line.lineType === "MC" || line.lineType === "IC"
+    const isDashed = line.lineType === 'MC' || line.lineType === 'IC'
 
     const lineGroup = createWrappedACGLine(line.points, color, isDashed)
     lineGroup.userData = {
@@ -213,7 +201,7 @@ export function createACGLineLayer(
 export function updateACGLineVisibility(
   group: THREE.Group,
   planetVisibility: PlanetVisibility,
-  typeFilters: ACGLineFilters
+  typeFilters: ACGLineFilters,
 ): void {
   group.traverse((child) => {
     if (child.userData.planet && child.userData.lineType) {
@@ -233,15 +221,14 @@ export function highlightACGLines(
   options: {
     planet?: PlanetId | null
     lineType?: keyof ACGLineFilters | null
-  }
+  },
 ): void {
   const { planet, lineType } = options
 
   group.traverse((child) => {
     if (child instanceof THREE.Line && child.material instanceof THREE.Material) {
       const matchesPlanet = !planet || child.parent?.userData.planet === planet
-      const matchesType =
-        !lineType || child.parent?.userData.lineType === lineType
+      const matchesType = !lineType || child.parent?.userData.lineType === lineType
 
       child.material.opacity = matchesPlanet && matchesType ? 1.0 : 0.2
     }
@@ -253,10 +240,10 @@ export function highlightACGLines(
  */
 export function getLineTypeDisplayName(lineType: string): string {
   const names: Record<string, string> = {
-    ASC: "Ascending",
-    DSC: "Descending",
-    MC: "Midheaven",
-    IC: "Imum Coeli",
+    ASC: 'Ascending',
+    DSC: 'Descending',
+    MC: 'Midheaven',
+    IC: 'Imum Coeli',
   }
   return names[lineType] || lineType
 }
@@ -266,10 +253,10 @@ export function getLineTypeDisplayName(lineType: string): string {
  */
 export function getLineTypeDescription(lineType: string): string {
   const descriptions: Record<string, string> = {
-    ASC: "Where the planet is rising (ascending horizon)",
-    DSC: "Where the planet is setting (descending horizon)",
-    MC: "Where the planet is culminating (on the meridian)",
-    IC: "Where the planet is at anti-culmination",
+    ASC: 'Where the planet is rising (ascending horizon)',
+    DSC: 'Where the planet is setting (descending horizon)',
+    MC: 'Where the planet is culminating (on the meridian)',
+    IC: 'Where the planet is at anti-culmination',
   }
-  return descriptions[lineType] || ""
+  return descriptions[lineType] || ''
 }

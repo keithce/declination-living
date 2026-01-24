@@ -1,4 +1,4 @@
-"use node"
+'use node'
 
 /**
  * Enhanced Convex Actions for Celestial Sphere Engineering.
@@ -13,23 +13,23 @@
  * - Complete analysis pipeline
  */
 
-import { action } from "../_generated/server"
-import { v } from "convex/values"
+import { v } from 'convex/values'
+import { action } from '../_generated/server'
 
-import { dateToJulianDay, calculateAllPositions, calculateDeclinations } from "./ephemeris"
-import { findOptimalLatitudes, getOptimalLatitudeBands } from "./optimizer"
+import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from './ephemeris'
+import { findOptimalLatitudes, getOptimalLatitudeBands } from './optimizer'
 
 // Import new modules
-import type { PlanetId, EquatorialCoordinates, ACGLine, ZenithLine, ParanResult } from "./core/types"
-import { PLANET_IDS } from "./core/types"
-import { getMeanObliquity, checkAllOOBStatus } from "./ephemeris/oob"
-import { calculateAllZenithLines, scoreLatitudeForZenith } from "./acg/zenith"
-import { calculateAllACGLines, findACGLinesNearLocation } from "./acg/line_solver"
-import { calculateAllParans, getStrongestParans } from "./parans/solver"
-import { calculateAllDignities, longitudeToSignPosition, isDayChart } from "./dignity/calculator"
-import { matchVibeFromQuery, getVibeById, DEFAULT_WEIGHTS } from "./vibes/translator"
-import { generateSearchBands, scoreLatitude } from "./geospatial/search"
-import { quickSafetyCheck } from "./safety/filter"
+import { PLANET_IDS } from './core/types'
+import { checkAllOOBStatus, getMeanObliquity } from './ephemeris/oob'
+import { calculateAllZenithLines } from './acg/zenith'
+import { calculateAllACGLines, findACGLinesNearLocation } from './acg/line_solver'
+import { calculateAllParans, getStrongestParans } from './parans/solver'
+import { calculateAllDignities, isDayChart, longitudeToSignPosition } from './dignity/calculator'
+import { DEFAULT_WEIGHTS, getVibeById, matchVibeFromQuery } from './vibes/translator'
+import { generateSearchBands } from './geospatial/search'
+import { quickSafetyCheck } from './safety/filter'
+import type { EquatorialCoordinates, PlanetId } from './core/types'
 
 // =============================================================================
 // Validators
@@ -156,10 +156,12 @@ export const calculateACGLinesAction = action({
       lineType: line.lineType,
       isCircumpolar: line.isCircumpolar ?? false,
       // Sample every 5th point for reduced data transfer
-      points: line.points.filter((_, i) => i % 5 === 0).map((p) => ({
-        lat: Math.round(p.latitude * 100) / 100,
-        lon: Math.round(p.longitude * 100) / 100,
-      })),
+      points: line.points
+        .filter((_, i) => i % 5 === 0)
+        .map((p) => ({
+          lat: Math.round(p.latitude * 100) / 100,
+          lon: Math.round(p.longitude * 100) / 100,
+        })),
     }))
 
     return {
@@ -200,11 +202,7 @@ export const findACGLinesNearLocationAction = action({
     }
 
     const allLines = calculateAllACGLines(jd, equatorialPositions)
-    const nearbyLines = findACGLinesNearLocation(
-      { latitude, longitude },
-      allLines,
-      orb ?? 2
-    )
+    const nearbyLines = findACGLinesNearLocation({ latitude, longitude }, allLines, orb ?? 2)
 
     return nearbyLines.map((nl) => ({
       planet: nl.line.planet,
@@ -327,7 +325,7 @@ export const calculateDignitiesAction = action({
           breakdown: dignities[planet].breakdown,
           signPosition: longitudeToSignPosition(longitudes[planet]),
         },
-      ])
+      ]),
     )
   },
 })
@@ -499,16 +497,16 @@ export const calculateCompleteEnhanced = action({
           total: dignities[planet].total,
           indicator:
             dignities[planet].domicile > 0
-              ? "R"
+              ? 'R'
               : dignities[planet].exaltation > 0
-                ? "E"
+                ? 'E'
                 : dignities[planet].detriment < 0
-                  ? "d"
+                  ? 'd'
                   : dignities[planet].fall < 0
-                    ? "f"
-                    : "-",
+                    ? 'f'
+                    : '-',
         },
-      ])
+      ]),
     )
 
     return {
@@ -525,7 +523,7 @@ export const calculateCompleteEnhanced = action({
             isOOB: oobStatus[planet].isOOB,
             oobDegrees: oobStatus[planet].oobDegrees,
           },
-        ])
+        ]),
       ),
 
       // Optimization results
@@ -554,7 +552,7 @@ export const calculateCompleteEnhanced = action({
       dignities: dignityScores,
 
       // Metadata
-      sect: isDay ? "day" : "night",
+      sect: isDay ? 'day' : 'night',
     }
   },
 })
@@ -600,9 +598,7 @@ export const generateSearchBandsAction = action({
         score: Math.round(b.score * 100) / 100,
         dominantPlanets: b.dominantPlanets,
       })),
-      optimalLatitudes: result.optimalLatitudes.slice(0, 10).map((l) =>
-        Math.round(l * 10) / 10
-      ),
+      optimalLatitudes: result.optimalLatitudes.slice(0, 10).map((l) => Math.round(l * 10) / 10),
       paranLatitudeCount: result.paranLatitudes.length,
     }
   },

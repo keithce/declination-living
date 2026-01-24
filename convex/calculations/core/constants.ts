@@ -185,29 +185,29 @@ export const DIGNITY_POINTS = {
 // =============================================================================
 
 export const PLANET_SYMBOLS: Record<string, string> = {
-  sun: "☉",
-  moon: "☽",
-  mercury: "☿",
-  venus: "♀",
-  mars: "♂",
-  jupiter: "♃",
-  saturn: "♄",
-  uranus: "♅",
-  neptune: "♆",
-  pluto: "♇",
+  sun: '☉',
+  moon: '☽',
+  mercury: '☿',
+  venus: '♀',
+  mars: '♂',
+  jupiter: '♃',
+  saturn: '♄',
+  uranus: '♅',
+  neptune: '♆',
+  pluto: '♇',
 }
 
 export const PLANET_COLORS: Record<string, string> = {
-  sun: "#FFD700", // Gold
-  moon: "#C0C0C0", // Silver
-  mercury: "#A0522D", // Sienna
-  venus: "#FF69B4", // Hot pink
-  mars: "#FF4500", // Red-orange
-  jupiter: "#4169E1", // Royal blue
-  saturn: "#8B4513", // Saddle brown
-  uranus: "#00CED1", // Dark turquoise
-  neptune: "#4682B4", // Steel blue
-  pluto: "#800080", // Purple
+  sun: '#FFD700', // Gold
+  moon: '#C0C0C0', // Silver
+  mercury: '#A0522D', // Sienna
+  venus: '#FF69B4', // Hot pink
+  mars: '#FF4500', // Red-orange
+  jupiter: '#4169E1', // Royal blue
+  saturn: '#8B4513', // Saddle brown
+  uranus: '#00CED1', // Dark turquoise
+  neptune: '#4682B4', // Steel blue
+  pluto: '#800080', // Purple
 }
 
 // =============================================================================
@@ -215,61 +215,61 @@ export const PLANET_COLORS: Record<string, string> = {
 // =============================================================================
 
 export const SIGN_NAMES = [
-  "Aries",
-  "Taurus",
-  "Gemini",
-  "Cancer",
-  "Leo",
-  "Virgo",
-  "Libra",
-  "Scorpio",
-  "Sagittarius",
-  "Capricorn",
-  "Aquarius",
-  "Pisces",
+  'Aries',
+  'Taurus',
+  'Gemini',
+  'Cancer',
+  'Leo',
+  'Virgo',
+  'Libra',
+  'Scorpio',
+  'Sagittarius',
+  'Capricorn',
+  'Aquarius',
+  'Pisces',
 ] as const
 
 export const SIGN_SYMBOLS = [
-  "♈",
-  "♉",
-  "♊",
-  "♋",
-  "♌",
-  "♍",
-  "♎",
-  "♏",
-  "♐",
-  "♑",
-  "♒",
-  "♓",
+  '♈',
+  '♉',
+  '♊',
+  '♋',
+  '♌',
+  '♍',
+  '♎',
+  '♏',
+  '♐',
+  '♑',
+  '♒',
+  '♓',
 ] as const
 
 export const ZODIAC_ELEMENT_SEQUENCE = [
-  "fire",
-  "earth",
-  "air",
-  "water",
-  "fire",
-  "earth",
-  "air",
-  "water",
-  "fire",
-  "earth",
-  "air",
-  "water",
+  'fire',
+  'earth',
+  'air',
+  'water',
+  'fire',
+  'earth',
+  'air',
+  'water',
+  'fire',
+  'earth',
+  'air',
+  'water',
 ] as const
 
 export const SIGN_MODALITIES = [
-  "cardinal",
-  "fixed",
-  "mutable",
-  "cardinal",
-  "fixed",
-  "mutable",
-  "cardinal",
-  "fixed",
-  "mutable",
-  "cardinal",
-  "fixed",
-  "mutable",
+  'cardinal',
+  'fixed',
+  'mutable',
+  'cardinal',
+  'fixed',
+  'mutable',
+  'cardinal',
+  'fixed',
+  'mutable',
+  'cardinal',
+  'fixed',
+  'mutable',
 ] as const

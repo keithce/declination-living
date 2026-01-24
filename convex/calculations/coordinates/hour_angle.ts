@@ -5,14 +5,14 @@
  */
 
 import {
-  J2000,
   GMST_AT_J2000,
-  GMST_RATE,
-  GMST_QUAD,
   GMST_CUBIC,
+  GMST_QUAD,
+  GMST_RATE,
+  J2000,
   JULIAN_DAYS_PER_CENTURY,
-} from "../core/constants"
-import { normalizeDegrees, normalizeDegreesSymmetric } from "../core/math"
+} from '../core/constants'
+import { normalizeDegrees, normalizeDegreesSymmetric } from '../core/math'
 
 // =============================================================================
 // Sidereal Time Functions
@@ -33,11 +33,7 @@ export function getGMST(jd: number): number {
 
   // Mean sidereal time at 0h UT
   // θ₀ = 280.46061837 + 360.98564736629*(JD - 2451545) + 0.000387933*T² - T³/38710000
-  const gmst =
-    GMST_AT_J2000 +
-    GMST_RATE * (jd - J2000) +
-    GMST_QUAD * T * T +
-    GMST_CUBIC * T * T * T
+  const gmst = GMST_AT_J2000 + GMST_RATE * (jd - J2000) + GMST_QUAD * T * T + GMST_CUBIC * T * T * T
 
   return normalizeDegrees(gmst)
 }
@@ -79,11 +75,7 @@ export function getLMST(jd: number, longitude: number): number {
  * @param nutationInRA - Nutation in right ascension (degrees)
  * @returns LAST in degrees
  */
-export function getLAST(
-  jd: number,
-  longitude: number,
-  nutationInRA: number
-): number {
+export function getLAST(jd: number, longitude: number, nutationInRA: number): number {
   const gast = getGAST(jd, nutationInRA)
   return normalizeDegrees(gast + longitude)
 }
@@ -107,11 +99,7 @@ export function getLAST(
  * @param ra - Object's Right Ascension in degrees
  * @returns Local Hour Angle in degrees [-180, 180)
  */
-export function getLocalHourAngle(
-  jd: number,
-  longitude: number,
-  ra: number
-): number {
+export function getLocalHourAngle(jd: number, longitude: number, ra: number): number {
   const lmst = getLMST(jd, longitude)
   return normalizeDegreesSymmetric(lmst - ra)
 }
@@ -124,11 +112,7 @@ export function getLocalHourAngle(
  * @param ra - Object's Right Ascension in degrees
  * @returns Local Hour Angle in hours [-12, 12)
  */
-export function getLocalHourAngleHours(
-  jd: number,
-  longitude: number,
-  ra: number
-): number {
+export function getLocalHourAngleHours(jd: number, longitude: number, ra: number): number {
   return getLocalHourAngle(jd, longitude, ra) / 15
 }
 
@@ -152,11 +136,7 @@ export function getLocalHourAngleHours(
  * @param targetHA - Target hour angle in degrees
  * @returns Longitude in degrees [-180, 180]
  */
-export function longitudeForHourAngle(
-  jd: number,
-  ra: number,
-  targetHA: number
-): number {
+export function longitudeForHourAngle(jd: number, ra: number, targetHA: number): number {
   const gmst = getGMST(jd)
   // LHA = GMST + longitude - RA
   // longitude = LHA + RA - GMST
@@ -206,13 +186,13 @@ export function jdForHourAngle(
   jd0: number,
   longitude: number,
   ra: number,
-  targetHA: number
+  targetHA: number,
 ): number {
   // Current hour angle
   const currentHA = getLocalHourAngle(jd0, longitude, ra)
 
   // Difference from target (how far we need to rotate)
-  let diff = normalizeDegreesSymmetric(targetHA - currentHA)
+  const diff = normalizeDegreesSymmetric(targetHA - currentHA)
 
   // Convert degrees to days (Earth rotates 360.98564736629°/day sidereal)
   const daysPerDegree = 1 / GMST_RATE
@@ -228,11 +208,7 @@ export function jdForHourAngle(
  * @param ra - Object's Right Ascension in degrees
  * @returns Julian Day of culmination
  */
-export function jdForCulmination(
-  jd0: number,
-  longitude: number,
-  ra: number
-): number {
+export function jdForCulmination(jd0: number, longitude: number, ra: number): number {
   return jdForHourAngle(jd0, longitude, ra, 0)
 }
 
@@ -250,9 +226,9 @@ export function hourAngleToHMS(haDegrees: number): {
   hours: number
   minutes: number
   seconds: number
-  sign: "+" | "-"
+  sign: '+' | '-'
 } {
-  const sign = haDegrees >= 0 ? "+" : "-"
+  const sign = haDegrees >= 0 ? '+' : '-'
   const totalHours = Math.abs(haDegrees) / 15
   const hours = Math.floor(totalHours)
   const minutesFloat = (totalHours - hours) * 60
@@ -296,8 +272,7 @@ export function calculateAltitude(ha: number, dec: number, lat: number): number 
   const haRad = (ha * Math.PI) / 180
 
   const sinAlt =
-    Math.sin(latRad) * Math.sin(decRad) +
-    Math.cos(latRad) * Math.cos(decRad) * Math.cos(haRad)
+    Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(haRad)
 
   return (Math.asin(sinAlt) * 180) / Math.PI
 }
@@ -317,8 +292,7 @@ export function calculateAzimuth(ha: number, dec: number, lat: number): number {
 
   const sinAz = -Math.cos(decRad) * Math.sin(haRad)
   const cosAz =
-    Math.sin(decRad) * Math.cos(latRad) -
-    Math.cos(decRad) * Math.cos(haRad) * Math.sin(latRad)
+    Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.cos(haRad) * Math.sin(latRad)
 
   let azimuth = (Math.atan2(sinAz, cosAz) * 180) / Math.PI
   if (azimuth < 0) azimuth += 360

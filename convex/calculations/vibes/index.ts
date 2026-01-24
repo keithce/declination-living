@@ -2,4 +2,4 @@
  * Vibe/Search module exports.
  */
 
-export * from "./translator"
+export * from './translator'

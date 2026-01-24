@@ -5,14 +5,9 @@
  * each planet passes directly overhead (zenith).
  */
 
-import * as THREE from "three"
-import type {
-  ZenithLineData,
-  PlanetVisibility,
-  LayerGroup,
-  PlanetId,
-} from "./types"
-import { PLANET_COLORS_HEX } from "./types"
+import * as THREE from 'three'
+import { PLANET_COLORS_HEX } from './types'
+import type { LayerGroup, PlanetId, PlanetVisibility, ZenithLineData } from './types'
 
 // =============================================================================
 // Constants
@@ -45,7 +40,7 @@ const DEFAULT_BAND_WIDTH = 1.0
 function createLatitudeRingGeometry(
   latitude: number,
   radius: number,
-  width: number = DEFAULT_BAND_WIDTH
+  width: number = DEFAULT_BAND_WIDTH,
 ): THREE.BufferGeometry {
   const phi = ((90 - latitude) * Math.PI) / 180
   const ringRadius = Math.sin(phi) * radius
@@ -58,7 +53,7 @@ function createLatitudeRingGeometry(
   const geometry = new THREE.RingGeometry(
     Math.max(0.001, innerRadius),
     outerRadius,
-    LATITUDE_SEGMENTS
+    LATITUDE_SEGMENTS,
   )
 
   // Position the geometry
@@ -80,14 +75,14 @@ function createLatitudeBandGeometry(
   latitude: number,
   orbMin: number,
   orbMax: number,
-  radius: number
+  radius: number,
 ): THREE.BufferGeometry {
   const segments = LATITUDE_SEGMENTS
   const bandSegments = 5 // Segments across the width
 
-  const vertices: number[] = []
-  const colors: number[] = []
-  const indices: number[] = []
+  const vertices: Array<number> = []
+  const colors: Array<number> = []
+  const indices: Array<number> = []
 
   // Create vertex grid
   for (let i = 0; i <= bandSegments; i++) {
@@ -129,11 +124,8 @@ function createLatitudeBandGeometry(
   }
 
   const geometry = new THREE.BufferGeometry()
-  geometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(vertices, 3)
-  )
-  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 4))
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4))
   geometry.setIndex(indices)
   geometry.computeVertexNormals()
 
@@ -152,13 +144,13 @@ function createLatitudeBandGeometry(
  * @returns LayerGroup with the band meshes
  */
 export function createZenithBandLayer(
-  zenithLines: ZenithLineData[],
-  planetVisibility: PlanetVisibility
+  zenithLines: Array<ZenithLineData>,
+  planetVisibility: PlanetVisibility,
 ): LayerGroup {
   const group = new THREE.Group()
-  group.name = "zenithBands"
+  group.name = 'zenithBands'
 
-  const meshes: THREE.Mesh[] = []
+  const meshes: Array<THREE.Mesh> = []
 
   for (const line of zenithLines) {
     // Skip if planet is not visible
@@ -171,7 +163,7 @@ export function createZenithBandLayer(
       line.latitude,
       line.orbMin,
       line.orbMax,
-      GLOBE_RADIUS + BAND_OFFSET
+      GLOBE_RADIUS + BAND_OFFSET,
     )
 
     // Create material with vertex colors for gradient
@@ -193,7 +185,7 @@ export function createZenithBandLayer(
     const centerRing = createLatitudeRingGeometry(
       line.latitude,
       GLOBE_RADIUS + BAND_OFFSET + 0.002,
-      0.2
+      0.2,
     )
     const centerMaterial = new THREE.MeshBasicMaterial({
       color: color,
@@ -203,7 +195,7 @@ export function createZenithBandLayer(
       depthWrite: false,
     })
     const centerMesh = new THREE.Mesh(centerRing, centerMaterial)
-    centerMesh.userData = { planet: line.planet, type: "center" }
+    centerMesh.userData = { planet: line.planet, type: 'center' }
     group.add(centerMesh)
   }
 
@@ -242,7 +234,7 @@ export function createZenithBandLayer(
  */
 export function updateZenithBandVisibility(
   group: THREE.Group,
-  planetVisibility: PlanetVisibility
+  planetVisibility: PlanetVisibility,
 ): void {
   group.traverse((child) => {
     if (child instanceof THREE.Mesh && child.userData.planet) {
@@ -254,10 +246,7 @@ export function updateZenithBandVisibility(
 /**
  * Highlight a specific planet's zenith band.
  */
-export function highlightZenithBand(
-  group: THREE.Group,
-  planet: PlanetId | null
-): void {
+export function highlightZenithBand(group: THREE.Group, planet: PlanetId | null): void {
   group.traverse((child) => {
     if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshBasicMaterial) {
       const isPlanet = child.userData.planet === planet

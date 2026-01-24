@@ -54,8 +54,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         property: 'og:description',
-        content:
-          'Discover your optimal living location based on astrological declination theory.',
+        content: 'Discover your optimal living location based on astrological declination theory.',
       },
       {
         property: 'og:image',
@@ -72,8 +71,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: 'twitter:description',
-        content:
-          'Find your optimal living location based on planetary declinations.',
+        content: 'Find your optimal living location based on planetary declinations.',
       },
       {
         name: 'twitter:image',
@@ -109,9 +107,7 @@ function NotFoundComponent() {
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-800/50 flex items-center justify-center">
           <Compass className="w-10 h-10 text-amber-400" />
         </div>
-        <h1 className="font-display text-3xl font-semibold text-white mb-4">
-          Page Not Found
-        </h1>
+        <h1 className="font-display text-3xl font-semibold text-white mb-4">Page Not Found</h1>
         <p className="text-slate-400 mb-8">
           The page you're looking for doesn't exist or has been moved.
         </p>

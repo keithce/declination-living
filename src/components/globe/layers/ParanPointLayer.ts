@@ -5,9 +5,9 @@
  * (e.g., one rising while another culminates).
  */
 
-import * as THREE from "three"
-import type { ParanPointData, PlanetVisibility, LayerGroup, PlanetId } from "./types"
-import { PLANET_COLORS_HEX } from "./types"
+import * as THREE from 'three'
+import { PLANET_COLORS_HEX } from './types'
+import type { LayerGroup, ParanPointData, PlanetId, PlanetVisibility } from './types'
 
 // =============================================================================
 // Constants
@@ -29,18 +29,14 @@ const GLOW_SIZE_MULTIPLIER = 3
 /**
  * Convert lat/lon to 3D position on sphere.
  */
-function latLonToVector3(
-  lat: number,
-  lon: number,
-  radius: number
-): THREE.Vector3 {
+function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector3 {
   const phi = ((90 - lat) * Math.PI) / 180
   const theta = ((lon + 180) * Math.PI) / 180
 
   return new THREE.Vector3(
     -radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    radius * Math.sin(phi) * Math.sin(theta),
   )
 }
 
@@ -72,24 +68,17 @@ function blendColors(color1: number, color2: number, ratio: number = 0.5): numbe
  */
 function createGlowTexture(): THREE.Texture {
   const size = 64
-  const canvas = document.createElement("canvas")
+  const canvas = document.createElement('canvas')
   canvas.width = size
   canvas.height = size
 
-  const ctx = canvas.getContext("2d")!
-  const gradient = ctx.createRadialGradient(
-    size / 2,
-    size / 2,
-    0,
-    size / 2,
-    size / 2,
-    size / 2
-  )
+  const ctx = canvas.getContext('2d')!
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
 
-  gradient.addColorStop(0, "rgba(255, 255, 255, 1)")
-  gradient.addColorStop(0.2, "rgba(255, 255, 255, 0.8)")
-  gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)")
-  gradient.addColorStop(1, "rgba(255, 255, 255, 0)")
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+  gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)')
+  gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.3)')
+  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
 
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
@@ -107,10 +96,7 @@ function createGlowTexture(): THREE.Texture {
 /**
  * Create a paran point marker with glow effect.
  */
-function createParanMarker(
-  paran: ParanPointData,
-  longitude: number
-): THREE.Group {
+function createParanMarker(paran: ParanPointData, longitude: number): THREE.Group {
   const markerGroup = new THREE.Group()
 
   // Blend colors of both planets
@@ -147,11 +133,7 @@ function createParanMarker(
   markerGroup.add(glow)
 
   // Position on globe
-  const position = latLonToVector3(
-    paran.latitude,
-    longitude,
-    1 + POINT_OFFSET
-  )
+  const position = latLonToVector3(paran.latitude, longitude, 1 + POINT_OFFSET)
   markerGroup.position.copy(position)
 
   // Store data for interaction
@@ -179,14 +161,14 @@ function createParanMarker(
  * @returns LayerGroup with the point markers
  */
 export function createParanPointLayer(
-  parans: ParanPointData[],
-  planetVisibility: PlanetVisibility
+  parans: Array<ParanPointData>,
+  planetVisibility: PlanetVisibility,
 ): LayerGroup {
   const group = new THREE.Group()
-  group.name = "paranPoints"
+  group.name = 'paranPoints'
 
   // Group parans by latitude to avoid overlap
-  const latitudeGroups = new Map<number, ParanPointData[]>()
+  const latitudeGroups = new Map<number, Array<ParanPointData>>()
 
   for (const paran of parans) {
     // Skip if either planet is not visible
@@ -250,7 +232,7 @@ export function createParanPointLayer(
  */
 export function updateParanPointVisibility(
   group: THREE.Group,
-  planetVisibility: PlanetVisibility
+  planetVisibility: PlanetVisibility,
 ): void {
   group.traverse((child) => {
     if (child.userData.planet1 && child.userData.planet2) {
@@ -266,14 +248,16 @@ export function updateParanPointVisibility(
  */
 export function getParanTooltip(userData: Record<string, unknown>): string {
   const eventNames: Record<string, string> = {
-    rise: "Rising",
-    set: "Setting",
-    culminate: "Culminating",
-    anti_culminate: "Anti-culminating",
+    rise: 'Rising',
+    set: 'Setting',
+    culminate: 'Culminating',
+    anti_culminate: 'Anti-culminating',
   }
 
-  const p1 = (userData.planet1 as string).charAt(0).toUpperCase() + (userData.planet1 as string).slice(1)
-  const p2 = (userData.planet2 as string).charAt(0).toUpperCase() + (userData.planet2 as string).slice(1)
+  const p1 =
+    (userData.planet1 as string).charAt(0).toUpperCase() + (userData.planet1 as string).slice(1)
+  const p2 =
+    (userData.planet2 as string).charAt(0).toUpperCase() + (userData.planet2 as string).slice(1)
   const e1 = eventNames[userData.event1 as string] || userData.event1
   const e2 = eventNames[userData.event2 as string] || userData.event2
   const lat = (userData.latitude as number).toFixed(1)
@@ -288,11 +272,11 @@ export function findParanAtPosition(
   group: THREE.Group,
   raycaster: THREE.Raycaster,
   camera: THREE.Camera,
-  mousePosition: THREE.Vector2
+  mousePosition: THREE.Vector2,
 ): Record<string, unknown> | null {
   raycaster.setFromCamera(mousePosition, camera)
 
-  const meshes: THREE.Object3D[] = []
+  const meshes: Array<THREE.Object3D> = []
   group.traverse((child) => {
     if (child instanceof THREE.Mesh) {
       meshes.push(child)

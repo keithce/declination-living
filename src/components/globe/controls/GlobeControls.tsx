@@ -4,26 +4,23 @@
  * Provides toggles for layers, planet filters, and ACG line type filters.
  */
 
-import { useState } from "react"
+import { useState } from 'react'
 import {
-  Layers,
-  Eye,
-  EyeOff,
   ChevronDown,
   ChevronRight,
-  RotateCcw,
-  Flame,
   Circle,
+  Eye,
+  EyeOff,
+  Flame,
+  Layers,
   Minus,
-} from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import type { PlanetId } from "../layers/types"
-import { PLANET_COLORS_HEX, PLANET_IDS } from "../layers/types"
-import type { UseGlobeStateReturn } from "../hooks/useGlobeState"
-import {
-  getVisiblePlanetCount,
-  getVisibleACGLineTypeCount,
-} from "../hooks/useGlobeState"
+  RotateCcw,
+} from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { PLANET_COLORS_HEX, PLANET_IDS } from '../layers/types'
+import { getVisibleACGLineTypeCount, getVisiblePlanetCount } from '../hooks/useGlobeState'
+import type { PlanetId } from '../layers/types'
+import type { UseGlobeStateReturn } from '../hooks/useGlobeState'
 
 // =============================================================================
 // Types
@@ -46,29 +43,18 @@ interface ToggleButtonProps {
   className?: string
 }
 
-function ToggleButton({
-  enabled,
-  onClick,
-  label,
-  color,
-  className = "",
-}: ToggleButtonProps) {
+function ToggleButton({ enabled, onClick, label, color, className = '' }: ToggleButtonProps) {
   return (
     <button
       onClick={onClick}
       className={`
         flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-all
-        ${enabled ? "bg-slate-700/50 text-white" : "bg-slate-800/30 text-slate-500"}
+        ${enabled ? 'bg-slate-700/50 text-white' : 'bg-slate-800/30 text-slate-500'}
         hover:bg-slate-700/70
         ${className}
       `}
     >
-      {color && (
-        <span
-          className="w-2.5 h-2.5 rounded-full"
-          style={{ backgroundColor: color }}
-        />
-      )}
+      {color && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />}
       <span>{label}</span>
       {enabled ? (
         <Eye className="w-3.5 h-3.5 ml-auto" />
@@ -105,23 +91,17 @@ function CollapsibleSection({
         {icon}
         <span>{title}</span>
         {badge !== undefined && (
-          <span className="ml-1 px-1.5 py-0.5 text-xs bg-slate-700/50 rounded">
-            {badge}
-          </span>
+          <span className="ml-1 px-1.5 py-0.5 text-xs bg-slate-700/50 rounded">{badge}</span>
         )}
         <span className="ml-auto">
-          {isOpen ? (
-            <ChevronDown className="w-4 h-4" />
-          ) : (
-            <ChevronRight className="w-4 h-4" />
-          )}
+          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         </span>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
@@ -143,14 +123,7 @@ interface SliderControlProps {
   onChange: (value: number) => void
 }
 
-function SliderControl({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-}: SliderControlProps) {
+function SliderControl({ label, value, min, max, step, onChange }: SliderControlProps) {
   return (
     <div className="px-1">
       <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
@@ -188,30 +161,30 @@ function SliderControl({
 // =============================================================================
 
 const PLANET_DISPLAY_NAMES: Record<PlanetId, string> = {
-  sun: "Sun",
-  moon: "Moon",
-  mercury: "Mercury",
-  venus: "Venus",
-  mars: "Mars",
-  jupiter: "Jupiter",
-  saturn: "Saturn",
-  uranus: "Uranus",
-  neptune: "Neptune",
-  pluto: "Pluto",
+  sun: 'Sun',
+  moon: 'Moon',
+  mercury: 'Mercury',
+  venus: 'Venus',
+  mars: 'Mars',
+  jupiter: 'Jupiter',
+  saturn: 'Saturn',
+  uranus: 'Uranus',
+  neptune: 'Neptune',
+  pluto: 'Pluto',
 }
 
 const ACG_LINE_DISPLAY_NAMES: Record<string, string> = {
-  ASC: "Ascending",
-  DSC: "Descending",
-  MC: "Midheaven",
-  IC: "Imum Coeli",
+  ASC: 'Ascending',
+  DSC: 'Descending',
+  MC: 'Midheaven',
+  IC: 'Imum Coeli',
 }
 
 // =============================================================================
 // Main Component
 // =============================================================================
 
-export function GlobeControls({ state, className = "" }: GlobeControlsProps) {
+export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
   const visiblePlanetCount = getVisiblePlanetCount(state.planets)
   const visibleACGCount = getVisibleACGLineTypeCount(state.acgLineTypes)
 
@@ -219,7 +192,7 @@ export function GlobeControls({ state, className = "" }: GlobeControlsProps) {
    * Convert hex number to CSS hex string.
    */
   const hexToColor = (hex: number): string => {
-    return `#${hex.toString(16).padStart(6, "0")}`
+    return `#${hex.toString(16).padStart(6, '0')}`
   }
 
   return (
@@ -246,28 +219,25 @@ export function GlobeControls({ state, className = "" }: GlobeControlsProps) {
       </div>
 
       {/* Layer Toggles */}
-      <CollapsibleSection
-        title="Visualization Layers"
-        icon={<Layers className="w-4 h-4" />}
-      >
+      <CollapsibleSection title="Visualization Layers" icon={<Layers className="w-4 h-4" />}>
         <ToggleButton
           enabled={state.layers.zenithBands}
-          onClick={() => state.toggleLayer("zenithBands")}
+          onClick={() => state.toggleLayer('zenithBands')}
           label="Zenith Bands"
         />
         <ToggleButton
           enabled={state.layers.acgLines}
-          onClick={() => state.toggleLayer("acgLines")}
+          onClick={() => state.toggleLayer('acgLines')}
           label="ACG Lines"
         />
         <ToggleButton
           enabled={state.layers.paranPoints}
-          onClick={() => state.toggleLayer("paranPoints")}
+          onClick={() => state.toggleLayer('paranPoints')}
           label="Paran Points"
         />
         <ToggleButton
           enabled={state.layers.heatmap}
-          onClick={() => state.toggleLayer("heatmap")}
+          onClick={() => state.toggleLayer('heatmap')}
           label="Heatmap"
         />
       </CollapsibleSection>
@@ -352,7 +322,7 @@ export function GlobeControls({ state, className = "" }: GlobeControlsProps) {
               Hide All
             </button>
           </div>
-          {(["ASC", "DSC", "MC", "IC"] as const).map((lineType) => (
+          {(['ASC', 'DSC', 'MC', 'IC'] as const).map((lineType) => (
             <ToggleButton
               key={lineType}
               enabled={state.acgLineTypes[lineType]}
@@ -375,9 +345,7 @@ export function GlobeControls({ state, className = "" }: GlobeControlsProps) {
             <span
               className="w-3 h-3 rounded-full"
               style={{
-                backgroundColor: hexToColor(
-                  PLANET_COLORS_HEX[state.highlightedPlanet]
-                ),
+                backgroundColor: hexToColor(PLANET_COLORS_HEX[state.highlightedPlanet]),
               }}
             />
             <span className="text-sm text-slate-300">

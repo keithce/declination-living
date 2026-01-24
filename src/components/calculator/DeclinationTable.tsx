@@ -52,9 +52,7 @@ export const DeclinationTable = memo(function DeclinationTable({
         <h3 className="font-display text-lg font-semibold text-white">
           Your Planetary Declinations
         </h3>
-        <p className="text-sm text-slate-400 mt-1">
-          North/South celestial position at your birth
-        </p>
+        <p className="text-sm text-slate-400 mt-1">North/South celestial position at your birth</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5">
@@ -74,15 +72,10 @@ export const DeclinationTable = memo(function DeclinationTable({
                 </span>
                 <span className="text-sm text-slate-400">{planet.name}</span>
               </div>
-              <div
-                className="font-mono text-lg font-semibold"
-                style={{ color: planet.color }}
-              >
+              <div className="font-mono text-lg font-semibold" style={{ color: planet.color }}>
                 {formatDeclination(declination)}
               </div>
-              <div className="text-xs text-slate-500 mt-1">
-                {declination.toFixed(2)}°
-              </div>
+              <div className="text-xs text-slate-500 mt-1">{declination.toFixed(2)}°</div>
             </motion.div>
           )
         })}

@@ -9,10 +9,10 @@
  * where the planet passes near the zenith.
  */
 
-import type { PlanetId, ZenithLine, PlanetDeclinations, PlanetWeights } from "../core/types"
-import { PLANET_IDS } from "../core/types"
-import { DEFAULT_DECLINATION_ORB, DECLINATION_SIGMA } from "../core/constants"
-import { gaussian, clamp } from "../core/math"
+import { PLANET_IDS } from '../core/types'
+import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../core/constants'
+import { clamp, gaussian } from '../core/math'
+import type { PlanetDeclinations, PlanetId, PlanetWeights, ZenithLine } from '../core/types'
 
 // =============================================================================
 // Types
@@ -62,7 +62,7 @@ export interface ZenithScore {
 export function calculateZenithLine(
   planet: PlanetId,
   declination: number,
-  orb: number = DEFAULT_DECLINATION_ORB
+  orb: number = DEFAULT_DECLINATION_ORB,
 ): ZenithLine {
   return {
     planet,
@@ -81,11 +81,9 @@ export function calculateZenithLine(
  */
 export function calculateAllZenithLines(
   declinations: PlanetDeclinations,
-  orb: number = DEFAULT_DECLINATION_ORB
-): ZenithLine[] {
-  return PLANET_IDS.map((planet) =>
-    calculateZenithLine(planet, declinations[planet], orb)
-  )
+  orb: number = DEFAULT_DECLINATION_ORB,
+): Array<ZenithLine> {
+  return PLANET_IDS.map((planet) => calculateZenithLine(planet, declinations[planet], orb))
 }
 
 // =============================================================================
@@ -103,8 +101,8 @@ export function calculateAllZenithLines(
 export function calculateZenithBands(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
-  orb: number = DEFAULT_DECLINATION_ORB
-): ZenithBand[] {
+  orb: number = DEFAULT_DECLINATION_ORB,
+): Array<ZenithBand> {
   return PLANET_IDS.map((planet) => ({
     planet,
     centerLatitude: declinations[planet],
@@ -133,11 +131,11 @@ export function calculateZenithBands(
  */
 export function scoreLatitudeForZenith(
   latitude: number,
-  zenithLines: ZenithLine[],
+  zenithLines: Array<ZenithLine>,
   weights: PlanetWeights,
-  sigma: number = DECLINATION_SIGMA
+  sigma: number = DECLINATION_SIGMA,
 ): ZenithScore {
-  const contributions: ZenithScore["contributions"] = []
+  const contributions: ZenithScore['contributions'] = []
   let totalScore = 0
 
   for (const zenith of zenithLines) {
@@ -177,16 +175,14 @@ export function scoreLatitudeForZenith(
  * @returns Array of scores
  */
 export function scoreLatitudesForZenith(
-  latitudes: number[],
+  latitudes: Array<number>,
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
-  sigma: number = DECLINATION_SIGMA
-): ZenithScore[] {
+  sigma: number = DECLINATION_SIGMA,
+): Array<ZenithScore> {
   const zenithLines = calculateAllZenithLines(declinations)
 
-  return latitudes.map((lat) =>
-    scoreLatitudeForZenith(lat, zenithLines, weights, sigma)
-  )
+  return latitudes.map((lat) => scoreLatitudeForZenith(lat, zenithLines, weights, sigma))
 }
 
 // =============================================================================
@@ -208,10 +204,10 @@ export function findOptimalZenithLatitudes(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
   topN: number = 10,
-  stepSize: number = 0.5
-): ZenithScore[] {
+  stepSize: number = 0.5,
+): Array<ZenithScore> {
   const zenithLines = calculateAllZenithLines(declinations)
-  const scores: ZenithScore[] = []
+  const scores: Array<ZenithScore> = []
 
   // Sample latitudes from -70 to +70 (habitable range)
   for (let lat = -70; lat <= 70; lat += stepSize) {
@@ -241,10 +237,10 @@ export function findOptimalZenithLatitudes(
 export function findZenithOverlaps(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
-  orb: number = DEFAULT_DECLINATION_ORB
+  orb: number = DEFAULT_DECLINATION_ORB,
 ): Array<{
   latitude: number
-  planets: PlanetId[]
+  planets: Array<PlanetId>
   combinedWeight: number
 }> {
   const activeBands = PLANET_IDS.filter((p) => weights[p] > 0).map((planet) => ({
@@ -257,7 +253,7 @@ export function findZenithOverlaps(
 
   const overlaps: Array<{
     latitude: number
-    planets: PlanetId[]
+    planets: Array<PlanetId>
     combinedWeight: number
   }> = []
 
@@ -276,9 +272,7 @@ export function findZenithOverlaps(
         const overlapCenter = (overlapMin + overlapMax) / 2
 
         // Check if this overlap is already recorded (with other planets)
-        const existing = overlaps.find(
-          (o) => Math.abs(o.latitude - overlapCenter) < orb
-        )
+        const existing = overlaps.find((o) => Math.abs(o.latitude - overlapCenter) < orb)
 
         if (existing) {
           // Add planets to existing overlap
@@ -321,7 +315,7 @@ export function findZenithOverlaps(
  */
 export function generateZenithBandPoints(
   zenithLine: ZenithLine,
-  longitudeStep: number = 5
+  longitudeStep: number = 5,
 ): Array<{ lat: number; lon: number }> {
   const points: Array<{ lat: number; lon: number }> = []
 
@@ -349,7 +343,7 @@ export function generateZenithBandPoints(
 export function getZenithBandIntensity(
   zenithLine: ZenithLine,
   weights: PlanetWeights,
-  maxWeight: number = 10
+  maxWeight: number = 10,
 ): number {
   const weight = weights[zenithLine.planet]
   return clamp(weight / maxWeight, 0, 1)

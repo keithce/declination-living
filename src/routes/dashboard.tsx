@@ -1,22 +1,21 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useQuery, useMutation } from 'convex/react'
-import { useConvexAuth } from 'convex/react'
-import { api } from '../../convex/_generated/api'
-import type { Id } from '../../convex/_generated/dataModel'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useConvexAuth, useMutation, useQuery } from 'convex/react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Plus,
-  Trash2,
-  Share2,
-  ExternalLink,
   Calendar,
-  MapPin,
-  Copy,
   Check,
-  Loader2,
+  Copy,
+  ExternalLink,
   LayoutGrid,
+  Loader2,
+  MapPin,
+  Plus,
+  Share2,
+  Trash2,
 } from 'lucide-react'
 import { useState } from 'react'
+import { api } from '../../convex/_generated/api'
+import type { Id } from '../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/dashboard')({
   component: DashboardPage,
@@ -76,15 +75,11 @@ function ChartCard({
   const navigate = useNavigate()
 
   // Find the dominant planet (highest weight)
-  const dominantPlanet = Object.entries(chart.weights).reduce((a, b) =>
-    a[1] > b[1] ? a : b
-  )[0]
+  const dominantPlanet = Object.entries(chart.weights).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
 
   const handleCopyLink = async () => {
     if (chart.shareSlug) {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/chart/${chart.shareSlug}`
-      )
+      await navigator.clipboard.writeText(`${window.location.origin}/chart/${chart.shareSlug}`)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -116,9 +111,7 @@ function ChartCard({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
-            <h3 className="font-display text-lg font-semibold text-white truncate">
-              {chart.name}
-            </h3>
+            <h3 className="font-display text-lg font-semibold text-white truncate">{chart.name}</h3>
             <div className="flex items-center gap-2 mt-1 text-sm text-slate-400">
               <Calendar className="w-3.5 h-3.5" />
               <span>{chart.birthDate}</span>
@@ -126,10 +119,7 @@ function ChartCard({
               <span>{chart.birthTime}</span>
             </div>
           </div>
-          <span
-            className="text-2xl ml-2"
-            style={{ color: PLANET_COLORS[dominantPlanet] }}
-          >
+          <span className="text-2xl ml-2" style={{ color: PLANET_COLORS[dominantPlanet] }}>
             {PLANET_SYMBOLS[dominantPlanet]}
           </span>
         </div>
@@ -188,11 +178,7 @@ function ChartCard({
               onClick={handleCopyLink}
               className="flex items-center justify-center gap-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
             >
-              {copied ? (
-                <Check className="w-4 h-4 text-green-400" />
-              ) : (
-                <Copy className="w-4 h-4" />
-              )}
+              {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
             </button>
           ) : (
             <button
@@ -225,12 +211,10 @@ function EmptyState() {
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-800/50 flex items-center justify-center">
         <LayoutGrid className="w-10 h-10 text-slate-600" />
       </div>
-      <h3 className="font-display text-xl font-semibold text-white mb-2">
-        No charts yet
-      </h3>
+      <h3 className="font-display text-xl font-semibold text-white mb-2">No charts yet</h3>
       <p className="text-slate-400 mb-6 max-w-md mx-auto">
-        Create your first declination chart to discover your optimal living
-        locations based on planetary alignments.
+        Create your first declination chart to discover your optimal living locations based on
+        planetary alignments.
       </p>
       <Link
         to="/calculator"
@@ -246,10 +230,7 @@ function EmptyState() {
 function DashboardPage() {
   const navigate = useNavigate()
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth()
-  const charts = useQuery(
-    api.charts.queries.listMine,
-    isAuthenticated ? {} : 'skip'
-  )
+  const charts = useQuery(api.charts.queries.listMine, isAuthenticated ? {} : 'skip')
   const deleteChart = useMutation(api.charts.mutations.remove)
   const generateShareSlug = useMutation(api.charts.mutations.generateShareSlug)
 
@@ -298,9 +279,7 @@ function DashboardPage() {
             <h1 className="font-display text-3xl md:text-4xl font-semibold text-white mb-2">
               Your Charts
             </h1>
-            <p className="text-slate-400">
-              Manage your saved declination calculations
-            </p>
+            <p className="text-slate-400">Manage your saved declination calculations</p>
           </div>
 
           <Link

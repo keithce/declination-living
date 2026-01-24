@@ -9,15 +9,15 @@
  * extreme or unconventional ways.
  */
 
-import type { PlanetId, PlanetDeclinations } from "../core/types"
-import { PLANET_IDS } from "../core/types"
+import { PLANET_IDS } from '../core/types'
 import {
+  APPROX_OBLIQUITY,
   J2000,
   JULIAN_DAYS_PER_CENTURY,
   MEAN_OBLIQUITY_J2000,
   OBLIQUITY_RATE,
-  APPROX_OBLIQUITY,
-} from "../core/constants"
+} from '../core/constants'
+import type { PlanetDeclinations, PlanetId } from '../core/types'
 
 // =============================================================================
 // Types
@@ -29,7 +29,7 @@ export interface OOBStatus {
   /** Degrees beyond the obliquity limit (only if OOB) */
   oobDegrees: number | null
   /** Direction: 'north' if dec > obliquity, 'south' if dec < -obliquity */
-  direction: "north" | "south" | null
+  direction: 'north' | 'south' | null
   /** The declination value */
   declination: number
   /** The obliquity used for comparison */
@@ -79,10 +79,7 @@ export function getApproxObliquity(): number {
  * @param obliquity - Obliquity in degrees (default: approximate current)
  * @returns True if |declination| > obliquity
  */
-export function isOutOfBounds(
-  declination: number,
-  obliquity: number = APPROX_OBLIQUITY
-): boolean {
+export function isOutOfBounds(declination: number, obliquity: number = APPROX_OBLIQUITY): boolean {
   return Math.abs(declination) > obliquity
 }
 
@@ -93,10 +90,7 @@ export function isOutOfBounds(
  * @param obliquity - Obliquity in degrees
  * @returns OOBStatus with all details
  */
-export function getOOBStatus(
-  declination: number,
-  obliquity: number = APPROX_OBLIQUITY
-): OOBStatus {
+export function getOOBStatus(declination: number, obliquity: number = APPROX_OBLIQUITY): OOBStatus {
   const absDec = Math.abs(declination)
   const isOOB = absDec > obliquity
 
@@ -113,7 +107,7 @@ export function getOOBStatus(
   return {
     isOOB: true,
     oobDegrees: absDec - obliquity,
-    direction: declination > 0 ? "north" : "south",
+    direction: declination > 0 ? 'north' : 'south',
     declination,
     obliquity,
   }
@@ -126,10 +120,7 @@ export function getOOBStatus(
  * @param jd - Julian Day (for precise obliquity calculation)
  * @returns OOB status for each planet
  */
-export function checkAllOOBStatus(
-  declinations: PlanetDeclinations,
-  jd?: number
-): PlanetOOBStatus {
+export function checkAllOOBStatus(declinations: PlanetDeclinations, jd?: number): PlanetOOBStatus {
   const obliquity = jd !== undefined ? getMeanObliquity(jd) : APPROX_OBLIQUITY
 
   const result: Partial<PlanetOOBStatus> = {}
@@ -150,11 +141,9 @@ export function checkAllOOBStatus(
  */
 export function getOOBPlanets(
   declinations: PlanetDeclinations,
-  obliquity: number = APPROX_OBLIQUITY
-): PlanetId[] {
-  return PLANET_IDS.filter((planet) =>
-    isOutOfBounds(declinations[planet], obliquity)
-  )
+  obliquity: number = APPROX_OBLIQUITY,
+): Array<PlanetId> {
+  return PLANET_IDS.filter((planet) => isOutOfBounds(declinations[planet], obliquity))
 }
 
 // =============================================================================
@@ -175,7 +164,7 @@ export interface OOBPeriod {
   /** Maximum OOB degrees reached */
   maxOOBDegrees: number
   /** Direction (north/south) */
-  direction: "north" | "south"
+  direction: 'north' | 'south'
 }
 
 /**
@@ -191,7 +180,7 @@ export function findNextOOBEntry(
   getDeclination: (jd: number) => number,
   jd: number,
   obliquity: number = APPROX_OBLIQUITY,
-  maxDays: number = 365 * 2
+  maxDays: number = 365 * 2,
 ): number | null {
   const step = 1.0 // Search in 1-day steps
 
@@ -251,17 +240,17 @@ export function findNextOOBEntry(
  * Mars rarely goes OOB.
  * Outer planets almost never go OOB.
  */
-export const OOB_LIKELIHOOD: Record<PlanetId, "common" | "occasional" | "rare" | "never"> = {
-  sun: "never", // Sun defines the obliquity
-  moon: "common", // Regularly goes OOB
-  mercury: "occasional", // Can go up to ~27°
-  venus: "occasional", // Can go up to ~28°
-  mars: "rare", // Very rarely exceeds obliquity
-  jupiter: "rare", // Almost never
-  saturn: "rare",
-  uranus: "rare",
-  neptune: "rare",
-  pluto: "common", // Has high inclination, often OOB
+export const OOB_LIKELIHOOD: Record<PlanetId, 'common' | 'occasional' | 'rare' | 'never'> = {
+  sun: 'never', // Sun defines the obliquity
+  moon: 'common', // Regularly goes OOB
+  mercury: 'occasional', // Can go up to ~27°
+  venus: 'occasional', // Can go up to ~28°
+  mars: 'rare', // Very rarely exceeds obliquity
+  jupiter: 'rare', // Almost never
+  saturn: 'rare',
+  uranus: 'rare',
+  neptune: 'rare',
+  pluto: 'common', // Has high inclination, often OOB
 }
 
 /**
@@ -272,7 +261,7 @@ export function getOOBInterpretation(status: OOBStatus, planet: PlanetId): strin
     return `${planet} is within bounds at ${status.declination.toFixed(2)}° declination.`
   }
 
-  const direction = status.direction === "north" ? "northern" : "southern"
+  const direction = status.direction === 'north' ? 'northern' : 'southern'
   const degrees = status.oobDegrees!.toFixed(2)
 
   return `${planet} is out-of-bounds at ${status.declination.toFixed(2)}° declination (${degrees}° beyond ${direction} limit). This suggests ${planet}'s energy may express in more extreme or unconventional ways.`
@@ -290,9 +279,9 @@ export function getOOBInterpretation(status: OOBStatus, planet: PlanetId): strin
  */
 export function formatOOBStatus(status: OOBStatus): string {
   if (!status.isOOB) {
-    return "In bounds"
+    return 'In bounds'
   }
 
-  const dir = status.direction === "north" ? "N" : "S"
+  const dir = status.direction === 'north' ? 'N' : 'S'
   return `OOB +${status.oobDegrees!.toFixed(1)}°${dir}`
 }

@@ -5,20 +5,19 @@
  * the best latitude bands for relocation.
  */
 
+import { PLANET_IDS } from '../core/types'
+import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../core/constants'
+import { gaussian } from '../core/math'
+import { findZenithOverlaps } from '../acg/zenith'
+import { calculateAllParans } from '../parans/solver'
 import type {
-  PlanetId,
-  PlanetDeclinations,
-  PlanetWeights,
   EquatorialCoordinates,
   GeospatialSearchResult,
   ParanPoint,
-  ZenithLine,
-} from "../core/types"
-import { PLANET_IDS } from "../core/types"
-import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from "../core/constants"
-import { gaussian } from "../core/math"
-import { calculateAllZenithLines, findZenithOverlaps } from "../acg/zenith"
-import { calculateAllParans, getParansNearLatitude } from "../parans/solver"
+  PlanetDeclinations,
+  PlanetId,
+  PlanetWeights,
+} from '../core/types'
 
 // =============================================================================
 // Types
@@ -29,8 +28,8 @@ export interface LatitudeTarget {
   latitude: number
   score: number
   sources: Array<{
-    type: "zenith" | "paran" | "overlap"
-    planets: PlanetId[]
+    type: 'zenith' | 'paran' | 'overlap'
+    planets: Array<PlanetId>
     contribution: number
   }>
 }
@@ -40,8 +39,8 @@ export interface SearchBand {
   minLat: number
   maxLat: number
   score: number
-  dominantPlanets: PlanetId[]
-  zenithPlanets: PlanetId[]
+  dominantPlanets: Array<PlanetId>
+  zenithPlanets: Array<PlanetId>
   paranCount: number
 }
 
@@ -60,9 +59,9 @@ export interface SearchBand {
 export function calculateZenithLatitudes(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
-  orb: number = DEFAULT_DECLINATION_ORB
-): LatitudeTarget[] {
-  const targets: LatitudeTarget[] = []
+  orb: number = DEFAULT_DECLINATION_ORB,
+): Array<LatitudeTarget> {
+  const targets: Array<LatitudeTarget> = []
 
   // Each planet's declination is a zenith latitude
   for (const planet of PLANET_IDS) {
@@ -76,7 +75,7 @@ export function calculateZenithLatitudes(
       score: weight,
       sources: [
         {
-          type: "zenith",
+          type: 'zenith',
           planets: [planet],
           contribution: weight,
         },
@@ -89,18 +88,13 @@ export function calculateZenithLatitudes(
 
   for (const overlap of overlaps) {
     // Find if we already have a target near this latitude
-    const existingIndex = targets.findIndex(
-      (t) => Math.abs(t.latitude - overlap.latitude) < orb
-    )
+    const existingIndex = targets.findIndex((t) => Math.abs(t.latitude - overlap.latitude) < orb)
 
     if (existingIndex >= 0) {
       // Merge with existing target
-      targets[existingIndex].score = Math.max(
-        targets[existingIndex].score,
-        overlap.combinedWeight
-      )
+      targets[existingIndex].score = Math.max(targets[existingIndex].score, overlap.combinedWeight)
       targets[existingIndex].sources.push({
-        type: "overlap",
+        type: 'overlap',
         planets: overlap.planets,
         contribution: overlap.combinedWeight,
       })
@@ -111,7 +105,7 @@ export function calculateZenithLatitudes(
         score: overlap.combinedWeight,
         sources: [
           {
-            type: "overlap",
+            type: 'overlap',
             planets: overlap.planets,
             contribution: overlap.combinedWeight,
           },
@@ -139,14 +133,14 @@ export function calculateZenithLatitudes(
  */
 export function calculateParanLatitudes(
   positions: Record<PlanetId, EquatorialCoordinates>,
-  weights: PlanetWeights
-): LatitudeTarget[] {
+  weights: PlanetWeights,
+): Array<LatitudeTarget> {
   const result = calculateAllParans(positions)
-  const targets: LatitudeTarget[] = []
+  const targets: Array<LatitudeTarget> = []
 
   // Group parans by latitude (within 2° bands)
   const bandSize = 2
-  const bands = new Map<number, ParanPoint[]>()
+  const bands = new Map<number, Array<ParanPoint>>()
 
   for (const paran of result.points) {
     const bandCenter = Math.round(paran.latitude / bandSize) * bandSize
@@ -168,9 +162,7 @@ export function calculateParanLatitudes(
       planets.add(paran.planet2)
 
       // Add weighted contribution
-      score +=
-        (weights[paran.planet1] + weights[paran.planet2]) *
-        (paran.strength ?? 0.5)
+      score += (weights[paran.planet1] + weights[paran.planet2]) * (paran.strength ?? 0.5)
     }
 
     targets.push({
@@ -178,7 +170,7 @@ export function calculateParanLatitudes(
       score,
       sources: [
         {
-          type: "paran",
+          type: 'paran',
           planets: Array.from(planets),
           contribution: score,
         },
@@ -208,7 +200,7 @@ export function generateSearchBands(
   declinations: PlanetDeclinations,
   positions: Record<PlanetId, EquatorialCoordinates>,
   weights: PlanetWeights,
-  tolerance: number = 3
+  tolerance: number = 3,
 ): GeospatialSearchResult {
   // Get zenith-based targets
   const zenithTargets = calculateZenithLatitudes(declinations, weights)
@@ -217,12 +209,12 @@ export function generateSearchBands(
   const paranTargets = calculateParanLatitudes(positions, weights)
 
   // Merge all targets
-  const allTargets: LatitudeTarget[] = [...zenithTargets]
+  const allTargets: Array<LatitudeTarget> = [...zenithTargets]
 
   for (const paranTarget of paranTargets) {
     // Check if there's an existing target nearby
     const existingIndex = allTargets.findIndex(
-      (t) => Math.abs(t.latitude - paranTarget.latitude) < tolerance
+      (t) => Math.abs(t.latitude - paranTarget.latitude) < tolerance,
     )
 
     if (existingIndex >= 0) {
@@ -239,7 +231,7 @@ export function generateSearchBands(
   allTargets.sort((a, b) => b.score - a.score)
 
   // Create search bands from top targets
-  const bands: SearchBand[] = []
+  const bands: Array<SearchBand> = []
   const usedLatitudes = new Set<number>()
 
   for (const target of allTargets.slice(0, 20)) {
@@ -256,11 +248,11 @@ export function generateSearchBands(
     for (const source of target.sources) {
       for (const planet of source.planets) {
         allPlanets.add(planet)
-        if (source.type === "zenith" || source.type === "overlap") {
+        if (source.type === 'zenith' || source.type === 'overlap') {
           zenithPlanets.add(planet)
         }
       }
-      if (source.type === "paran") {
+      if (source.type === 'paran') {
         paranCount++
       }
     }
@@ -279,8 +271,8 @@ export function generateSearchBands(
   const paranResult = calculateAllParans(positions)
 
   // Collect paran latitudes
-  const paranLatitudes: Array<{ latitude: number; parans: ParanPoint[] }> = []
-  const paranBands = new Map<number, ParanPoint[]>()
+  const paranLatitudes: Array<{ latitude: number; parans: Array<ParanPoint> }> = []
+  const paranBands = new Map<number, Array<ParanPoint>>()
 
   for (const paran of paranResult.points) {
     const bandCenter = Math.round(paran.latitude / 2) * 2
@@ -321,7 +313,7 @@ export function scoreLatitude(
   latitude: number,
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
-  sigma: number = DECLINATION_SIGMA
+  sigma: number = DECLINATION_SIGMA,
 ): {
   score: number
   contributions: Array<{ planet: PlanetId; distance: number; contribution: number }>
@@ -368,7 +360,7 @@ export function findOptimalLatitudeInRange(
   minLat: number,
   maxLat: number,
   declinations: PlanetDeclinations,
-  weights: PlanetWeights
+  weights: PlanetWeights,
 ): { latitude: number; score: number } {
   const goldenRatio = (1 + Math.sqrt(5)) / 2
   const tolerance = 0.1
@@ -416,7 +408,7 @@ export function findHighScoringBands(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
   threshold: number = 0.5,
-  stepSize: number = 0.5
+  stepSize: number = 0.5,
 ): Array<{ minLat: number; maxLat: number; avgScore: number }> {
   // Calculate scores for all latitudes
   const scores: Array<{ lat: number; score: number }> = []

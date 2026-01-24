@@ -89,7 +89,7 @@ export function PlanetWeightsEditor({ weights, onChange }: PlanetWeightsProps) {
     onChange(presetWeights)
   }
 
-  const handleSliderChange = (planet: keyof PlanetWeights, value: number[]) => {
+  const handleSliderChange = (planet: keyof PlanetWeights, value: Array<number>) => {
     onChange({ ...weights, [planet]: value[0] })
   }
 
@@ -102,9 +102,7 @@ export function PlanetWeightsEditor({ weights, onChange }: PlanetWeightsProps) {
     >
       {/* Presets */}
       <div>
-        <h3 className="text-sm font-medium text-slate-300 mb-4">
-          Quick Presets
-        </h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-4">Quick Presets</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {PRESETS.map((preset) => (
             <button
@@ -125,9 +123,7 @@ export function PlanetWeightsEditor({ weights, onChange }: PlanetWeightsProps) {
 
       {/* Individual sliders */}
       <div>
-        <h3 className="text-sm font-medium text-slate-300 mb-4">
-          Fine-tune Weights
-        </h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-4">Fine-tune Weights</h3>
         <div className="space-y-4">
           {PLANETS.map((planet) => (
             <div
@@ -136,10 +132,7 @@ export function PlanetWeightsEditor({ weights, onChange }: PlanetWeightsProps) {
             >
               {/* Planet symbol and name */}
               <div className="w-24 flex items-center gap-2">
-                <span
-                  className="text-xl"
-                  style={{ color: planet.color }}
-                >
+                <span className="text-xl" style={{ color: planet.color }}>
                   {planet.symbol}
                 </span>
                 <span className="text-sm text-slate-300">{planet.name}</span>
@@ -174,10 +167,7 @@ export function PlanetWeightsEditor({ weights, onChange }: PlanetWeightsProps) {
 
               {/* Value display */}
               <div className="w-12 text-right">
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: planet.color }}
-                >
+                <span className="text-sm font-medium" style={{ color: planet.color }}>
                   {weights[planet.key].toFixed(1)}x
                 </span>
               </div>
@@ -189,9 +179,9 @@ export function PlanetWeightsEditor({ weights, onChange }: PlanetWeightsProps) {
       {/* Weight explanation */}
       <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
         <p className="text-sm text-slate-400">
-          <strong className="text-slate-300">How weights work:</strong> Higher
-          weights (up to 3x) increase that planet's influence when scoring
-          locations. A weight of 0 ignores that planet entirely.
+          <strong className="text-slate-300">How weights work:</strong> Higher weights (up to 3x)
+          increase that planet's influence when scoring locations. A weight of 0 ignores that planet
+          entirely.
         </p>
       </div>
     </motion.div>

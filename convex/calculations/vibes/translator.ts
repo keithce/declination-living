@@ -5,8 +5,8 @@
  * weighted planetary importance for location optimization.
  */
 
-import type { PlanetId, PlanetWeights, VibeCategory } from "../core/types"
-import { PLANET_IDS } from "../core/types"
+import { PLANET_IDS } from '../core/types'
+import type { PlanetId, PlanetWeights, VibeCategory } from '../core/types'
 
 // =============================================================================
 // Default Weights
@@ -53,23 +53,23 @@ export function zeroWeights(): PlanetWeights {
 /**
  * Predefined vibe categories mapping life goals to planetary weights.
  */
-export const VIBE_CATEGORIES: VibeCategory[] = [
+export const VIBE_CATEGORIES: Array<VibeCategory> = [
   {
-    id: "wealth",
-    name: "Wealth & Abundance",
-    description: "Financial prosperity, material success, and abundance",
+    id: 'wealth',
+    name: 'Wealth & Abundance',
+    description: 'Financial prosperity, material success, and abundance',
     keywords: [
-      "wealth",
-      "money",
-      "rich",
-      "financial",
-      "prosperity",
-      "abundance",
-      "fortune",
-      "income",
-      "profitable",
+      'wealth',
+      'money',
+      'rich',
+      'financial',
+      'prosperity',
+      'abundance',
+      'fortune',
+      'income',
+      'profitable',
     ],
-    primaryPlanets: ["jupiter", "venus"],
+    primaryPlanets: ['jupiter', 'venus'],
     weights: {
       sun: 3, // Success, recognition
       moon: 1,
@@ -84,22 +84,22 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "career",
-    name: "Career & Achievement",
-    description: "Professional success, recognition, and accomplishment",
+    id: 'career',
+    name: 'Career & Achievement',
+    description: 'Professional success, recognition, and accomplishment',
     keywords: [
-      "career",
-      "job",
-      "work",
-      "professional",
-      "success",
-      "achievement",
-      "promotion",
-      "business",
-      "leadership",
-      "ambition",
+      'career',
+      'job',
+      'work',
+      'professional',
+      'success',
+      'achievement',
+      'promotion',
+      'business',
+      'leadership',
+      'ambition',
     ],
-    primaryPlanets: ["sun", "saturn", "mars"],
+    primaryPlanets: ['sun', 'saturn', 'mars'],
     weights: {
       sun: 10, // Identity, success, recognition
       moon: 2,
@@ -114,21 +114,21 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "love",
-    name: "Love & Relationships",
-    description: "Romantic love, partnerships, and deep connections",
+    id: 'love',
+    name: 'Love & Relationships',
+    description: 'Romantic love, partnerships, and deep connections',
     keywords: [
-      "love",
-      "romance",
-      "relationship",
-      "marriage",
-      "partner",
-      "dating",
-      "soulmate",
-      "connection",
-      "intimacy",
+      'love',
+      'romance',
+      'relationship',
+      'marriage',
+      'partner',
+      'dating',
+      'soulmate',
+      'connection',
+      'intimacy',
     ],
-    primaryPlanets: ["venus", "moon"],
+    primaryPlanets: ['venus', 'moon'],
     weights: {
       sun: 3,
       moon: 8, // Emotions, nurturing, intimacy
@@ -143,22 +143,22 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "spirituality",
-    name: "Spirituality & Enlightenment",
-    description: "Spiritual growth, inner peace, and transcendence",
+    id: 'spirituality',
+    name: 'Spirituality & Enlightenment',
+    description: 'Spiritual growth, inner peace, and transcendence',
     keywords: [
-      "spiritual",
-      "meditation",
-      "enlightenment",
-      "peace",
-      "mindfulness",
-      "consciousness",
-      "awakening",
-      "mystical",
-      "sacred",
-      "divine",
+      'spiritual',
+      'meditation',
+      'enlightenment',
+      'peace',
+      'mindfulness',
+      'consciousness',
+      'awakening',
+      'mystical',
+      'sacred',
+      'divine',
     ],
-    primaryPlanets: ["neptune", "jupiter", "moon"],
+    primaryPlanets: ['neptune', 'jupiter', 'moon'],
     weights: {
       sun: 3,
       moon: 7, // Intuition, inner life
@@ -173,21 +173,21 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "creativity",
-    name: "Creativity & Art",
-    description: "Artistic expression, imagination, and creative flow",
+    id: 'creativity',
+    name: 'Creativity & Art',
+    description: 'Artistic expression, imagination, and creative flow',
     keywords: [
-      "creative",
-      "art",
-      "artist",
-      "music",
-      "writing",
-      "design",
-      "imagination",
-      "inspiration",
-      "expression",
+      'creative',
+      'art',
+      'artist',
+      'music',
+      'writing',
+      'design',
+      'imagination',
+      'inspiration',
+      'expression',
     ],
-    primaryPlanets: ["venus", "neptune", "moon"],
+    primaryPlanets: ['venus', 'neptune', 'moon'],
     weights: {
       sun: 5, // Self-expression
       moon: 7, // Imagination, emotions
@@ -202,20 +202,20 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "health",
-    name: "Health & Vitality",
-    description: "Physical health, energy, and well-being",
+    id: 'health',
+    name: 'Health & Vitality',
+    description: 'Physical health, energy, and well-being',
     keywords: [
-      "health",
-      "fitness",
-      "energy",
-      "vitality",
-      "wellness",
-      "healing",
-      "strength",
-      "longevity",
+      'health',
+      'fitness',
+      'energy',
+      'vitality',
+      'wellness',
+      'healing',
+      'strength',
+      'longevity',
     ],
-    primaryPlanets: ["sun", "mars", "moon"],
+    primaryPlanets: ['sun', 'mars', 'moon'],
     weights: {
       sun: 10, // Vitality, life force
       moon: 6, // Emotional health, cycles
@@ -230,20 +230,20 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "adventure",
-    name: "Adventure & Travel",
-    description: "Exploration, travel, and new experiences",
+    id: 'adventure',
+    name: 'Adventure & Travel',
+    description: 'Exploration, travel, and new experiences',
     keywords: [
-      "adventure",
-      "travel",
-      "explore",
-      "journey",
-      "freedom",
-      "excitement",
-      "discovery",
-      "wanderlust",
+      'adventure',
+      'travel',
+      'explore',
+      'journey',
+      'freedom',
+      'excitement',
+      'discovery',
+      'wanderlust',
     ],
-    primaryPlanets: ["jupiter", "uranus", "mars"],
+    primaryPlanets: ['jupiter', 'uranus', 'mars'],
     weights: {
       sun: 4,
       moon: 2,
@@ -258,21 +258,21 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "knowledge",
-    name: "Knowledge & Wisdom",
-    description: "Learning, education, and intellectual growth",
+    id: 'knowledge',
+    name: 'Knowledge & Wisdom',
+    description: 'Learning, education, and intellectual growth',
     keywords: [
-      "knowledge",
-      "learning",
-      "education",
-      "study",
-      "wisdom",
-      "intellectual",
-      "research",
-      "understanding",
-      "teaching",
+      'knowledge',
+      'learning',
+      'education',
+      'study',
+      'wisdom',
+      'intellectual',
+      'research',
+      'understanding',
+      'teaching',
     ],
-    primaryPlanets: ["mercury", "jupiter", "saturn"],
+    primaryPlanets: ['mercury', 'jupiter', 'saturn'],
     weights: {
       sun: 3,
       moon: 2,
@@ -287,21 +287,21 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "transformation",
-    name: "Transformation & Rebirth",
-    description: "Personal transformation and profound change",
+    id: 'transformation',
+    name: 'Transformation & Rebirth',
+    description: 'Personal transformation and profound change',
     keywords: [
-      "transformation",
-      "change",
-      "rebirth",
-      "evolution",
-      "growth",
-      "healing",
-      "crisis",
-      "phoenix",
-      "renewal",
+      'transformation',
+      'change',
+      'rebirth',
+      'evolution',
+      'growth',
+      'healing',
+      'crisis',
+      'phoenix',
+      'renewal',
     ],
-    primaryPlanets: ["pluto", "uranus", "saturn"],
+    primaryPlanets: ['pluto', 'uranus', 'saturn'],
     weights: {
       sun: 4,
       moon: 5, // Emotional processing
@@ -316,21 +316,21 @@ export const VIBE_CATEGORIES: VibeCategory[] = [
     },
   },
   {
-    id: "stability",
-    name: "Stability & Security",
-    description: "Groundedness, security, and solid foundations",
+    id: 'stability',
+    name: 'Stability & Security',
+    description: 'Groundedness, security, and solid foundations',
     keywords: [
-      "stability",
-      "security",
-      "grounded",
-      "safe",
-      "home",
-      "foundation",
-      "routine",
-      "reliable",
-      "steady",
+      'stability',
+      'security',
+      'grounded',
+      'safe',
+      'home',
+      'foundation',
+      'routine',
+      'reliable',
+      'steady',
     ],
-    primaryPlanets: ["saturn", "moon", "venus"],
+    primaryPlanets: ['saturn', 'moon', 'venus'],
     weights: {
       sun: 4,
       moon: 8, // Home, comfort, security
@@ -397,9 +397,7 @@ export function matchVibeFromQuery(query: string): VibeCategory | null {
  * @param query - User's natural language query
  * @returns Array of matching vibes with scores
  */
-export function findMatchingVibes(
-  query: string
-): Array<{ vibe: VibeCategory; score: number }> {
+export function findMatchingVibes(query: string): Array<{ vibe: VibeCategory; score: number }> {
   const queryLower = query.toLowerCase()
   const matches: Array<{ vibe: VibeCategory; score: number }> = []
 
@@ -434,9 +432,7 @@ export function findMatchingVibes(
  * @param vibes - Array of {vibe, ratio} where ratio is 0-1
  * @returns Blended planet weights
  */
-export function blendVibes(
-  vibes: Array<{ vibe: VibeCategory; ratio: number }>
-): PlanetWeights {
+export function blendVibes(vibes: Array<{ vibe: VibeCategory; ratio: number }>): PlanetWeights {
   const result = zeroWeights()
 
   // Normalize ratios to sum to 1
@@ -461,10 +457,7 @@ export function blendVibes(
  * @param secondary - Optional secondary vibe (30% influence)
  * @returns Combined weights
  */
-export function combineVibeWeights(
-  primary: VibeCategory,
-  secondary?: VibeCategory
-): PlanetWeights {
+export function combineVibeWeights(primary: VibeCategory, secondary?: VibeCategory): PlanetWeights {
   if (!secondary) {
     return { ...primary.weights }
   }
@@ -486,10 +479,7 @@ export function combineVibeWeights(
  * @param targetSum - Desired sum (default 100)
  * @returns Normalized weights
  */
-export function normalizeWeights(
-  weights: PlanetWeights,
-  targetSum: number = 100
-): PlanetWeights {
+export function normalizeWeights(weights: PlanetWeights, targetSum: number = 100): PlanetWeights {
   const currentSum = PLANET_IDS.reduce((sum, p) => sum + weights[p], 0)
   if (currentSum === 0) return DEFAULT_WEIGHTS
 
@@ -506,10 +496,7 @@ export function normalizeWeights(
 /**
  * Scale weights by a factor.
  */
-export function scaleWeights(
-  weights: PlanetWeights,
-  factor: number
-): PlanetWeights {
+export function scaleWeights(weights: PlanetWeights, factor: number): PlanetWeights {
   const result = zeroWeights()
 
   for (const planet of PLANET_IDS) {
@@ -533,14 +520,14 @@ export function getVibeById(id: string): VibeCategory | undefined {
 /**
  * Get all available vibe categories.
  */
-export function getAllVibes(): VibeCategory[] {
+export function getAllVibes(): Array<VibeCategory> {
   return [...VIBE_CATEGORIES]
 }
 
 /**
  * Get the primary planets for a vibe.
  */
-export function getPrimaryPlanets(vibe: VibeCategory): PlanetId[] {
+export function getPrimaryPlanets(vibe: VibeCategory): Array<PlanetId> {
   return vibe.primaryPlanets
 }
 
@@ -549,22 +536,22 @@ export function getPrimaryPlanets(vibe: VibeCategory): PlanetId[] {
  */
 export function describeWeights(weights: PlanetWeights): string {
   const sorted = PLANET_IDS.map((p) => ({ planet: p, weight: weights[p] })).sort(
-    (a, b) => b.weight - a.weight
+    (a, b) => b.weight - a.weight,
   )
 
   const top3 = sorted.slice(0, 3)
   const planetNames: Record<PlanetId, string> = {
-    sun: "Sun",
-    moon: "Moon",
-    mercury: "Mercury",
-    venus: "Venus",
-    mars: "Mars",
-    jupiter: "Jupiter",
-    saturn: "Saturn",
-    uranus: "Uranus",
-    neptune: "Neptune",
-    pluto: "Pluto",
+    sun: 'Sun',
+    moon: 'Moon',
+    mercury: 'Mercury',
+    venus: 'Venus',
+    mars: 'Mars',
+    jupiter: 'Jupiter',
+    saturn: 'Saturn',
+    uranus: 'Uranus',
+    neptune: 'Neptune',
+    pluto: 'Pluto',
   }
 
-  return `Prioritizes ${top3.map((p) => planetNames[p.planet]).join(", ")}`
+  return `Prioritizes ${top3.map((p) => planetNames[p.planet]).join(', ')}`
 }

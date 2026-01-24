@@ -7,17 +7,17 @@
  * Transformation: Geocentric = Planet_helio - Earth_helio
  */
 
-import type { EclipticCoordinates, EquatorialCoordinates } from "../core/types"
 import {
-  sinDeg,
-  cosDeg,
-  atan2Deg,
   asinDeg,
+  atan2Deg,
+  cosDeg,
   normalizeDegrees,
+  sinDeg,
   toDegrees,
   toRadians,
-} from "../core/math"
-import { EPSILON } from "../core/constants"
+} from '../core/math'
+import { EPSILON } from '../core/constants'
+import type { EclipticCoordinates, EquatorialCoordinates } from '../core/types'
 
 // =============================================================================
 // Types
@@ -52,11 +52,7 @@ export interface GeocentricPosition {
  * @param r - Distance in AU
  * @returns Cartesian coordinates
  */
-export function eclipticToCartesian(
-  lon: number,
-  lat: number,
-  r: number
-): CartesianCoordinates {
+export function eclipticToCartesian(lon: number, lat: number, r: number): CartesianCoordinates {
   const lonRad = toRadians(lon)
   const latRad = toRadians(lat)
 
@@ -104,19 +100,19 @@ export function cartesianToEcliptic(cart: CartesianCoordinates): EclipticCoordin
  */
 export function heliocentricToGeocentric(
   planetHelio: EclipticCoordinates,
-  earthHelio: EclipticCoordinates
+  earthHelio: EclipticCoordinates,
 ): EclipticCoordinates {
   // Convert both to Cartesian
   const planetCart = eclipticToCartesian(
     planetHelio.longitude,
     planetHelio.latitude,
-    planetHelio.distance || 1
+    planetHelio.distance || 1,
   )
 
   const earthCart = eclipticToCartesian(
     earthHelio.longitude,
     earthHelio.latitude,
-    earthHelio.distance || 1
+    earthHelio.distance || 1,
   )
 
   // Subtract Earth's position (geocentric = planet - earth)
@@ -139,7 +135,7 @@ export function heliocentricToGeocentric(
  */
 export function eclipticToEquatorial(
   ecliptic: EclipticCoordinates,
-  obliquity: number
+  obliquity: number,
 ): EquatorialCoordinates {
   const lon = toRadians(ecliptic.longitude)
   const lat = toRadians(ecliptic.latitude)
@@ -147,8 +143,7 @@ export function eclipticToEquatorial(
 
   // Standard transformation formulas
   // sin(dec) = sin(lat)*cos(eps) + cos(lat)*sin(eps)*sin(lon)
-  const sinDec =
-    Math.sin(lat) * Math.cos(eps) + Math.cos(lat) * Math.sin(eps) * Math.sin(lon)
+  const sinDec = Math.sin(lat) * Math.cos(eps) + Math.cos(lat) * Math.sin(eps) * Math.sin(lon)
 
   const dec = Math.asin(sinDec)
 
@@ -180,7 +175,7 @@ export function eclipticToEquatorial(
 export function calculateGeocentricPosition(
   planetHelio: EclipticCoordinates,
   earthHelio: EclipticCoordinates,
-  obliquity: number
+  obliquity: number,
 ): GeocentricPosition {
   const geoEcliptic = heliocentricToGeocentric(planetHelio, earthHelio)
   const geoEquatorial = eclipticToEquatorial(geoEcliptic, obliquity)
@@ -209,7 +204,7 @@ export function calculateGeocentricPosition(
  */
 export function getSunGeocentricPosition(
   earthHelio: EclipticCoordinates,
-  obliquity: number
+  obliquity: number,
 ): GeocentricPosition {
   const sunLon = normalizeDegrees(earthHelio.longitude + 180)
   const sunLat = -(earthHelio.latitude || 0) // Effectively 0
@@ -242,7 +237,7 @@ export function getSunGeocentricPosition(
  */
 export function getMoonGeocentricPosition(
   moonEcliptic: EclipticCoordinates,
-  obliquity: number
+  obliquity: number,
 ): GeocentricPosition {
   const moonEquatorial = eclipticToEquatorial(moonEcliptic, obliquity)
 
@@ -291,7 +286,7 @@ export function getLightTime(distance: number): number {
 export function applyAberration(
   lon: number,
   lat: number,
-  sunLon: number
+  sunLon: number,
 ): { longitude: number; latitude: number } {
   // Constant of aberration in degrees
   const k = 20.49552 / 3600 // 20.49552 arcseconds in degrees

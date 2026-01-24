@@ -3,15 +3,15 @@ import { useState } from 'react'
 import { useConvexAuth } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import {
+  Calculator,
   Globe,
   Home,
-  Menu,
-  Calculator,
   LayoutDashboard,
   LogIn,
   LogOut,
-  X,
+  Menu,
   User,
+  X,
 } from 'lucide-react'
 
 export default function Header() {

@@ -8,16 +8,8 @@ if (!CONVEX_URL) {
 
 const convex = new ConvexReactClient(CONVEX_URL)
 
-export default function AppConvexProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <ConvexAuthProvider client={convex}>
-      {children}
-    </ConvexAuthProvider>
-  )
+export default function AppConvexProvider({ children }: { children: React.ReactNode }) {
+  return <ConvexAuthProvider client={convex}>{children}</ConvexAuthProvider>
 }
 
 export { convex }

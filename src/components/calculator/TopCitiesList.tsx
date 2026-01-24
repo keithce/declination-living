@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { MapPin, ExternalLink } from 'lucide-react'
+import { ExternalLink, MapPin } from 'lucide-react'
 
 interface City {
   id: string
@@ -13,7 +13,7 @@ interface City {
 }
 
 interface TopCitiesListProps {
-  cities: City[]
+  cities: Array<City>
   onCityClick?: (city: City) => void
 }
 
@@ -53,9 +53,7 @@ export function TopCitiesList({ cities, onCityClick }: TopCitiesListProps) {
     return (
       <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-8 text-center">
         <MapPin className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-        <p className="text-slate-400">
-          No cities loaded. Import city data to see recommendations.
-        </p>
+        <p className="text-slate-400">No cities loaded. Import city data to see recommendations.</p>
       </div>
     )
   }
@@ -69,12 +67,8 @@ export function TopCitiesList({ cities, onCityClick }: TopCitiesListProps) {
       <div className="p-4 border-b border-slate-700/50 flex items-center gap-3">
         <MapPin className="w-5 h-5 text-amber-400" />
         <div>
-          <h3 className="font-display text-lg font-semibold text-white">
-            Top Cities
-          </h3>
-          <p className="text-sm text-slate-400">
-            Cities with strongest planetary alignments
-          </p>
+          <h3 className="font-display text-lg font-semibold text-white">Top Cities</h3>
+          <p className="text-sm text-slate-400">Cities with strongest planetary alignments</p>
         </div>
       </div>
 
@@ -102,13 +96,8 @@ export function TopCitiesList({ cities, onCityClick }: TopCitiesListProps) {
             {/* City info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-white truncate">
-                  {city.name}
-                </span>
-                <span
-                  className="text-lg"
-                  style={{ color: PLANET_COLORS[city.dominantPlanet] }}
-                >
+                <span className="font-medium text-white truncate">{city.name}</span>
+                <span className="text-lg" style={{ color: PLANET_COLORS[city.dominantPlanet] }}>
                   {PLANET_SYMBOLS[city.dominantPlanet]}
                 </span>
               </div>
@@ -145,9 +134,7 @@ export function TopCitiesList({ cities, onCityClick }: TopCitiesListProps) {
 
       {cities.length > 20 && (
         <div className="p-4 text-center border-t border-slate-700/30">
-          <span className="text-sm text-slate-500">
-            +{cities.length - 20} more cities
-          </span>
+          <span className="text-sm text-slate-500">+{cities.length - 20} more cities</span>
         </div>
       )}
     </motion.div>

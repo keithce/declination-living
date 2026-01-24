@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
@@ -15,8 +15,8 @@ interface LatitudeScore {
 }
 
 interface GlobeCanvasProps {
-  optimalLatitudes: LatitudeScore[]
-  latitudeBands: LatitudeBand[]
+  optimalLatitudes: Array<LatitudeScore>
+  latitudeBands: Array<LatitudeBand>
   birthLocation?: {
     latitude: number
     longitude: number
@@ -38,26 +38,18 @@ const PLANET_COLORS: Record<string, string> = {
 }
 
 // Convert lat/lon to 3D position on sphere
-function latLonToVector3(
-  lat: number,
-  lon: number,
-  radius: number
-): THREE.Vector3 {
+function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180)
   const theta = (lon + 180) * (Math.PI / 180)
 
   return new THREE.Vector3(
     -radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    radius * Math.sin(phi) * Math.sin(theta),
   )
 }
 
-export function GlobeCanvas({
-  optimalLatitudes,
-  latitudeBands,
-  birthLocation,
-}: GlobeCanvasProps) {
+export function GlobeCanvas({ optimalLatitudes, latitudeBands, birthLocation }: GlobeCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<{
     scene: THREE.Scene
@@ -68,10 +60,7 @@ export function GlobeCanvas({
   } | null>(null)
 
   // Memoize data to prevent unnecessary re-renders
-  const topLatitudes = useMemo(
-    () => optimalLatitudes.slice(0, 10),
-    [optimalLatitudes]
-  )
+  const topLatitudes = useMemo(() => optimalLatitudes.slice(0, 10), [optimalLatitudes])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -125,11 +114,7 @@ export function GlobeCanvas({
     scene.add(wireframe)
 
     // Latitude rings (at specific latitudes)
-    const createLatitudeRing = (
-      lat: number,
-      color: string,
-      opacity: number = 1
-    ) => {
+    const createLatitudeRing = (lat: number, color: string, opacity: number = 1) => {
       const phi = (90 - lat) * (Math.PI / 180)
       const radius = Math.sin(phi) * 1.01
       const y = Math.cos(phi) * 1.01
@@ -192,11 +177,7 @@ export function GlobeCanvas({
       const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 })
       const marker = new THREE.Mesh(markerGeometry, markerMaterial)
 
-      const pos = latLonToVector3(
-        birthLocation.latitude,
-        birthLocation.longitude,
-        1.02
-      )
+      const pos = latLonToVector3(birthLocation.latitude, birthLocation.longitude, 1.02)
       marker.position.copy(pos)
       scene.add(marker)
 
@@ -236,10 +217,7 @@ export function GlobeCanvas({
         starsPositions.push(x, y, z)
       }
     }
-    starsGeometry.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(starsPositions, 3)
-    )
+    starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsPositions, 3))
     const starsMaterial = new THREE.PointsMaterial({
       color: 0xffffff,
       size: 0.05,

@@ -8,28 +8,28 @@
 // =============================================================================
 
 export type PlanetId =
-  | "sun"
-  | "moon"
-  | "mercury"
-  | "venus"
-  | "mars"
-  | "jupiter"
-  | "saturn"
-  | "uranus"
-  | "neptune"
-  | "pluto"
+  | 'sun'
+  | 'moon'
+  | 'mercury'
+  | 'venus'
+  | 'mars'
+  | 'jupiter'
+  | 'saturn'
+  | 'uranus'
+  | 'neptune'
+  | 'pluto'
 
-export const PLANET_IDS: readonly PlanetId[] = [
-  "sun",
-  "moon",
-  "mercury",
-  "venus",
-  "mars",
-  "jupiter",
-  "saturn",
-  "uranus",
-  "neptune",
-  "pluto",
+export const PLANET_IDS: ReadonlyArray<PlanetId> = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+  'uranus',
+  'neptune',
+  'pluto',
 ] as const
 
 // =============================================================================
@@ -103,14 +103,14 @@ export type PlanetWeights = Record<PlanetId, number>
 // =============================================================================
 
 /** Types of angular lines in ACG mapping */
-export type ACGLineType = "ASC" | "DSC" | "MC" | "IC"
+export type ACGLineType = 'ASC' | 'DSC' | 'MC' | 'IC'
 
 /** ACG line data - a planetary line on the globe */
 export interface ACGLine {
   planet: PlanetId
   lineType: ACGLineType
   /** Array of lat/lon points forming the line */
-  points: GeoLocation[]
+  points: Array<GeoLocation>
   /** Whether this is a circumpolar case (line doesn't exist at some latitudes) */
   isCircumpolar?: boolean
 }
@@ -135,14 +135,14 @@ export interface ZenithLine {
 // =============================================================================
 
 /** Angular events for paran calculations */
-export type AngularEvent = "rise" | "set" | "culminate" | "anti_culminate"
+export type AngularEvent = 'rise' | 'set' | 'culminate' | 'anti_culminate'
 
 /** Display names for angular events */
 export const ANGULAR_EVENT_NAMES: Record<AngularEvent, string> = {
-  rise: "Rising",
-  set: "Setting",
-  culminate: "Culminating",
-  anti_culminate: "Anti-culminating",
+  rise: 'Rising',
+  set: 'Setting',
+  culminate: 'Culminating',
+  anti_culminate: 'Anti-culminating',
 }
 
 /** A paran intersection point */
@@ -160,7 +160,7 @@ export interface ParanPoint {
 /** Full paran analysis result */
 export interface ParanResult {
   /** All paran points found */
-  points: ParanPoint[]
+  points: Array<ParanPoint>
   /** Count by event type combinations */
   summary: {
     riseRise: number
@@ -196,32 +196,32 @@ export interface SemiDiurnalArc {
 
 /** Zodiac signs (0-indexed for array access) */
 export type ZodiacSign =
-  | "aries"
-  | "taurus"
-  | "gemini"
-  | "cancer"
-  | "leo"
-  | "virgo"
-  | "libra"
-  | "scorpio"
-  | "sagittarius"
-  | "capricorn"
-  | "aquarius"
-  | "pisces"
+  | 'aries'
+  | 'taurus'
+  | 'gemini'
+  | 'cancer'
+  | 'leo'
+  | 'virgo'
+  | 'libra'
+  | 'scorpio'
+  | 'sagittarius'
+  | 'capricorn'
+  | 'aquarius'
+  | 'pisces'
 
-export const ZODIAC_SIGNS: readonly ZodiacSign[] = [
-  "aries",
-  "taurus",
-  "gemini",
-  "cancer",
-  "leo",
-  "virgo",
-  "libra",
-  "scorpio",
-  "sagittarius",
-  "capricorn",
-  "aquarius",
-  "pisces",
+export const ZODIAC_SIGNS: ReadonlyArray<ZodiacSign> = [
+  'aries',
+  'taurus',
+  'gemini',
+  'cancer',
+  'leo',
+  'virgo',
+  'libra',
+  'scorpio',
+  'sagittarius',
+  'capricorn',
+  'aquarius',
+  'pisces',
 ] as const
 
 /** Sign and degree position within the zodiac */
@@ -256,7 +256,7 @@ export interface DignityScore {
   /** Total score */
   total: number
   /** Human-readable breakdown */
-  breakdown: string[]
+  breakdown: Array<string>
 }
 
 // =============================================================================
@@ -268,8 +268,8 @@ export interface VibeCategory {
   id: string
   name: string
   description: string
-  keywords: string[]
-  primaryPlanets: PlanetId[]
+  keywords: Array<string>
+  primaryPlanets: Array<PlanetId>
   weights: PlanetWeights
 }
 
@@ -280,15 +280,15 @@ export interface GeospatialSearchResult {
     minLat: number
     maxLat: number
     score: number
-    dominantPlanets: PlanetId[]
+    dominantPlanets: Array<PlanetId>
   }>
   /** Specific paran latitudes */
   paranLatitudes: Array<{
     latitude: number
-    parans: ParanPoint[]
+    parans: Array<ParanPoint>
   }>
   /** Combined optimal latitudes */
-  optimalLatitudes: number[]
+  optimalLatitudes: Array<number>
 }
 
 // =============================================================================
@@ -308,7 +308,7 @@ export interface SafetyScore {
   difficultAspects: Array<{
     planet: PlanetId
     aspect: string
-    target: "ASC" | "MC"
+    target: 'ASC' | 'MC'
   }>
   /** Planets with poor dignity */
   weakDignity: Array<{
@@ -316,5 +316,5 @@ export interface SafetyScore {
     score: number
   }>
   /** Warnings for the user */
-  warnings: string[]
+  warnings: Array<string>
 }

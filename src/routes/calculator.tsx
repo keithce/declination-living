@@ -1,15 +1,17 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useAction, useMutation, useConvexAuth } from 'convex/react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useAction, useConvexAuth, useMutation } from 'convex/react'
+import { ChevronLeft, ChevronRight, Loader2, Save, Sparkles, X } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
-import { BirthDataForm, type BirthData } from '@/components/calculator/BirthDataForm'
-import { PlanetWeightsEditor, type PlanetWeights } from '@/components/calculator/PlanetWeights'
+import type { BirthData } from '@/components/calculator/BirthDataForm'
+import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
+import { BirthDataForm } from '@/components/calculator/BirthDataForm'
+import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { useCalculatorState } from '@/hooks/use-calculator-state'
 import { DeclinationTable } from '@/components/calculator/DeclinationTable'
 import { ResultsPanel } from '@/components/calculator/ResultsPanel'
 import { GlobeView } from '@/components/globe'
-import { Sparkles, ChevronLeft, ChevronRight, X, Save, Loader2 } from 'lucide-react'
 
 export const Route = createFileRoute('/calculator')({
   component: CalculatorPage,
@@ -35,17 +37,23 @@ function CalculatorPage() {
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [chartName, setChartName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const calculateComplete = useAction(api.calculations.actions.calculateComplete)
   const recalculateWithWeights = useAction(api.calculations.actions.recalculateWithWeights)
   const createChart = useMutation(api.charts.mutations.create)
 
-  const handleBirthDataSubmit = async (data: BirthData) => {
+  const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
   }
 
   const handleCalculate = async () => {
-    if (!birthData) return
+    setError(null)
+
+    if (!birthData) {
+      setError('Birth data is missing. Please go back and enter your details.')
+      return
+    }
 
     setIsCalculating(true)
     try {
@@ -57,8 +65,9 @@ function CalculatorPage() {
       })
 
       setResult(calcResult)
-    } catch (error) {
-      console.error('Calculation failed:', error)
+    } catch (err) {
+      console.error('Calculation failed:', err)
+      setError('Calculation failed. Please try again.')
     } finally {
       setIsCalculating(false)
     }
@@ -81,10 +90,10 @@ function CalculatorPage() {
           optimalLatitudes: recalcResult.optimalLatitudes,
           latitudeBands: recalcResult.latitudeBands,
         },
-        newWeights
+        newWeights,
       )
-    } catch (error) {
-      console.error('Recalculation failed:', error)
+    } catch (err) {
+      console.error('Recalculation failed:', err)
     } finally {
       setIsCalculating(false)
     }
@@ -111,8 +120,8 @@ function CalculatorPage() {
       // Reset state and navigate to dashboard
       resetState()
       navigate({ to: '/dashboard' })
-    } catch (error) {
-      console.error('Failed to save chart:', error)
+    } catch (err) {
+      console.error('Failed to save chart:', err)
       alert('Failed to save chart. Please try again.')
     } finally {
       setIsSaving(false)
@@ -155,8 +164,8 @@ function CalculatorPage() {
             Declination Calculator
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            Enter your birth details to discover the latitudes where your
-            planetary energies resonate most strongly.
+            Enter your birth details to discover the latitudes where your planetary energies
+            resonate most strongly.
           </p>
         </motion.div>
 
@@ -174,15 +183,11 @@ function CalculatorPage() {
                   else if (s.key === 'weights' && birthData) setStep('weights')
                   else if (s.key === 'results' && result) setStep('results')
                 }}
-                disabled={
-                  (s.key === 'weights' && !birthData) ||
-                  (s.key === 'results' && !result)
-                }
+                disabled={(s.key === 'weights' && !birthData) || (s.key === 'results' && !result)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                   step === s.key
                     ? 'bg-amber-500 text-slate-900 font-semibold'
-                    : (s.key === 'weights' && !birthData) ||
-                        (s.key === 'results' && !result)
+                    : (s.key === 'weights' && !birthData) || (s.key === 'results' && !result)
                       ? 'bg-slate-800/30 text-slate-600 cursor-not-allowed'
                       : 'bg-slate-800/50 text-slate-400 hover:text-white'
                 }`}
@@ -192,9 +197,7 @@ function CalculatorPage() {
                 </span>
                 <span className="hidden sm:inline">{s.label}</span>
               </button>
-              {index < 2 && (
-                <div className="w-8 h-px bg-slate-700 hidden sm:block" />
-              )}
+              {index < 2 && <div className="w-8 h-px bg-slate-700 hidden sm:block" />}
             </div>
           ))}
         </div>
@@ -210,10 +213,7 @@ function CalculatorPage() {
               className="max-w-lg mx-auto"
             >
               <div className="rounded-2xl bg-slate-800/30 border border-slate-700/50 p-8">
-                <BirthDataForm
-                  onSubmit={handleBirthDataSubmit}
-                  isLoading={false}
-                />
+                <BirthDataForm onSubmit={handleBirthDataSubmit} isLoading={false} />
               </div>
             </motion.div>
           )}
@@ -227,6 +227,12 @@ function CalculatorPage() {
             >
               <div className="rounded-2xl bg-slate-800/30 border border-slate-700/50 p-8">
                 <PlanetWeightsEditor weights={weights} onChange={setWeights} />
+
+                {error && (
+                  <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400">
+                    {error}
+                  </div>
+                )}
 
                 <div className="mt-8 flex items-center justify-between">
                   <button
@@ -313,16 +319,11 @@ function CalculatorPage() {
               {/* Weights adjuster (collapsed) */}
               <details className="group rounded-xl bg-slate-800/30 border border-slate-700/50 overflow-hidden">
                 <summary className="p-4 cursor-pointer flex items-center justify-between hover:bg-slate-800/50 transition-colors">
-                  <span className="font-medium text-white">
-                    Adjust Weights
-                  </span>
+                  <span className="font-medium text-white">Adjust Weights</span>
                   <ChevronRight className="w-4 h-4 text-slate-400 transition-transform group-open:rotate-90" />
                 </summary>
                 <div className="p-4 border-t border-slate-700/30">
-                  <PlanetWeightsEditor
-                    weights={weights}
-                    onChange={handleRecalculate}
-                  />
+                  <PlanetWeightsEditor weights={weights} onChange={handleRecalculate} />
                 </div>
               </details>
 
@@ -370,9 +371,7 @@ function CalculatorPage() {
                 className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 p-6 shadow-2xl"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-display text-xl font-semibold text-white">
-                    Save Chart
-                  </h3>
+                  <h3 className="font-display text-xl font-semibold text-white">Save Chart</h3>
                   <button
                     onClick={() => setShowSaveModal(false)}
                     className="text-slate-400 hover:text-white transition-colors"

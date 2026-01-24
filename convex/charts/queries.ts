@@ -1,6 +1,6 @@
-import { query } from "../_generated/server"
-import { v } from "convex/values"
-import { auth } from "../auth"
+import { v } from 'convex/values'
+import { query } from '../_generated/server'
+import { auth } from '../auth'
 
 export const listMine = query({
   args: {},
@@ -9,18 +9,18 @@ export const listMine = query({
     if (!userId) return []
 
     return await ctx.db
-      .query("charts")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .order("desc")
+      .query('charts')
+      .withIndex('by_user', (q) => q.eq('userId', userId))
+      .order('desc')
       .collect()
   },
 })
 
 export const getById = query({
-  args: { id: v.id("charts") },
+  args: { id: v.id('charts') },
   handler: async (ctx, { id }) => {
     const userId = await auth.getUserId(ctx)
-    const chart = await ctx.db.get(id)
+    const chart = await ctx.db.get('charts', id)
 
     if (!chart) return null
 
@@ -37,8 +37,8 @@ export const getByShareSlug = query({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {
     const chart = await ctx.db
-      .query("charts")
-      .withIndex("by_share_slug", (q) => q.eq("shareSlug", slug))
+      .query('charts')
+      .withIndex('by_share_slug', (q) => q.eq('shareSlug', slug))
       .first()
 
     if (!chart || !chart.isPublic) return null

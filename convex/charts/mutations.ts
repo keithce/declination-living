@@ -1,6 +1,6 @@
-import { mutation } from "../_generated/server"
-import { v } from "convex/values"
-import { auth } from "../auth"
+import { v } from 'convex/values'
+import { mutation } from '../_generated/server'
+import { auth } from '../auth'
 
 const planetWeightsValidator = v.object({
   sun: v.number(),
@@ -43,19 +43,19 @@ export const create = mutation({
     topLocations: v.optional(
       v.array(
         v.object({
-          cityId: v.id("cities"),
+          cityId: v.id('cities'),
           score: v.number(),
-        })
-      )
+        }),
+      ),
     ),
     isPublic: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await auth.getUserId(ctx)
-    if (!userId) throw new Error("Not authenticated")
+    if (!userId) throw new Error('Not authenticated')
 
     const now = Date.now()
-    return await ctx.db.insert("charts", {
+    return await ctx.db.insert('charts', {
       name: args.name,
       birthDate: args.birthDate,
       birthTime: args.birthTime,
@@ -77,34 +77,37 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    id: v.id("charts"),
+    id: v.id('charts'),
     name: v.optional(v.string()),
     weights: v.optional(planetWeightsValidator),
     topLocations: v.optional(
       v.array(
         v.object({
-          cityId: v.id("cities"),
+          cityId: v.id('cities'),
           score: v.number(),
-        })
-      )
+        }),
+      ),
     ),
     isPublic: v.optional(v.boolean()),
     shareSlug: v.optional(v.string()),
   },
   handler: async (ctx, { id, ...updates }) => {
     const userId = await auth.getUserId(ctx)
-    if (!userId) throw new Error("Not authenticated")
+    if (!userId) throw new Error('Not authenticated')
 
-    const chart = await ctx.db.get(id)
+    const chart = await ctx.db.get('charts', id)
     if (!chart || chart.userId !== userId) {
-      throw new Error("Chart not found or not authorized")
+      throw new Error('Chart not found or not authorized')
     }
 
+    // Filter out undefined values (Convex optional args may be undefined at runtime)
     const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, v]) => v !== undefined)
+      Object.entries(updates as Record<string, unknown>).filter(
+        (entry): entry is [string, NonNullable<(typeof entry)[1]>] => entry[1] !== undefined,
+      ),
     )
 
-    await ctx.db.patch(id, {
+    await ctx.db.patch('charts', id, {
       ...filteredUpdates,
       updatedAt: Date.now(),
     })
@@ -114,38 +117,37 @@ export const update = mutation({
 })
 
 export const remove = mutation({
-  args: { id: v.id("charts") },
+  args: { id: v.id('charts') },
   handler: async (ctx, { id }) => {
     const userId = await auth.getUserId(ctx)
-    if (!userId) throw new Error("Not authenticated")
+    if (!userId) throw new Error('Not authenticated')
 
-    const chart = await ctx.db.get(id)
+    const chart = await ctx.db.get('charts', id)
     if (!chart || chart.userId !== userId) {
-      throw new Error("Chart not found or not authorized")
+      throw new Error('Chart not found or not authorized')
     }
 
-    await ctx.db.delete(id)
+    await ctx.db.delete('charts', id)
     return { success: true }
   },
 })
 
 // Generate a shareable link
 export const generateShareSlug = mutation({
-  args: { id: v.id("charts") },
+  args: { id: v.id('charts') },
   handler: async (ctx, { id }) => {
     const userId = await auth.getUserId(ctx)
-    if (!userId) throw new Error("Not authenticated")
+    if (!userId) throw new Error('Not authenticated')
 
-    const chart = await ctx.db.get(id)
+    const chart = await ctx.db.get('charts', id)
     if (!chart || chart.userId !== userId) {
-      throw new Error("Chart not found or not authorized")
+      throw new Error('Chart not found or not authorized')
     }
 
     // Generate a simple slug using timestamp + random chars
-    const slug =
-      Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
+    const slug = Date.now().toString(36) + Math.random().toString(36).substring(2, 8)
 
-    await ctx.db.patch(id, {
+    await ctx.db.patch('charts', id, {
       shareSlug: slug,
       isPublic: true,
       updatedAt: Date.now(),

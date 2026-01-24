@@ -1,4 +1,4 @@
-import { mutation } from "../_generated/server"
+import { mutation } from '../_generated/server'
 
 const DEFAULT_WEIGHTS = {
   sun: 1,
@@ -15,16 +15,16 @@ const DEFAULT_WEIGHTS = {
 
 const PRESETS = [
   {
-    name: "Balanced",
-    description: "Equal weight to all planets for a holistic assessment",
-    icon: "balance-scale",
+    name: 'Balanced',
+    description: 'Equal weight to all planets for a holistic assessment',
+    icon: 'balance-scale',
     weights: { ...DEFAULT_WEIGHTS },
     order: 0,
   },
   {
-    name: "Relationships",
-    description: "Emphasizes Venus, Moon, and Mars for love and connection",
-    icon: "heart",
+    name: 'Relationships',
+    description: 'Emphasizes Venus, Moon, and Mars for love and connection',
+    icon: 'heart',
     weights: {
       ...DEFAULT_WEIGHTS,
       venus: 3,
@@ -34,9 +34,9 @@ const PRESETS = [
     order: 1,
   },
   {
-    name: "Career",
-    description: "Focuses on Saturn, Sun, and Jupiter for professional success",
-    icon: "briefcase",
+    name: 'Career',
+    description: 'Focuses on Saturn, Sun, and Jupiter for professional success',
+    icon: 'briefcase',
     weights: {
       ...DEFAULT_WEIGHTS,
       saturn: 3,
@@ -46,9 +46,9 @@ const PRESETS = [
     order: 2,
   },
   {
-    name: "Wealth",
-    description: "Prioritizes Jupiter, Venus, and Mercury for financial abundance",
-    icon: "coins",
+    name: 'Wealth',
+    description: 'Prioritizes Jupiter, Venus, and Mercury for financial abundance',
+    icon: 'coins',
     weights: {
       ...DEFAULT_WEIGHTS,
       jupiter: 3,
@@ -58,9 +58,9 @@ const PRESETS = [
     order: 3,
   },
   {
-    name: "Creativity",
-    description: "Highlights Neptune, Venus, and Moon for artistic expression",
-    icon: "palette",
+    name: 'Creativity',
+    description: 'Highlights Neptune, Venus, and Moon for artistic expression',
+    icon: 'palette',
     weights: {
       ...DEFAULT_WEIGHTS,
       neptune: 3,
@@ -70,9 +70,9 @@ const PRESETS = [
     order: 4,
   },
   {
-    name: "Spiritual",
-    description: "Emphasizes Neptune, Jupiter, and Moon for inner growth",
-    icon: "lotus",
+    name: 'Spiritual',
+    description: 'Emphasizes Neptune, Jupiter, and Moon for inner growth',
+    icon: 'lotus',
     weights: {
       ...DEFAULT_WEIGHTS,
       neptune: 3,
@@ -82,9 +82,9 @@ const PRESETS = [
     order: 5,
   },
   {
-    name: "Health",
-    description: "Focuses on Sun, Mars, and Jupiter for vitality and wellness",
-    icon: "heart-pulse",
+    name: 'Health',
+    description: 'Focuses on Sun, Mars, and Jupiter for vitality and wellness',
+    icon: 'heart-pulse',
     weights: {
       ...DEFAULT_WEIGHTS,
       sun: 3,
@@ -99,14 +99,14 @@ export const seedPresets = mutation({
   args: {},
   handler: async (ctx) => {
     // Check if presets already exist
-    const existing = await ctx.db.query("presets").first()
+    const existing = await ctx.db.query('presets').first()
     if (existing) {
-      return { message: "Presets already seeded" }
+      return { message: 'Presets already seeded' }
     }
 
     // Insert all presets
     for (const preset of PRESETS) {
-      await ctx.db.insert("presets", preset)
+      await ctx.db.insert('presets', preset)
     }
 
     return { message: `Seeded ${PRESETS.length} presets` }

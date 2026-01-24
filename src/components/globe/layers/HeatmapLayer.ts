@@ -5,9 +5,9 @@
  * to optimal latitudes (declination/zenith lines).
  */
 
-import * as THREE from "three"
-import type { LayerGroup, PlanetId } from "./types"
-import { PLANET_COLORS_HEX, PLANET_IDS } from "./types"
+import * as THREE from 'three'
+import { PLANET_COLORS_HEX, PLANET_IDS } from './types'
+import type { LayerGroup, PlanetId } from './types'
 
 // =============================================================================
 // Constants
@@ -140,14 +140,14 @@ export interface HeatmapOptions {
  */
 export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
   const group = new THREE.Group()
-  group.name = "heatmap"
+  group.name = 'heatmap'
 
   const { declinations, weights, intensity = 1.0, sigma = 3.0 } = options
 
   // Prepare uniform arrays
-  const hotLatitudes: number[] = []
-  const hotColors: number[] = []
-  const hotWeights: number[] = []
+  const hotLatitudes: Array<number> = []
+  const hotColors: Array<number> = []
+  const hotWeights: Array<number> = []
 
   for (const planet of PLANET_IDS) {
     if (weights[planet] > 0) {
@@ -218,20 +218,17 @@ export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
 /**
  * Update heatmap with new data.
  */
-export function updateHeatmap(
-  group: THREE.Group,
-  options: HeatmapOptions
-): void {
-  const mesh = group.children[0] as THREE.Mesh
-  if (!mesh || !(mesh.material instanceof THREE.ShaderMaterial)) return
+export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void {
+  const mesh = group.children[0]
+  if (!(mesh instanceof THREE.Mesh) || !(mesh.material instanceof THREE.ShaderMaterial)) return
 
   const material = mesh.material
   const { declinations, weights, intensity = 1.0, sigma = 3.0 } = options
 
   // Rebuild uniform arrays
-  const hotLatitudes: number[] = []
-  const hotColors: number[] = []
-  const hotWeights: number[] = []
+  const hotLatitudes: Array<number> = []
+  const hotColors: Array<number> = []
+  const hotWeights: Array<number> = []
 
   for (const planet of PLANET_IDS) {
     if (weights[planet] > 0) {
@@ -266,8 +263,8 @@ export function updateHeatmap(
  * Set heatmap intensity.
  */
 export function setHeatmapIntensity(group: THREE.Group, intensity: number): void {
-  const mesh = group.children[0] as THREE.Mesh
-  if (mesh && mesh.material instanceof THREE.ShaderMaterial) {
+  const mesh = group.children[0]
+  if (mesh instanceof THREE.Mesh && mesh.material instanceof THREE.ShaderMaterial) {
     mesh.material.uniforms.uIntensity.value = intensity
   }
 }
@@ -276,8 +273,8 @@ export function setHeatmapIntensity(group: THREE.Group, intensity: number): void
  * Set heatmap spread (sigma).
  */
 export function setHeatmapSpread(group: THREE.Group, sigma: number): void {
-  const mesh = group.children[0] as THREE.Mesh
-  if (mesh && mesh.material instanceof THREE.ShaderMaterial) {
+  const mesh = group.children[0]
+  if (mesh instanceof THREE.Mesh && mesh.material instanceof THREE.ShaderMaterial) {
     mesh.material.uniforms.uSigma.value = sigma
   }
 }

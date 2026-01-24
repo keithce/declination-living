@@ -1,17 +1,17 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { useMemo, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-  Sun,
-  Moon,
-  Sparkles,
+  ArrowRight,
+  Calculator,
+  ChevronDown,
+  Compass,
   Globe,
   MapPin,
-  ArrowRight,
-  ChevronDown,
-  Calculator,
+  Moon,
+  Sparkles,
+  Sun,
   Target,
-  Compass,
 } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
@@ -172,8 +172,7 @@ function HeroSection() {
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0f172a 40%, #050714 100%)',
+          background: 'radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0f172a 40%, #050714 100%)',
         }}
       />
 
@@ -210,8 +209,7 @@ function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
         >
-          Find Where the{' '}
-          <span className="text-celestial-gradient italic">Stars</span>
+          Find Where the <span className="text-celestial-gradient italic">Stars</span>
           <br />
           Align for You
         </motion.h1>
@@ -223,9 +221,8 @@ function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.8 }}
         >
-          Discover your optimal living location using the ancient wisdom of
-          planetary declination. Where on Earth does your birth chart resonate
-          most powerfully?
+          Discover your optimal living location using the ancient wisdom of planetary declination.
+          Where on Earth does your birth chart resonate most powerfully?
         </motion.p>
 
         {/* CTA Buttons */}
@@ -301,11 +298,7 @@ function TheorySection() {
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
             >
-              What is{' '}
-              <span className="text-celestial-gradient italic">
-                Declination
-              </span>
-              ?
+              What is <span className="text-celestial-gradient italic">Declination</span>?
             </motion.h2>
 
             <motion.div
@@ -316,22 +309,20 @@ function TheorySection() {
               transition={{ delay: 0.4 }}
             >
               <p>
-                Just as Earth has latitude lines running parallel to the
-                equator, the celestial sphere has{' '}
-                <strong className="text-white">declination</strong> — measuring
-                how far north or south a planet appears from the celestial
-                equator.
+                Just as Earth has latitude lines running parallel to the equator, the celestial
+                sphere has <strong className="text-white">declination</strong> — measuring how far
+                north or south a planet appears from the celestial equator.
               </p>
               <p>
-                When a planet's declination in your natal chart matches a
-                geographic latitude on Earth, you create what astrologers call a{' '}
-                <strong className="text-amber-400">"parallel" alignment</strong>
-                . This resonance amplifies that planet's influence in your life.
+                When a planet's declination in your natal chart matches a geographic latitude on
+                Earth, you create what astrologers call a{' '}
+                <strong className="text-amber-400">"parallel" alignment</strong>. This resonance
+                amplifies that planet's influence in your life.
               </p>
               <p>
-                Living at a latitude that aligns with your most important
-                planets can enhance specific areas of life — from career success
-                to spiritual growth, relationships to creative expression.
+                Living at a latitude that aligns with your most important planets can enhance
+                specific areas of life — from career success to spiritual growth, relationships to
+                creative expression.
               </p>
             </motion.div>
           </div>
@@ -357,9 +348,7 @@ function TheorySection() {
                     top: `${50 - lat * 0.6}%`,
                   }}
                 >
-                  <span className="absolute -left-8 -top-3 text-xs text-slate-500">
-                    {lat}°
-                  </span>
+                  <span className="absolute -left-8 -top-3 text-xs text-slate-500">{lat}°</span>
                 </div>
               ))}
 
@@ -488,9 +477,7 @@ function HowItWorksSection() {
                 <h3 className="font-display text-2xl font-semibold text-white mb-3">
                   {step.title}
                 </h3>
-                <p className="text-slate-400 leading-relaxed">
-                  {step.description}
-                </p>
+                <p className="text-slate-400 leading-relaxed">{step.description}</p>
               </div>
             </motion.div>
           ))}
@@ -512,12 +499,10 @@ function PlanetGridSection() {
           viewport={{ once: true }}
         >
           <h2 className="font-display text-4xl md:text-5xl font-semibold text-white mb-4">
-            The Celestial{' '}
-            <span className="text-celestial-gradient italic">Influences</span>
+            The Celestial <span className="text-celestial-gradient italic">Influences</span>
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-            Each planet governs different aspects of life. Weight them according
-            to your priorities.
+            Each planet governs different aspects of life. Weight them according to your priorities.
           </p>
         </motion.div>
 
@@ -541,27 +526,20 @@ function PlanetGridSection() {
               </div>
 
               {/* Planet name */}
-              <h3 className="font-display text-xl font-semibold text-white mb-1">
-                {planet.name}
-              </h3>
+              <h3 className="font-display text-xl font-semibold text-white mb-1">{planet.name}</h3>
 
               {/* Meaning */}
               <p className="text-sm text-slate-400">{planet.meaning}</p>
 
               {/* Hover detail */}
               <div className="absolute inset-0 p-6 rounded-2xl bg-slate-900/95 border border-slate-600/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center">
-                <div
-                  className="text-3xl mb-3"
-                  style={{ color: planet.color }}
-                >
+                <div className="text-3xl mb-3" style={{ color: planet.color }}>
                   {planet.symbol}
                 </div>
                 <h3 className="font-display text-lg font-semibold text-white mb-2">
                   {planet.name}
                 </h3>
-                <p className="text-sm text-slate-300 leading-relaxed">
-                  {planet.description}
-                </p>
+                <p className="text-sm text-slate-300 leading-relaxed">{planet.description}</p>
               </div>
             </motion.div>
           ))}
@@ -579,8 +557,7 @@ function CTASection() {
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'radial-gradient(ellipse at 50% 100%, #1e1b4b 0%, #0a0f1f 50%, #050714 100%)',
+          background: 'radial-gradient(ellipse at 50% 100%, #1e1b4b 0%, #0a0f1f 50%, #050714 100%)',
         }}
       />
       <div className="absolute inset-0 celestial-grid opacity-30" />
@@ -612,15 +589,12 @@ function CTASection() {
           <h2 className="font-display text-4xl md:text-6xl font-semibold text-white mb-6">
             Ready to Find Your
             <br />
-            <span className="text-celestial-gradient italic">
-              Optimal Location
-            </span>
-            ?
+            <span className="text-celestial-gradient italic">Optimal Location</span>?
           </h2>
 
           <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-            Enter your birth data and let the stars guide you to the places
-            where you'll thrive the most.
+            Enter your birth data and let the stars guide you to the places where you'll thrive the
+            most.
           </p>
 
           <Link
@@ -632,9 +606,7 @@ function CTASection() {
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
           </Link>
 
-          <p className="mt-6 text-sm text-slate-500">
-            Free to use • No account required
-          </p>
+          <p className="mt-6 text-sm text-slate-500">Free to use • No account required</p>
         </motion.div>
       </div>
     </section>
@@ -648,14 +620,10 @@ function Footer() {
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2">
           <Globe className="w-6 h-6 text-amber-400" />
-          <span className="font-display text-lg font-semibold text-white">
-            Declination Living
-          </span>
+          <span className="font-display text-lg font-semibold text-white">Declination Living</span>
         </div>
 
-        <p className="text-sm text-slate-500">
-          Celestial cartography for the modern seeker
-        </p>
+        <p className="text-sm text-slate-500">Celestial cartography for the modern seeker</p>
 
         <div className="flex items-center gap-6 text-sm text-slate-400">
           <Link to="/calculator" className="hover:text-white transition-colors">

@@ -2,4 +2,4 @@
  * Paran calculation module exports.
  */
 
-export * from "./solver"
+export * from './solver'

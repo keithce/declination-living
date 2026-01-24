@@ -8,25 +8,16 @@
  * - Heatmap overlay
  */
 
-import { useRef, useEffect, useCallback } from "react"
-import * as THREE from "three"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import type { ExtendedGlobeCanvasProps, LayerGroup } from "./layers/types"
-import type { UseGlobeStateReturn } from "./hooks/useGlobeState"
-import {
-  createZenithBandLayer,
-  updateZenithBandVisibility,
-} from "./layers/ZenithBandLayer"
-import {
-  createACGLineLayer,
-  updateACGLineVisibility,
-} from "./layers/ACGLineLayer"
-import {
-  createParanPointLayer,
-  updateParanPointVisibility,
-} from "./layers/ParanPointLayer"
-import { createHeatmapLayer, updateHeatmap } from "./layers/HeatmapLayer"
-import { PLANET_IDS } from "./layers/types"
+import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { createZenithBandLayer, updateZenithBandVisibility } from './layers/ZenithBandLayer'
+import { createACGLineLayer, updateACGLineVisibility } from './layers/ACGLineLayer'
+import { createParanPointLayer, updateParanPointVisibility } from './layers/ParanPointLayer'
+import { createHeatmapLayer } from './layers/HeatmapLayer'
+import { PLANET_IDS } from './layers/types'
+import type { UseGlobeStateReturn } from './hooks/useGlobeState'
+import type { ExtendedGlobeCanvasProps, LayerGroup } from './layers/types'
 
 // =============================================================================
 // Types
@@ -60,18 +51,14 @@ interface SceneRefs {
 /**
  * Convert lat/lon to 3D position on sphere.
  */
-function latLonToVector3(
-  lat: number,
-  lon: number,
-  radius: number
-): THREE.Vector3 {
+function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector3 {
   const phi = ((90 - lat) * Math.PI) / 180
   const theta = ((lon + 180) * Math.PI) / 180
 
   return new THREE.Vector3(
     -radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    radius * Math.sin(phi) * Math.sin(theta),
   )
 }
 
@@ -80,7 +67,7 @@ function latLonToVector3(
  */
 function createStars(): THREE.Points {
   const starsGeometry = new THREE.BufferGeometry()
-  const starsPositions: number[] = []
+  const starsPositions: Array<number> = []
 
   for (let i = 0; i < 2000; i++) {
     const x = (Math.random() - 0.5) * 100
@@ -92,10 +79,7 @@ function createStars(): THREE.Points {
     }
   }
 
-  starsGeometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(starsPositions, 3)
-  )
+  starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsPositions, 3))
 
   const starsMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
@@ -112,14 +96,12 @@ function createStars(): THREE.Points {
 // =============================================================================
 
 export function EnhancedGlobeCanvas({
-  optimalLatitudes,
-  latitudeBands,
   birthLocation,
   declinations,
   acgLines,
   parans,
   globeState,
-  className = "",
+  className = '',
 }: EnhancedGlobeCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<SceneRefs | null>(null)
@@ -137,7 +119,7 @@ export function EnhancedGlobeCanvas({
 
     // Scene
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color("#0a0f1f")
+    scene.background = new THREE.Color('#0a0f1f')
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000)
@@ -197,11 +179,7 @@ export function EnhancedGlobeCanvas({
       const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 })
       const marker = new THREE.Mesh(markerGeometry, markerMaterial)
 
-      const pos = latLonToVector3(
-        birthLocation.latitude,
-        birthLocation.longitude,
-        1.02
-      )
+      const pos = latLonToVector3(birthLocation.latitude, birthLocation.longitude, 1.02)
       marker.position.copy(pos)
       scene.add(marker)
 
@@ -263,17 +241,17 @@ export function EnhancedGlobeCanvas({
       renderer.setSize(newWidth, newHeight)
     }
 
-    window.addEventListener("resize", handleResize)
+    window.addEventListener('resize', handleResize)
 
     // Cleanup
     return () => {
-      window.removeEventListener("resize", handleResize)
+      window.removeEventListener('resize', handleResize)
       if (sceneRef.current) {
         cancelAnimationFrame(sceneRef.current.animationId)
 
         // Dispose layers
         Object.values(sceneRef.current.layers).forEach((layer) => {
-          layer?.dispose()
+          layer.dispose()
         })
       }
       renderer.dispose()
@@ -298,12 +276,15 @@ export function EnhancedGlobeCanvas({
     }
 
     // Create zenith line data from declinations
-    const zenithLines = PLANET_IDS.map((planet) => ({
-      planet,
-      latitude: declinations[planet] ?? 0,
-      orbMin: (declinations[planet] ?? 0) - 1,
-      orbMax: (declinations[planet] ?? 0) + 1,
-    }))
+    const zenithLines = PLANET_IDS.map((planet) => {
+      const lat = declinations[planet]
+      return {
+        planet,
+        latitude: lat,
+        orbMin: lat - 1,
+        orbMax: lat + 1,
+      }
+    })
 
     // Create new layer
     const layer = createZenithBandLayer(zenithLines, globeState.planets)
@@ -325,20 +306,11 @@ export function EnhancedGlobeCanvas({
     }
 
     // Create new layer
-    const layer = createACGLineLayer(
-      acgLines,
-      globeState.planets,
-      globeState.acgLineTypes
-    )
+    const layer = createACGLineLayer(acgLines, globeState.planets, globeState.acgLineTypes)
     layer.group.visible = globeState.layers.acgLines
     scene.add(layer.group)
     layers.acgLines = layer
-  }, [
-    acgLines,
-    globeState.planets,
-    globeState.acgLineTypes,
-    globeState.layers.acgLines,
-  ])
+  }, [acgLines, globeState.planets, globeState.acgLineTypes, globeState.layers.acgLines])
 
   // Update paran points when data or visibility changes
   useEffect(() => {
@@ -379,7 +351,7 @@ export function EnhancedGlobeCanvas({
         ...acc,
         [planet]: globeState.planets[planet] ? 5 : 0,
       }),
-      {} as Record<string, number>
+      {} as Record<string, number>,
     )
 
     // Create new heatmap layer
@@ -412,11 +384,7 @@ export function EnhancedGlobeCanvas({
 
     if (layers.acgLines) {
       layers.acgLines.group.visible = globeState.layers.acgLines
-      updateACGLineVisibility(
-        layers.acgLines.group,
-        globeState.planets,
-        globeState.acgLineTypes
-      )
+      updateACGLineVisibility(layers.acgLines.group, globeState.planets, globeState.acgLineTypes)
     }
 
     if (layers.paranPoints) {

@@ -52,7 +52,7 @@ export interface CityResult {
 }
 
 // Call Geoapify API directly (API key is safe for geocoding APIs)
-export async function searchCities(query: string): Promise<CityResult[]> {
+export async function searchCities(query: string): Promise<Array<CityResult>> {
   if (query.length < 2) return []
 
   if (!GEOAPIFY_API_KEY) {
@@ -105,10 +105,7 @@ export async function searchCities(query: string): Promise<CityResult[]> {
 }
 
 // Get timezone for coordinates
-export async function getTimezone(
-  lat: number,
-  lon: number
-): Promise<string | null> {
+export async function getTimezone(lat: number, lon: number): Promise<string | null> {
   if (!GEOAPIFY_API_KEY) {
     console.error('VITE_GEOAPIFY_API_KEY not configured')
     return null

@@ -22,12 +22,12 @@ export interface LatitudeScore {
   latitude: number
   score: number
   dominantPlanet: string
-  alignments: {
+  alignments: Array<{
     planet: string
     declination: number
     distance: number
     contribution: number
-  }[]
+  }>
 }
 
 export interface CityScore {
@@ -37,7 +37,7 @@ export interface CityScore {
   dominantPlanet: string
 }
 
-const PLANET_NAMES: (keyof PlanetDeclinations)[] = [
+const PLANET_NAMES: Array<keyof PlanetDeclinations> = [
   'sun',
   'moon',
   'mercury',
@@ -60,7 +60,7 @@ const PLANET_NAMES: (keyof PlanetDeclinations)[] = [
 export function calculateAlignmentScore(
   latitude: number,
   declination: number,
-  weight: number
+  weight: number,
 ): number {
   if (weight === 0) return 0
 
@@ -83,7 +83,7 @@ export function calculateAlignmentScore(
 export function calculateLatitudeScore(
   latitude: number,
   declinations: PlanetDeclinations,
-  weights: PlanetWeights
+  weights: PlanetWeights,
 ): LatitudeScore {
   const alignments: LatitudeScore['alignments'] = []
   let totalScore = 0
@@ -117,8 +117,7 @@ export function calculateLatitudeScore(
   // Normalize score to 0-100 range
   // Max possible score = sum of all weights (if all planets aligned at this latitude)
   const maxPossibleScore = Object.values(weights).reduce((a, b) => a + b, 0)
-  const normalizedScore =
-    maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0
+  const normalizedScore = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0
 
   return {
     latitude,
@@ -136,9 +135,9 @@ export function findOptimalLatitudes(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
   topN: number = 10,
-  stepSize: number = 1
-): LatitudeScore[] {
-  const scores: LatitudeScore[] = []
+  stepSize: number = 1,
+): Array<LatitudeScore> {
+  const scores: Array<LatitudeScore> = []
 
   // Sample latitudes from -70 to 70 (most inhabited regions)
   for (let lat = -70; lat <= 70; lat += stepSize) {
@@ -157,8 +156,8 @@ export function findOptimalLatitudes(
 export function scoreCities(
   cities: Array<{ id: string; latitude: number }>,
   declinations: PlanetDeclinations,
-  weights: PlanetWeights
-): CityScore[] {
+  weights: PlanetWeights,
+): Array<CityScore> {
   return cities
     .map((city) => {
       const result = calculateLatitudeScore(city.latitude, declinations, weights)
@@ -179,11 +178,10 @@ export function scoreCities(
 export function getOptimalLatitudeBands(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
-  threshold: number = 50 // minimum score percentage
+  threshold: number = 50, // minimum score percentage
 ): Array<{ min: number; max: number; dominantPlanet: string }> {
   const bands: Array<{ min: number; max: number; dominantPlanet: string }> = []
-  let currentBand: { min: number; max: number; dominantPlanet: string } | null =
-    null
+  let currentBand: { min: number; max: number; dominantPlanet: string } | null = null
 
   for (let lat = -70; lat <= 70; lat += 0.5) {
     const score = calculateLatitudeScore(lat, declinations, weights)

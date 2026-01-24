@@ -10,7 +10,7 @@
  * Starting from Aries first decan (Mars), this creates a continuous cycle.
  */
 
-import type { PlanetId, ZodiacSign } from "../core/types"
+import type { PlanetId, ZodiacSign } from '../core/types'
 
 // =============================================================================
 // Chaldean Order
@@ -20,14 +20,14 @@ import type { PlanetId, ZodiacSign } from "../core/types"
  * The Chaldean order of planets (by orbital period, slowest to fastest).
  * This order is used for decan assignments and planetary hours.
  */
-export const CHALDEAN_ORDER: PlanetId[] = [
-  "saturn",
-  "jupiter",
-  "mars",
-  "sun",
-  "venus",
-  "mercury",
-  "moon",
+export const CHALDEAN_ORDER: Array<PlanetId> = [
+  'saturn',
+  'jupiter',
+  'mars',
+  'sun',
+  'venus',
+  'mercury',
+  'moon',
 ]
 
 // =============================================================================
@@ -42,24 +42,24 @@ export const CHALDEAN_ORDER: PlanetId[] = [
  */
 export const DECANS: Record<ZodiacSign, [PlanetId, PlanetId, PlanetId]> = {
   // Fire signs
-  aries: ["mars", "sun", "venus"],
-  leo: ["saturn", "jupiter", "mars"],
-  sagittarius: ["mercury", "moon", "saturn"],
+  aries: ['mars', 'sun', 'venus'],
+  leo: ['saturn', 'jupiter', 'mars'],
+  sagittarius: ['mercury', 'moon', 'saturn'],
 
   // Earth signs
-  taurus: ["mercury", "moon", "saturn"],
-  virgo: ["sun", "venus", "mercury"],
-  capricorn: ["jupiter", "mars", "sun"],
+  taurus: ['mercury', 'moon', 'saturn'],
+  virgo: ['sun', 'venus', 'mercury'],
+  capricorn: ['jupiter', 'mars', 'sun'],
 
   // Air signs
-  gemini: ["jupiter", "mars", "sun"],
-  libra: ["moon", "saturn", "jupiter"],
-  aquarius: ["venus", "mercury", "moon"],
+  gemini: ['jupiter', 'mars', 'sun'],
+  libra: ['moon', 'saturn', 'jupiter'],
+  aquarius: ['venus', 'mercury', 'moon'],
 
   // Water signs
-  cancer: ["venus", "mercury", "moon"],
-  scorpio: ["mars", "sun", "venus"],
-  pisces: ["saturn", "jupiter", "mars"],
+  cancer: ['venus', 'mercury', 'moon'],
+  scorpio: ['mars', 'sun', 'venus'],
+  pisces: ['saturn', 'jupiter', 'mars'],
 }
 
 // =============================================================================
@@ -98,11 +98,7 @@ export function getDecanRuler(sign: ZodiacSign, degree: number): PlanetId {
  * @param degree - Degree within sign
  * @returns True if planet is in its own face
  */
-export function isInOwnFace(
-  planet: PlanetId,
-  sign: ZodiacSign,
-  degree: number
-): boolean {
+export function isInOwnFace(planet: PlanetId, sign: ZodiacSign, degree: number): boolean {
   return getDecanRuler(sign, degree) === planet
 }
 
@@ -134,19 +130,19 @@ export function getDecanRulerByLongitude(longitude: number): PlanetId {
   const signIndex = Math.floor(normalizedLon / 30)
   const degree = normalizedLon % 30
 
-  const signs: ZodiacSign[] = [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces",
+  const signs: Array<ZodiacSign> = [
+    'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces',
   ]
 
   return getDecanRuler(signs[signIndex], degree)
@@ -175,23 +171,23 @@ export interface DecanInfo {
  *
  * @returns Array of 36 decan info objects
  */
-export function getAllDecans(): DecanInfo[] {
-  const signs: ZodiacSign[] = [
-    "aries",
-    "taurus",
-    "gemini",
-    "cancer",
-    "leo",
-    "virgo",
-    "libra",
-    "scorpio",
-    "sagittarius",
-    "capricorn",
-    "aquarius",
-    "pisces",
+export function getAllDecans(): Array<DecanInfo> {
+  const signs: Array<ZodiacSign> = [
+    'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces',
   ]
 
-  const decans: DecanInfo[] = []
+  const decans: Array<DecanInfo> = []
 
   for (let signIndex = 0; signIndex < 12; signIndex++) {
     const sign = signs[signIndex]

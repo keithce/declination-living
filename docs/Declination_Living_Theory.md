@@ -1,6 +1,6 @@
 # Declination-Based Relocation
 
-*How Planetary Declinations Can Guide Your Optimal Living Location*
+_How Planetary Declinations Can Guide Your Optimal Living Location_
 
 ---
 
@@ -143,73 +143,73 @@ Not all planetary energies are equally important for everyone. A person focused 
 
 #### ❤️ For Relationships & Love
 
-| Planet | Weight | Reason |
-|--------|--------|--------|
-| Venus | High (3x) | Primary planet of love and attraction |
-| Moon | High (2.5x) | Emotional connection and nurturing |
-| Mars | Medium (1.5x) | Passion and physical attraction |
-| Jupiter | Medium (1.5x) | Growth in partnership, generosity |
-| Sun | Normal (1x) | Personal vitality in relationship |
+| Planet  | Weight        | Reason                                |
+| ------- | ------------- | ------------------------------------- |
+| Venus   | High (3x)     | Primary planet of love and attraction |
+| Moon    | High (2.5x)   | Emotional connection and nurturing    |
+| Mars    | Medium (1.5x) | Passion and physical attraction       |
+| Jupiter | Medium (1.5x) | Growth in partnership, generosity     |
+| Sun     | Normal (1x)   | Personal vitality in relationship     |
 
 ---
 
 #### 💼 For Career & Success
 
-| Planet | Weight | Reason |
-|--------|--------|--------|
-| Saturn | High (3x) | Career structure and authority |
-| Sun | High (2.5x) | Recognition and leadership |
-| Jupiter | High (2x) | Expansion and opportunity |
-| Mars | Medium (1.5x) | Drive and ambition |
-| Mercury | Medium (1.5x) | Business communication |
+| Planet  | Weight        | Reason                         |
+| ------- | ------------- | ------------------------------ |
+| Saturn  | High (3x)     | Career structure and authority |
+| Sun     | High (2.5x)   | Recognition and leadership     |
+| Jupiter | High (2x)     | Expansion and opportunity      |
+| Mars    | Medium (1.5x) | Drive and ambition             |
+| Mercury | Medium (1.5x) | Business communication         |
 
 ---
 
 #### 💰 For Wealth & Abundance
 
-| Planet | Weight | Reason |
-|--------|--------|--------|
-| Jupiter | High (3x) | Abundance and good fortune |
-| Venus | High (2.5x) | Attraction of money, luxury |
-| Mercury | Medium (2x) | Commerce and financial acumen |
-| Sun | Medium (1.5x) | Success and recognition |
-| Pluto | Medium (1.5x) | Hidden resources, investments |
+| Planet  | Weight        | Reason                        |
+| ------- | ------------- | ----------------------------- |
+| Jupiter | High (3x)     | Abundance and good fortune    |
+| Venus   | High (2.5x)   | Attraction of money, luxury   |
+| Mercury | Medium (2x)   | Commerce and financial acumen |
+| Sun     | Medium (1.5x) | Success and recognition       |
+| Pluto   | Medium (1.5x) | Hidden resources, investments |
 
 ---
 
 #### 🎨 For Creativity & Art
 
-| Planet | Weight | Reason |
-|--------|--------|--------|
-| Neptune | High (3x) | Imagination, music, film, dreams |
-| Venus | High (2.5x) | Beauty, aesthetics, art |
-| Moon | Medium (2x) | Emotional expression |
-| Uranus | Medium (1.5x) | Innovation and originality |
-| Mercury | Normal (1x) | Writing and communication |
+| Planet  | Weight        | Reason                           |
+| ------- | ------------- | -------------------------------- |
+| Neptune | High (3x)     | Imagination, music, film, dreams |
+| Venus   | High (2.5x)   | Beauty, aesthetics, art          |
+| Moon    | Medium (2x)   | Emotional expression             |
+| Uranus  | Medium (1.5x) | Innovation and originality       |
+| Mercury | Normal (1x)   | Writing and communication        |
 
 ---
 
 #### 🧘 For Spiritual Growth
 
-| Planet | Weight | Reason |
-|--------|--------|--------|
-| Neptune | High (3x) | Spirituality, transcendence |
-| Jupiter | High (2.5x) | Wisdom, philosophy, expansion |
-| Moon | Medium (2x) | Intuition, inner life |
-| Pluto | Medium (1.5x) | Deep transformation |
-| Saturn | Normal (1x) | Discipline in practice |
+| Planet  | Weight        | Reason                        |
+| ------- | ------------- | ----------------------------- |
+| Neptune | High (3x)     | Spirituality, transcendence   |
+| Jupiter | High (2.5x)   | Wisdom, philosophy, expansion |
+| Moon    | Medium (2x)   | Intuition, inner life         |
+| Pluto   | Medium (1.5x) | Deep transformation           |
+| Saturn  | Normal (1x)   | Discipline in practice        |
 
 ---
 
 #### 🏃 For Health & Vitality
 
-| Planet | Weight | Reason |
-|--------|--------|--------|
-| Sun | High (3x) | Core vitality and life force |
-| Mars | High (2.5x) | Physical energy and strength |
-| Jupiter | Medium (2x) | Overall wellbeing, optimism |
-| Moon | Medium (1.5x) | Emotional health |
-| Saturn | Normal (1x) | Discipline, longevity |
+| Planet  | Weight        | Reason                       |
+| ------- | ------------- | ---------------------------- |
+| Sun     | High (3x)     | Core vitality and life force |
+| Mars    | High (2.5x)   | Physical energy and strength |
+| Jupiter | Medium (2x)   | Overall wellbeing, optimism  |
+| Moon    | Medium (1.5x) | Emotional health             |
+| Saturn  | Normal (1x)   | Discipline, longevity        |
 
 ---
 
@@ -314,6 +314,7 @@ Declination-based relocation offers a unique lens for understanding how geograph
 > **Remember:** Astrology is a tool for self-understanding, not a deterministic prescription. These locations represent energetic alignments that may support certain life themes. Your free will, actions, and other factors remain the primary drivers of your life experience.
 
 The most powerful approach combines:
+
 - Declination-based latitude alignment
 - Traditional astrocartography
 - Practical life considerations

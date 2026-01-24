@@ -1,6 +1,6 @@
-import { defineSchema, defineTable } from "convex/server"
-import { v } from "convex/values"
-import { authTables } from "@convex-dev/auth/server"
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
+import { authTables } from '@convex-dev/auth/server'
 
 const planetWeights = v.object({
   sun: v.number(),
@@ -89,13 +89,13 @@ export default defineSchema({
   ...authTables,
 
   profiles: defineTable({
-    userId: v.id("users"),
+    userId: v.id('users'),
     displayName: v.optional(v.string()),
     defaultWeights: v.optional(planetWeights),
-  }).index("by_user", ["userId"]),
+  }).index('by_user', ['userId']),
 
   charts: defineTable({
-    userId: v.id("users"),
+    userId: v.id('users'),
     name: v.string(),
     birthDate: v.string(), // YYYY-MM-DD
     birthTime: v.string(), // HH:MM (24-hour)
@@ -108,9 +108,9 @@ export default defineSchema({
     weights: planetWeights,
     topLocations: v.array(
       v.object({
-        cityId: v.id("cities"),
+        cityId: v.id('cities'),
         score: v.number(),
-      })
+      }),
     ),
     isPublic: v.boolean(),
     shareSlug: v.optional(v.string()),
@@ -118,12 +118,12 @@ export default defineSchema({
     updatedAt: v.number(),
     // Enhanced fields (optional for backward compatibility)
     dignities: v.optional(planetDignities),
-    sect: v.optional(v.union(v.literal("day"), v.literal("night"))),
+    sect: v.optional(v.union(v.literal('day'), v.literal('night'))),
     vibeId: v.optional(v.string()),
     ascendant: v.optional(v.number()), // For sect determination
   })
-    .index("by_user", ["userId"])
-    .index("by_share_slug", ["shareSlug"]),
+    .index('by_user', ['userId'])
+    .index('by_share_slug', ['shareSlug']),
 
   cities: defineTable({
     name: v.string(),
@@ -136,15 +136,15 @@ export default defineSchema({
     population: v.number(),
     timezone: v.string(),
     tier: v.union(
-      v.literal("major"), // >500k
-      v.literal("medium"), // 100k-500k
-      v.literal("minor"), // 50k-100k
-      v.literal("small") // 10k-50k
+      v.literal('major'), // >500k
+      v.literal('medium'), // 100k-500k
+      v.literal('minor'), // 50k-100k
+      v.literal('small'), // 10k-50k
     ),
   })
-    .index("by_latitude", ["latitude"])
-    .index("by_tier_latitude", ["tier", "latitude"])
-    .searchIndex("search_name", { searchField: "nameAscii" }),
+    .index('by_latitude', ['latitude'])
+    .index('by_tier_latitude', ['tier', 'latitude'])
+    .searchIndex('search_name', { searchField: 'nameAscii' }),
 
   presets: defineTable({
     name: v.string(),
@@ -152,11 +152,11 @@ export default defineSchema({
     icon: v.string(),
     weights: planetWeights,
     order: v.number(),
-  }).index("by_order", ["order"]),
+  }).index('by_order', ['order']),
 
   // Analysis cache for storing computed results
   analysisCache: defineTable({
-    chartId: v.id("charts"),
+    chartId: v.id('charts'),
     julianDay: v.number(),
     obliquity: v.number(),
     enhancedDeclinations: enhancedDeclinations,
@@ -171,13 +171,13 @@ export default defineSchema({
       total: v.number(),
     }),
     dignities: planetDignities,
-    sect: v.union(v.literal("day"), v.literal("night")),
+    sect: v.union(v.literal('day'), v.literal('night')),
     computedAt: v.number(),
-  }).index("by_chart", ["chartId"]),
+  }).index('by_chart', ['chartId']),
 
   // User-defined and preset vibes for search
   vibes: defineTable({
-    userId: v.optional(v.id("users")),
+    userId: v.optional(v.id('users')),
     name: v.string(),
     description: v.string(),
     weights: planetWeights,
@@ -187,7 +187,7 @@ export default defineSchema({
     isPreset: v.boolean(),
     createdAt: v.number(),
   })
-    .index("by_user", ["userId"])
-    .index("by_public", ["isPublic"])
-    .index("by_preset", ["isPreset"]),
+    .index('by_user', ['userId'])
+    .index('by_public', ['isPublic'])
+    .index('by_preset', ['isPreset']),
 })

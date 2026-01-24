@@ -3,8 +3,9 @@
  * Uses 3-point numerical differentiation to calculate daily motion.
  */
 
-import { type PlanetId, type PlanetPositions, PLANET_IDS } from "../core/types"
-import { SPEED_CALC_STEP, EPSILON } from "../core/constants"
+import { PLANET_IDS } from '../core/types'
+import { EPSILON, SPEED_CALC_STEP } from '../core/constants'
+import type { PlanetId, PlanetPositions } from '../core/types'
 
 // =============================================================================
 // Types
@@ -57,7 +58,7 @@ const STATIONARY_THRESHOLD: Record<PlanetId, number> = {
 export function calculatePlanetSpeeds(
   getPositions: (jd: number) => PlanetPositions,
   jd: number,
-  h: number = SPEED_CALC_STEP
+  h: number = SPEED_CALC_STEP,
 ): PlanetSpeeds {
   // Get positions at jd-h, jd, and jd+h
   const posMinus = getPositions(jd - h)
@@ -82,8 +83,7 @@ export function calculatePlanetSpeeds(
 
     // Determine retrograde and stationary status
     const isRetrograde = longitudeSpeed < -EPSILON
-    const isStationary =
-      Math.abs(longitudeSpeed) < STATIONARY_THRESHOLD[planet]
+    const isStationary = Math.abs(longitudeSpeed) < STATIONARY_THRESHOLD[planet]
 
     speeds[planet] = {
       longitudeSpeed,
@@ -109,7 +109,7 @@ export function calculateSinglePlanetSpeed(
   getPosition: (jd: number) => { longitude: number; declination: number },
   jd: number,
   planet: PlanetId,
-  h: number = SPEED_CALC_STEP
+  h: number = SPEED_CALC_STEP,
 ): PlanetSpeed {
   const posMinus = getPosition(jd - h)
   const posPlus = getPosition(jd + h)
@@ -120,8 +120,7 @@ export function calculateSinglePlanetSpeed(
   if (lonDiff < -180) lonDiff += 360
 
   const longitudeSpeed = lonDiff / (2 * h)
-  const declinationSpeed =
-    (posPlus.declination - posMinus.declination) / (2 * h)
+  const declinationSpeed = (posPlus.declination - posMinus.declination) / (2 * h)
 
   const isRetrograde = longitudeSpeed < -EPSILON
   const isStationary = Math.abs(longitudeSpeed) < STATIONARY_THRESHOLD[planet]
@@ -167,21 +166,17 @@ export function findNextRetrogradeStation(
   getPosition: (jd: number) => { longitude: number; declination: number },
   jd: number,
   planet: PlanetId,
-  maxDays: number = 730
+  maxDays: number = 730,
 ): number | null {
   // Sun and Moon don't go retrograde
-  if (planet === "sun" || planet === "moon") {
+  if (planet === 'sun' || planet === 'moon') {
     return null
   }
 
   const step = 1.0 // Search in 1-day steps
 
   let currentJD = jd
-  let wasRetrograde = calculateSinglePlanetSpeed(
-    getPosition,
-    currentJD,
-    planet
-  ).isRetrograde
+  let wasRetrograde = calculateSinglePlanetSpeed(getPosition, currentJD, planet).isRetrograde
 
   for (let i = 0; i < maxDays; i++) {
     currentJD += step
@@ -226,20 +221,16 @@ export function findNextDirectStation(
   getPosition: (jd: number) => { longitude: number; declination: number },
   jd: number,
   planet: PlanetId,
-  maxDays: number = 365
+  maxDays: number = 365,
 ): number | null {
-  if (planet === "sun" || planet === "moon") {
+  if (planet === 'sun' || planet === 'moon') {
     return null
   }
 
   const step = 1.0
 
   let currentJD = jd
-  let wasRetrograde = calculateSinglePlanetSpeed(
-    getPosition,
-    currentJD,
-    planet
-  ).isRetrograde
+  let wasRetrograde = calculateSinglePlanetSpeed(getPosition, currentJD, planet).isRetrograde
 
   // If not currently retrograde, return null
   if (!wasRetrograde) {
@@ -287,9 +278,9 @@ export function findNextDirectStation(
  * @returns Formatted string like "+0.95°/day" or "R -0.12°/day"
  */
 export function formatSpeed(speed: PlanetSpeed): string {
-  const sign = speed.longitudeSpeed >= 0 ? "+" : ""
-  const retroLabel = speed.isRetrograde ? "R " : ""
-  const statLabel = speed.isStationary ? " (Sta)" : ""
+  const sign = speed.longitudeSpeed >= 0 ? '+' : ''
+  const retroLabel = speed.isRetrograde ? 'R ' : ''
+  const statLabel = speed.isStationary ? ' (Sta)' : ''
 
   return `${retroLabel}${sign}${speed.longitudeSpeed.toFixed(2)}°/day${statLabel}`
 }
@@ -299,5 +290,5 @@ export function formatSpeed(speed: PlanetSpeed): string {
  * Only the planets (not Sun or Moon) exhibit apparent retrograde motion.
  */
 export function canGoRetrograde(planet: PlanetId): boolean {
-  return planet !== "sun" && planet !== "moon"
+  return planet !== 'sun' && planet !== 'moon'
 }

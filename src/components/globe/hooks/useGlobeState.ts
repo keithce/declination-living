@@ -5,14 +5,9 @@
  * and ACG line type filters.
  */
 
-import { useState, useCallback, useMemo } from "react"
-import type {
-  LayerVisibility,
-  PlanetVisibility,
-  ACGLineFilters,
-  PlanetId,
-} from "../layers/types"
-import { PLANET_IDS } from "../layers/types"
+import { useCallback, useMemo, useState } from 'react'
+import { PLANET_IDS } from '../layers/types'
+import type { ACGLineFilters, LayerVisibility, PlanetId, PlanetVisibility } from '../layers/types'
 
 // =============================================================================
 // Types
@@ -65,11 +60,13 @@ const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
   acgLines: true,
   paranPoints: true,
   heatmap: false,
+  latitudeBands: true,
+  birthLocation: true,
 }
 
 const DEFAULT_PLANET_VISIBILITY: PlanetVisibility = PLANET_IDS.reduce(
   (acc, planet) => ({ ...acc, [planet]: true }),
-  {} as PlanetVisibility
+  {} as PlanetVisibility,
 )
 
 const DEFAULT_ACG_LINE_FILTERS: ACGLineFilters = {
@@ -92,9 +89,7 @@ const DEFAULT_STATE: GlobeState = {
 // Hook
 // =============================================================================
 
-export function useGlobeState(
-  initialState?: Partial<GlobeState>
-): UseGlobeStateReturn {
+export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeStateReturn {
   const [state, setState] = useState<GlobeState>({
     ...DEFAULT_STATE,
     ...initialState,
@@ -139,7 +134,7 @@ export function useGlobeState(
       ...prev,
       planets: PLANET_IDS.reduce(
         (acc, planet) => ({ ...acc, [planet]: visible }),
-        {} as PlanetVisibility
+        {} as PlanetVisibility,
       ),
     }))
   }, [])
@@ -211,7 +206,7 @@ export function useGlobeState(
       setHeatmapSpread,
       setHighlightedPlanet,
       resetState,
-    ]
+    ],
   )
 }
 

@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { motion } from 'framer-motion'
-import { TrendingUp, Compass } from 'lucide-react'
+import { Compass, TrendingUp } from 'lucide-react'
 
 interface LatitudeScore {
   latitude: number
@@ -15,8 +15,8 @@ interface LatitudeBand {
 }
 
 interface ResultsPanelProps {
-  optimalLatitudes: LatitudeScore[]
-  latitudeBands: LatitudeBand[]
+  optimalLatitudes: Array<LatitudeScore>
+  latitudeBands: Array<LatitudeBand>
 }
 
 const PLANET_COLORS: Record<string, string> = {
@@ -65,12 +65,8 @@ export const ResultsPanel = memo(function ResultsPanel({
         <div className="p-4 border-b border-slate-700/50 flex items-center gap-3">
           <TrendingUp className="w-5 h-5 text-amber-400" />
           <div>
-            <h3 className="font-display text-lg font-semibold text-white">
-              Top Latitudes
-            </h3>
-            <p className="text-sm text-slate-400">
-              Ranked by planetary alignment strength
-            </p>
+            <h3 className="font-display text-lg font-semibold text-white">Top Latitudes</h3>
+            <p className="text-sm text-slate-400">Ranked by planetary alignment strength</p>
           </div>
         </div>
 
@@ -100,8 +96,7 @@ export const ResultsPanel = memo(function ResultsPanel({
                     className="font-medium"
                   >
                     {PLANET_SYMBOLS[lat.dominantPlanet]}{' '}
-                    {lat.dominantPlanet.charAt(0).toUpperCase() +
-                      lat.dominantPlanet.slice(1)}
+                    {lat.dominantPlanet.charAt(0).toUpperCase() + lat.dominantPlanet.slice(1)}
                   </span>
                 </div>
               </div>
@@ -147,9 +142,7 @@ export const ResultsPanel = memo(function ResultsPanel({
             <h3 className="font-display text-lg font-semibold text-white">
               Optimal Latitude Bands
             </h3>
-            <p className="text-sm text-slate-400">
-              Geographic zones with strong alignments
-            </p>
+            <p className="text-sm text-slate-400">Geographic zones with strong alignments</p>
           </div>
         </div>
 

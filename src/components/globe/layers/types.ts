@@ -2,35 +2,35 @@
  * Types for globe visualization layers.
  */
 
-import type * as THREE from "three"
+import type * as THREE from 'three'
 
 // =============================================================================
 // Planet Types
 // =============================================================================
 
 export type PlanetId =
-  | "sun"
-  | "moon"
-  | "mercury"
-  | "venus"
-  | "mars"
-  | "jupiter"
-  | "saturn"
-  | "uranus"
-  | "neptune"
-  | "pluto"
+  | 'sun'
+  | 'moon'
+  | 'mercury'
+  | 'venus'
+  | 'mars'
+  | 'jupiter'
+  | 'saturn'
+  | 'uranus'
+  | 'neptune'
+  | 'pluto'
 
-export const PLANET_IDS: readonly PlanetId[] = [
-  "sun",
-  "moon",
-  "mercury",
-  "venus",
-  "mars",
-  "jupiter",
-  "saturn",
-  "uranus",
-  "neptune",
-  "pluto",
+export const PLANET_IDS: ReadonlyArray<PlanetId> = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+  'uranus',
+  'neptune',
+  'pluto',
 ] as const
 
 // =============================================================================
@@ -38,16 +38,16 @@ export const PLANET_IDS: readonly PlanetId[] = [
 // =============================================================================
 
 export const PLANET_COLORS: Record<PlanetId, string> = {
-  sun: "#fbbf24",
-  moon: "#e2e8f0",
-  mercury: "#a78bfa",
-  venus: "#f472b6",
-  mars: "#ef4444",
-  jupiter: "#f97316",
-  saturn: "#78716c",
-  uranus: "#22d3ee",
-  neptune: "#818cf8",
-  pluto: "#a3a3a3",
+  sun: '#fbbf24',
+  moon: '#e2e8f0',
+  mercury: '#a78bfa',
+  venus: '#f472b6',
+  mars: '#ef4444',
+  jupiter: '#f97316',
+  saturn: '#78716c',
+  uranus: '#22d3ee',
+  neptune: '#818cf8',
+  pluto: '#a3a3a3',
 }
 
 export const PLANET_COLORS_HEX: Record<PlanetId, number> = {
@@ -78,7 +78,7 @@ export interface ZenithLineData {
 /** ACG line data from backend */
 export interface ACGLineData {
   planet: PlanetId
-  lineType: "ASC" | "DSC" | "MC" | "IC"
+  lineType: 'ASC' | 'DSC' | 'MC' | 'IC'
   isCircumpolar: boolean
   points: Array<{ lat: number; lon: number }>
 }
@@ -161,9 +161,9 @@ export interface ExtendedGlobeCanvasProps {
 
   // New visualization data
   declinations?: Record<PlanetId, number>
-  zenithLines?: ZenithLineData[]
-  acgLines?: ACGLineData[]
-  parans?: ParanPointData[]
+  zenithLines?: Array<ZenithLineData>
+  acgLines?: Array<ACGLineData>
+  parans?: Array<ParanPointData>
   dignityScores?: Record<PlanetId, { total: number; indicator: string }>
 
   // Visibility control (optional - defaults provided)
@@ -192,13 +192,10 @@ export const DEFAULT_ACG_FILTERS: ACGLineFilters = {
 }
 
 export function createDefaultPlanetVisibility(): PlanetVisibility {
-  return PLANET_IDS.reduce(
-    (acc, planet) => {
-      acc[planet] = true
-      return acc
-    },
-    {} as PlanetVisibility
-  )
+  return PLANET_IDS.reduce((acc, planet) => {
+    acc[planet] = true
+    return acc
+  }, {} as PlanetVisibility)
 }
 
 export const DEFAULT_VISIBILITY_STATE: GlobeVisibilityState = {

@@ -18,8 +18,8 @@ interface LatitudeScore {
 }
 
 interface GlobeViewProps {
-  optimalLatitudes: LatitudeScore[]
-  latitudeBands: LatitudeBand[]
+  optimalLatitudes: Array<LatitudeScore>
+  latitudeBands: Array<LatitudeBand>
   birthLocation?: {
     latitude: number
     longitude: number
@@ -39,11 +39,7 @@ function GlobeLoading() {
   )
 }
 
-export function GlobeView({
-  optimalLatitudes,
-  latitudeBands,
-  birthLocation,
-}: GlobeViewProps) {
+export function GlobeView({ optimalLatitudes, latitudeBands, birthLocation }: GlobeViewProps) {
   // Check if we're in the browser
   const isBrowser = typeof window !== 'undefined'
 

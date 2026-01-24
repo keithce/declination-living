@@ -5,11 +5,11 @@
 
 import {
   DEG_PER_RAD,
-  RAD_PER_DEG,
   EPSILON,
   PARAN_BISECTION_TOL,
   PARAN_MAX_ITERATIONS,
-} from "./constants"
+  RAD_PER_DEG,
+} from './constants'
 
 // =============================================================================
 // Angle Normalization
@@ -143,9 +143,12 @@ export function hoursToDegrees(hours: number): number {
 /**
  * Convert decimal degrees to degrees, minutes, seconds.
  */
-export function toDMS(
-  decimal: number
-): { degrees: number; minutes: number; seconds: number; sign: 1 | -1 } {
+export function toDMS(decimal: number): {
+  degrees: number
+  minutes: number
+  seconds: number
+  sign: 1 | -1
+} {
   const sign = decimal < 0 ? -1 : 1
   const abs = Math.abs(decimal)
   const degrees = Math.floor(abs)
@@ -158,11 +161,7 @@ export function toDMS(
 /**
  * Convert degrees, minutes, seconds to decimal degrees.
  */
-export function fromDMS(
-  degrees: number,
-  minutes: number,
-  seconds: number
-): number {
+export function fromDMS(degrees: number, minutes: number, seconds: number): number {
   const sign = degrees < 0 ? -1 : 1
   return sign * (Math.abs(degrees) + minutes / 60 + seconds / 3600)
 }
@@ -170,9 +169,7 @@ export function fromDMS(
 /**
  * Convert decimal hours to hours, minutes, seconds.
  */
-export function toHMS(
-  decimal: number
-): { hours: number; minutes: number; seconds: number } {
+export function toHMS(decimal: number): { hours: number; minutes: number; seconds: number } {
   const abs = Math.abs(decimal)
   const hours = Math.floor(abs)
   const minFloat = (abs - hours) * 60
@@ -215,7 +212,7 @@ export function bisectionSolve(
   a: number,
   b: number,
   tolerance: number = PARAN_BISECTION_TOL,
-  maxIterations: number = PARAN_MAX_ITERATIONS
+  maxIterations: number = PARAN_MAX_ITERATIONS,
 ): BisectionResult {
   let fa = f(a)
   let fb = f(b)
@@ -273,7 +270,7 @@ export function newtonRaphson(
   x0: number,
   tolerance: number = PARAN_BISECTION_TOL,
   maxIterations: number = PARAN_MAX_ITERATIONS,
-  h: number = 0.0001
+  h: number = 0.0001,
 ): BisectionResult {
   let x = x0
   let iterations = 0
@@ -335,12 +332,7 @@ export function clamp(value: number, min: number, max: number): number {
  * Three-point Lagrange interpolation.
  * Given values at x-h, x, x+h, interpolate for any x.
  */
-export function lagrangeInterp3(
-  yMinus: number,
-  y0: number,
-  yPlus: number,
-  t: number
-): number {
+export function lagrangeInterp3(yMinus: number, y0: number, yPlus: number, t: number): number {
   // t is the fractional position from -1 to 1
   // Lagrange basis polynomials for 3 points at -1, 0, 1
   const L0 = (t * (t - 1)) / 2
@@ -394,10 +386,6 @@ export function angularDifference(angle1: number, angle2: number): number {
 /**
  * Check if an angle is within an orb of a target angle.
  */
-export function isWithinOrb(
-  angle: number,
-  target: number,
-  orb: number
-): boolean {
+export function isWithinOrb(angle: number, target: number, orb: number): boolean {
   return angularDistance(angle, target) <= orb
 }

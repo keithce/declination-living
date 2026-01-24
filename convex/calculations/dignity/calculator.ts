@@ -12,19 +12,13 @@
  * - Peregrine: -5 (no positive dignities)
  */
 
-import type { PlanetId, ZodiacSign, DignityScore, SignPosition } from "../core/types"
-import { ZODIAC_SIGNS, PLANET_IDS } from "../core/types"
-import { DIGNITY_POINTS } from "../core/constants"
-import {
-  isInDomicile,
-  isInExaltation,
-  isInDetriment,
-  isInFall,
-  isTriplicityRuler,
-  getDignities,
-} from "./tables"
-import { isInOwnTerms, type TermSystem } from "./terms"
-import { isInOwnFace } from "./decans"
+import { PLANET_IDS, ZODIAC_SIGNS } from '../core/types'
+import { DIGNITY_POINTS } from '../core/constants'
+import { isInDetriment, isInDomicile, isInExaltation, isInFall, isTriplicityRuler } from './tables'
+import { isInOwnTerms } from './terms'
+import { isInOwnFace } from './decans'
+import type { TermSystem } from './terms'
+import type { DignityScore, PlanetId, SignPosition } from '../core/types'
 
 // =============================================================================
 // Position Conversion
@@ -77,7 +71,7 @@ export function calculateDignity(
   planet: PlanetId,
   longitude: number,
   isDay: boolean = true,
-  termSystem: TermSystem = "egyptian"
+  termSystem: TermSystem = 'egyptian',
 ): DignityScore {
   const position = longitudeToSignPosition(longitude)
   const { sign, degree } = position
@@ -92,7 +86,7 @@ export function calculateDignity(
   let fall = 0
   let peregrine = 0
 
-  const breakdown: string[] = []
+  const breakdown: Array<string> = []
 
   // Check each dignity
   if (isInDomicile(planet, sign)) {
@@ -140,8 +134,7 @@ export function calculateDignity(
     breakdown.push(`Peregrine (${peregrine})`)
   }
 
-  const total =
-    domicile + exaltation + triplicity + terms + face + detriment + fall + peregrine
+  const total = domicile + exaltation + triplicity + terms + face + detriment + fall + peregrine
 
   return {
     planet,
@@ -169,17 +162,12 @@ export function calculateDignity(
 export function calculateAllDignities(
   positions: Record<PlanetId, number>,
   isDay: boolean = true,
-  termSystem: TermSystem = "egyptian"
+  termSystem: TermSystem = 'egyptian',
 ): Record<PlanetId, DignityScore> {
   const result: Partial<Record<PlanetId, DignityScore>> = {}
 
   for (const planet of PLANET_IDS) {
-    result[planet] = calculateDignity(
-      planet,
-      positions[planet],
-      isDay,
-      termSystem
-    )
+    result[planet] = calculateDignity(planet, positions[planet], isDay, termSystem)
   }
 
   return result as Record<PlanetId, DignityScore>
@@ -193,7 +181,7 @@ export function calculateAllDignities(
  * Get planets sorted by dignity score (best to worst).
  */
 export function rankPlanetsByDignity(
-  dignities: Record<PlanetId, DignityScore>
+  dignities: Record<PlanetId, DignityScore>,
 ): Array<{ planet: PlanetId; score: DignityScore }> {
   return PLANET_IDS.map((planet) => ({
     planet,
@@ -204,18 +192,14 @@ export function rankPlanetsByDignity(
 /**
  * Get the strongest planets (total > 0).
  */
-export function getStrongPlanets(
-  dignities: Record<PlanetId, DignityScore>
-): PlanetId[] {
+export function getStrongPlanets(dignities: Record<PlanetId, DignityScore>): Array<PlanetId> {
   return PLANET_IDS.filter((p) => dignities[p].total > 0)
 }
 
 /**
  * Get the weakest planets (total < 0).
  */
-export function getWeakPlanets(
-  dignities: Record<PlanetId, DignityScore>
-): PlanetId[] {
+export function getWeakPlanets(dignities: Record<PlanetId, DignityScore>): Array<PlanetId> {
   return PLANET_IDS.filter((p) => dignities[p].total < 0)
 }
 
@@ -223,22 +207,18 @@ export function getWeakPlanets(
  * Get planets that are essentially dignified (domicile or exaltation).
  */
 export function getEssentiallyDignified(
-  dignities: Record<PlanetId, DignityScore>
-): PlanetId[] {
-  return PLANET_IDS.filter(
-    (p) => dignities[p].domicile > 0 || dignities[p].exaltation > 0
-  )
+  dignities: Record<PlanetId, DignityScore>,
+): Array<PlanetId> {
+  return PLANET_IDS.filter((p) => dignities[p].domicile > 0 || dignities[p].exaltation > 0)
 }
 
 /**
  * Get planets that are essentially debilitated (detriment or fall).
  */
 export function getEssentiallyDebilitated(
-  dignities: Record<PlanetId, DignityScore>
-): PlanetId[] {
-  return PLANET_IDS.filter(
-    (p) => dignities[p].detriment < 0 || dignities[p].fall < 0
-  )
+  dignities: Record<PlanetId, DignityScore>,
+): Array<PlanetId> {
+  return PLANET_IDS.filter((p) => dignities[p].detriment < 0 || dignities[p].fall < 0)
 }
 
 // =============================================================================
@@ -252,15 +232,15 @@ export function getEssentiallyDebilitated(
  * @returns Character like "R" (ruler), "E" (exalted), "d" (detriment), etc.
  */
 export function getDignityIndicator(score: DignityScore): string {
-  if (score.domicile > 0) return "R" // Ruler
-  if (score.exaltation > 0) return "E" // Exalted
-  if (score.triplicity > 0) return "T" // Triplicity
-  if (score.terms > 0) return "t" // Terms (lowercase)
-  if (score.face > 0) return "F" // Face
-  if (score.detriment < 0) return "d" // Detriment
-  if (score.fall < 0) return "f" // Fall
-  if (score.peregrine < 0) return "p" // Peregrine
-  return "-" // No significant dignity
+  if (score.domicile > 0) return 'R' // Ruler
+  if (score.exaltation > 0) return 'E' // Exalted
+  if (score.triplicity > 0) return 'T' // Triplicity
+  if (score.terms > 0) return 't' // Terms (lowercase)
+  if (score.face > 0) return 'F' // Face
+  if (score.detriment < 0) return 'd' // Detriment
+  if (score.fall < 0) return 'f' // Fall
+  if (score.peregrine < 0) return 'p' // Peregrine
+  return '-' // No significant dignity
 }
 
 /**
@@ -270,13 +250,13 @@ export function getDignityIndicator(score: DignityScore): string {
  * @returns Color string for UI
  */
 export function getDignityColor(score: DignityScore): string {
-  if (score.total >= 5) return "#4CAF50" // Strong green
-  if (score.total >= 3) return "#8BC34A" // Light green
-  if (score.total >= 1) return "#CDDC39" // Yellow-green
-  if (score.total === 0) return "#9E9E9E" // Gray
-  if (score.total >= -2) return "#FFC107" // Amber
-  if (score.total >= -4) return "#FF9800" // Orange
-  return "#F44336" // Red
+  if (score.total >= 5) return '#4CAF50' // Strong green
+  if (score.total >= 3) return '#8BC34A' // Light green
+  if (score.total >= 1) return '#CDDC39' // Yellow-green
+  if (score.total === 0) return '#9E9E9E' // Gray
+  if (score.total >= -2) return '#FFC107' // Amber
+  if (score.total >= -4) return '#FF9800' // Orange
+  return '#F44336' // Red
 }
 
 /**
@@ -286,7 +266,7 @@ export function getDignityColor(score: DignityScore): string {
  * @returns String like "+5 (R)" or "-4 (f)"
  */
 export function formatDignityScore(score: DignityScore): string {
-  const sign = score.total >= 0 ? "+" : ""
+  const sign = score.total >= 0 ? '+' : ''
   const indicator = getDignityIndicator(score)
   return `${sign}${score.total} (${indicator})`
 }

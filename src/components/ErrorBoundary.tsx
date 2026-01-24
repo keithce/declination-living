@@ -1,6 +1,7 @@
-import { Component, type ReactNode } from 'react'
+import { Component } from 'react'
 import { Link } from '@tanstack/react-router'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 interface Props {
   children: ReactNode
@@ -74,22 +75,14 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 // Functional wrapper for use with Suspense
-export function ErrorFallback({
-  error,
-  resetError,
-}: {
-  error: Error
-  resetError: () => void
-}) {
+export function ErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
   return (
     <div className="min-h-[400px] flex items-center justify-center p-6">
       <div className="max-w-md text-center">
         <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
           <AlertTriangle className="w-8 h-8 text-red-400" />
         </div>
-        <h2 className="font-display text-xl font-semibold text-white mb-2">
-          Something went wrong
-        </h2>
+        <h2 className="font-display text-xl font-semibold text-white mb-2">Something went wrong</h2>
         <p className="text-slate-400 mb-6">{error.message}</p>
         <div className="flex items-center justify-center gap-4">
           <button

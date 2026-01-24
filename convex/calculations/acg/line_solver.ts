@@ -11,31 +11,18 @@
  * ASC/DSC lines are curves that depend on both latitude and declination.
  */
 
+import { PLANET_IDS } from '../core/types'
+import { ACG_LATITUDE_STEP, ACG_MAX_LATITUDE } from '../core/constants'
+import { getGMST, longitudeForIC, longitudeForMC } from '../coordinates/hour_angle'
+import { calculateSDA, getRiseSetLatitudeRange } from '../coordinates/sda'
+import { normalizeDegreesSymmetric } from '../core/math'
 import type {
-  PlanetId,
   ACGLine,
   ACGLineType,
-  GeoLocation,
   EquatorialCoordinates,
-} from "../core/types"
-import { PLANET_IDS } from "../core/types"
-import {
-  ACG_LONGITUDE_STEP,
-  ACG_LATITUDE_STEP,
-  ACG_MAX_LATITUDE,
-} from "../core/constants"
-import {
-  longitudeForMC,
-  longitudeForIC,
-  getGMST,
-} from "../coordinates/hour_angle"
-import { calculateSDA, getRiseSetLatitudeRange } from "../coordinates/sda"
-import {
-  normalizeDegrees,
-  normalizeDegreesSymmetric,
-  tanDeg,
-  acosDeg,
-} from "../core/math"
+  GeoLocation,
+  PlanetId,
+} from '../core/types'
 
 // =============================================================================
 // MC/IC Line Calculation (Vertical Lines)
@@ -52,15 +39,11 @@ import {
  * @param planet - Planet ID
  * @returns ACGLine with points from -90 to +90 latitude
  */
-export function calculateMCLine(
-  jd: number,
-  planetRA: number,
-  planet: PlanetId
-): ACGLine {
+export function calculateMCLine(jd: number, planetRA: number, planet: PlanetId): ACGLine {
   const mcLongitude = longitudeForMC(jd, planetRA)
 
   // MC line is vertical - same longitude for all latitudes
-  const points: GeoLocation[] = []
+  const points: Array<GeoLocation> = []
 
   for (let lat = -ACG_MAX_LATITUDE; lat <= ACG_MAX_LATITUDE; lat += ACG_LATITUDE_STEP) {
     points.push({ latitude: lat, longitude: mcLongitude })
@@ -68,7 +51,7 @@ export function calculateMCLine(
 
   return {
     planet,
-    lineType: "MC",
+    lineType: 'MC',
     points,
     isCircumpolar: false, // MC line always exists
   }
@@ -85,14 +68,10 @@ export function calculateMCLine(
  * @param planet - Planet ID
  * @returns ACGLine with points from -90 to +90 latitude
  */
-export function calculateICLine(
-  jd: number,
-  planetRA: number,
-  planet: PlanetId
-): ACGLine {
+export function calculateICLine(jd: number, planetRA: number, planet: PlanetId): ACGLine {
   const icLongitude = longitudeForIC(jd, planetRA)
 
-  const points: GeoLocation[] = []
+  const points: Array<GeoLocation> = []
 
   for (let lat = -ACG_MAX_LATITUDE; lat <= ACG_MAX_LATITUDE; lat += ACG_LATITUDE_STEP) {
     points.push({ latitude: lat, longitude: icLongitude })
@@ -100,7 +79,7 @@ export function calculateICLine(
 
   return {
     planet,
-    lineType: "IC",
+    lineType: 'IC',
     points,
     isCircumpolar: false,
   }
@@ -127,7 +106,7 @@ function longitudeForRising(
   jd: number,
   planetRA: number,
   planetDec: number,
-  latitude: number
+  latitude: number,
 ): number | null {
   const sda = calculateSDA(latitude, planetDec)
 
@@ -161,7 +140,7 @@ function longitudeForSetting(
   jd: number,
   planetRA: number,
   planetDec: number,
-  latitude: number
+  latitude: number,
 ): number | null {
   const sda = calculateSDA(latitude, planetDec)
 
@@ -191,9 +170,9 @@ export function calculateASCLine(
   jd: number,
   planetRA: number,
   planetDec: number,
-  planet: PlanetId
+  planet: PlanetId,
 ): ACGLine {
-  const points: GeoLocation[] = []
+  const points: Array<GeoLocation> = []
   const range = getRiseSetLatitudeRange(planetDec)
 
   // Sample latitudes within the valid range
@@ -213,7 +192,7 @@ export function calculateASCLine(
 
   return {
     planet,
-    lineType: "ASC",
+    lineType: 'ASC',
     points,
     isCircumpolar,
   }
@@ -234,9 +213,9 @@ export function calculateDSCLine(
   jd: number,
   planetRA: number,
   planetDec: number,
-  planet: PlanetId
+  planet: PlanetId,
 ): ACGLine {
-  const points: GeoLocation[] = []
+  const points: Array<GeoLocation> = []
   const range = getRiseSetLatitudeRange(planetDec)
 
   const minLat = Math.max(-ACG_MAX_LATITUDE, range.minLatitude + 0.5)
@@ -254,7 +233,7 @@ export function calculateDSCLine(
 
   return {
     planet,
-    lineType: "DSC",
+    lineType: 'DSC',
     points,
     isCircumpolar,
   }
@@ -277,8 +256,8 @@ export function calculatePlanetACGLines(
   jd: number,
   planetRA: number,
   planetDec: number,
-  planet: PlanetId
-): ACGLine[] {
+  planet: PlanetId,
+): Array<ACGLine> {
   return [
     calculateMCLine(jd, planetRA, planet),
     calculateICLine(jd, planetRA, planet),
@@ -296,9 +275,9 @@ export function calculatePlanetACGLines(
  */
 export function calculateAllACGLines(
   jd: number,
-  positions: Record<PlanetId, EquatorialCoordinates>
-): ACGLine[] {
-  const lines: ACGLine[] = []
+  positions: Record<PlanetId, EquatorialCoordinates>,
+): Array<ACGLine> {
+  const lines: Array<ACGLine> = []
 
   for (const planet of PLANET_IDS) {
     const pos = positions[planet]
@@ -322,8 +301,8 @@ export function calculateAllACGLines(
  */
 export function findACGLinesNearLocation(
   location: GeoLocation,
-  lines: ACGLine[],
-  orb: number = 2
+  lines: Array<ACGLine>,
+  orb: number = 2,
 ): Array<{ line: ACGLine; minDistance: number }> {
   const results: Array<{ line: ACGLine; minDistance: number }> = []
 
@@ -333,9 +312,7 @@ export function findACGLinesNearLocation(
     for (const point of line.points) {
       // Simple distance calculation (not great circle, but good enough for small distances)
       const latDiff = Math.abs(point.latitude - location.latitude)
-      const lonDiff = Math.abs(
-        normalizeDegreesSymmetric(point.longitude - location.longitude)
-      )
+      const lonDiff = Math.abs(normalizeDegreesSymmetric(point.longitude - location.longitude))
 
       // Approximate distance (degrees)
       const distance = Math.sqrt(latDiff * latDiff + lonDiff * lonDiff)
@@ -363,10 +340,7 @@ export function findACGLinesNearLocation(
  * @param lineType - Type to filter by
  * @returns Filtered lines
  */
-export function filterACGLinesByType(
-  lines: ACGLine[],
-  lineType: ACGLineType
-): ACGLine[] {
+export function filterACGLinesByType(lines: Array<ACGLine>, lineType: ACGLineType): Array<ACGLine> {
   return lines.filter((line) => line.lineType === lineType)
 }
 
@@ -377,10 +351,7 @@ export function filterACGLinesByType(
  * @param planet - Planet to filter by
  * @returns Filtered lines
  */
-export function filterACGLinesByPlanet(
-  lines: ACGLine[],
-  planet: PlanetId
-): ACGLine[] {
+export function filterACGLinesByPlanet(lines: Array<ACGLine>, planet: PlanetId): Array<ACGLine> {
   return lines.filter((line) => line.planet === planet)
 }
 
@@ -400,38 +371,33 @@ export function filterACGLinesByPlanet(
 export function findACGLineIntersections(
   line1: ACGLine,
   line2: ACGLine,
-  tolerance: number = 1
-): GeoLocation[] {
-  const intersections: GeoLocation[] = []
+  tolerance: number = 1,
+): Array<GeoLocation> {
+  const intersections: Array<GeoLocation> = []
 
   // Simple O(n*m) search - could be optimized with spatial indexing
   for (const p1 of line1.points) {
     for (const p2 of line2.points) {
       const latDiff = Math.abs(p1.latitude - p2.latitude)
-      const lonDiff = Math.abs(
-        normalizeDegreesSymmetric(p1.longitude - p2.longitude)
-      )
+      const lonDiff = Math.abs(normalizeDegreesSymmetric(p1.longitude - p2.longitude))
 
       if (latDiff < tolerance && lonDiff < tolerance) {
         // Found an intersection - average the positions
         intersections.push({
           latitude: (p1.latitude + p2.latitude) / 2,
-          longitude: normalizeDegreesSymmetric(
-            (p1.longitude + p2.longitude) / 2
-          ),
+          longitude: normalizeDegreesSymmetric((p1.longitude + p2.longitude) / 2),
         })
       }
     }
   }
 
   // Remove duplicate intersections
-  const unique: GeoLocation[] = []
+  const unique: Array<GeoLocation> = []
   for (const int of intersections) {
     const isDupe = unique.some(
       (u) =>
         Math.abs(u.latitude - int.latitude) < tolerance &&
-        Math.abs(normalizeDegreesSymmetric(u.longitude - int.longitude)) <
-          tolerance
+        Math.abs(normalizeDegreesSymmetric(u.longitude - int.longitude)) < tolerance,
     )
     if (!isDupe) {
       unique.push(int)
@@ -450,16 +416,16 @@ export function findACGLineIntersections(
  */
 export function getACGLineName(line: ACGLine): string {
   const planetNames: Record<PlanetId, string> = {
-    sun: "Sun",
-    moon: "Moon",
-    mercury: "Mercury",
-    venus: "Venus",
-    mars: "Mars",
-    jupiter: "Jupiter",
-    saturn: "Saturn",
-    uranus: "Uranus",
-    neptune: "Neptune",
-    pluto: "Pluto",
+    sun: 'Sun',
+    moon: 'Moon',
+    mercury: 'Mercury',
+    venus: 'Venus',
+    mars: 'Mars',
+    jupiter: 'Jupiter',
+    saturn: 'Saturn',
+    uranus: 'Uranus',
+    neptune: 'Neptune',
+    pluto: 'Pluto',
   }
 
   return `${planetNames[line.planet]} ${line.lineType}`
@@ -470,5 +436,5 @@ export function getACGLineName(line: ACGLine): string {
  * Convention: MC/IC are dashed, ASC/DSC are solid.
  */
 export function isACGLineDashed(lineType: ACGLineType): boolean {
-  return lineType === "MC" || lineType === "IC"
+  return lineType === 'MC' || lineType === 'IC'
 }

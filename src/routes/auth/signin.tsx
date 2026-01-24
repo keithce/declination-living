@@ -21,12 +21,8 @@ function SignInPage() {
     <div className="min-h-screen bg-[#050714] flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-semibold text-white mb-2">
-            Sign In
-          </h1>
-          <p className="text-slate-400">
-            Save your charts and access them anywhere
-          </p>
+          <h1 className="font-display text-3xl font-semibold text-white mb-2">Sign In</h1>
+          <p className="text-slate-400">Save your charts and access them anywhere</p>
         </div>
 
         <div className="space-y-4">

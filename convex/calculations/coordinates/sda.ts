@@ -8,9 +8,9 @@
  * - ASC/DSC line calculations for ACG
  */
 
-import type { SemiDiurnalArc } from "../core/types"
-import { sinDeg, cosDeg, tanDeg, acosDeg } from "../core/math"
-import { EPSILON } from "../core/constants"
+import { acosDeg, cosDeg, sinDeg, tanDeg } from '../core/math'
+import { EPSILON } from '../core/constants'
+import type { SemiDiurnalArc } from '../core/types'
 
 // =============================================================================
 // Core SDA Calculation
@@ -36,10 +36,7 @@ import { EPSILON } from "../core/constants"
  * @param declination - Object's declination in degrees (-90 to +90)
  * @returns SemiDiurnalArc with SDA, circumpolar flags, and rise/set hour angles
  */
-export function calculateSDA(
-  latitude: number,
-  declination: number
-): SemiDiurnalArc {
+export function calculateSDA(latitude: number, declination: number): SemiDiurnalArc {
   // Handle pole cases
   if (Math.abs(latitude) > 89.9) {
     // At the poles, objects with same sign declination never set
@@ -187,10 +184,7 @@ export function neverRises(latitude: number, declination: number): boolean {
  * @param declination - Object's declination in degrees
  * @returns Latitude where object has this hour angle at rise/set, or null if impossible
  */
-export function latitudeForHourAngle(
-  hourAngle: number,
-  declination: number
-): number | null {
+export function latitudeForHourAngle(hourAngle: number, declination: number): number | null {
   // Handle zero declination (on celestial equator)
   if (Math.abs(declination) < EPSILON) {
     // Object on equator rises/sets at H = ±90° everywhere except poles
@@ -230,16 +224,16 @@ export function latitudeForHourAngle(
  */
 export function getDiurnalArcHours(
   latitude: number,
-  declination: number
-): number | "always_up" | "always_down" {
+  declination: number,
+): number | 'always_up' | 'always_down' {
   const sda = calculateSDA(latitude, declination)
 
   if (sda.neverSets) {
-    return "always_up"
+    return 'always_up'
   }
 
   if (sda.neverRises) {
-    return "always_down"
+    return 'always_down'
   }
 
   // Convert SDA (degrees) to hours (15° per hour)
@@ -256,16 +250,16 @@ export function getDiurnalArcHours(
  */
 export function getNocturnalArcHours(
   latitude: number,
-  declination: number
-): number | "always_up" | "always_down" {
+  declination: number,
+): number | 'always_up' | 'always_down' {
   const diurnal = getDiurnalArcHours(latitude, declination)
 
-  if (diurnal === "always_up") {
-    return "always_down"
+  if (diurnal === 'always_up') {
+    return 'always_down'
   }
 
-  if (diurnal === "always_down") {
-    return "always_up"
+  if (diurnal === 'always_down') {
+    return 'always_up'
   }
 
   return 24 - diurnal
@@ -324,7 +318,7 @@ export function getRiseSetLatitudeRange(declination: number): {
 export function hourAngleAtAltitude(
   latitude: number,
   declination: number,
-  altitude: number = 0
+  altitude: number = 0,
 ): number | null {
   const sinAlt = sinDeg(altitude)
   const sinLat = sinDeg(latitude)

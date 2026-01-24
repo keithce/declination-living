@@ -5,7 +5,7 @@
  * Includes domicile (rulership), exaltation, detriment, fall, and triplicity.
  */
 
-import type { PlanetId, ZodiacSign } from "../core/types"
+import type { PlanetId, ZodiacSign } from '../core/types'
 
 // =============================================================================
 // Domicile (Rulership)
@@ -16,26 +16,26 @@ import type { PlanetId, ZodiacSign } from "../core/types"
  * The planet is "at home" in these signs.
  * Points: +5
  */
-export const DOMICILE: Record<ZodiacSign, PlanetId[]> = {
-  aries: ["mars"],
-  taurus: ["venus"],
-  gemini: ["mercury"],
-  cancer: ["moon"],
-  leo: ["sun"],
-  virgo: ["mercury"],
-  libra: ["venus"],
-  scorpio: ["mars", "pluto"], // Traditional: Mars, Modern: Pluto
-  sagittarius: ["jupiter"],
-  capricorn: ["saturn"],
-  aquarius: ["saturn", "uranus"], // Traditional: Saturn, Modern: Uranus
-  pisces: ["jupiter", "neptune"], // Traditional: Jupiter, Modern: Neptune
+export const DOMICILE: Record<ZodiacSign, Array<PlanetId>> = {
+  aries: ['mars'],
+  taurus: ['venus'],
+  gemini: ['mercury'],
+  cancer: ['moon'],
+  leo: ['sun'],
+  virgo: ['mercury'],
+  libra: ['venus'],
+  scorpio: ['mars', 'pluto'], // Traditional: Mars, Modern: Pluto
+  sagittarius: ['jupiter'],
+  capricorn: ['saturn'],
+  aquarius: ['saturn', 'uranus'], // Traditional: Saturn, Modern: Uranus
+  pisces: ['jupiter', 'neptune'], // Traditional: Jupiter, Modern: Neptune
 }
 
 /**
  * Get the sign(s) a planet rules.
  */
-export function getRuledSigns(planet: PlanetId): ZodiacSign[] {
-  const signs: ZodiacSign[] = []
+export function getRuledSigns(planet: PlanetId): Array<ZodiacSign> {
+  const signs: Array<ZodiacSign> = []
   for (const [sign, rulers] of Object.entries(DOMICILE)) {
     if (rulers.includes(planet)) {
       signs.push(sign as ZodiacSign)
@@ -60,20 +60,18 @@ export function isInDomicile(planet: PlanetId, sign: ZodiacSign): boolean {
  * Also includes the exact degree of exaltation.
  * Points: +4
  */
-export const EXALTATION: Partial<
-  Record<PlanetId, { sign: ZodiacSign; exactDegree: number }>
-> = {
-  sun: { sign: "aries", exactDegree: 19 },
-  moon: { sign: "taurus", exactDegree: 3 },
-  mercury: { sign: "virgo", exactDegree: 15 },
-  venus: { sign: "pisces", exactDegree: 27 },
-  mars: { sign: "capricorn", exactDegree: 28 },
-  jupiter: { sign: "cancer", exactDegree: 15 },
-  saturn: { sign: "libra", exactDegree: 21 },
+export const EXALTATION: Partial<Record<PlanetId, { sign: ZodiacSign; exactDegree: number }>> = {
+  sun: { sign: 'aries', exactDegree: 19 },
+  moon: { sign: 'taurus', exactDegree: 3 },
+  mercury: { sign: 'virgo', exactDegree: 15 },
+  venus: { sign: 'pisces', exactDegree: 27 },
+  mars: { sign: 'capricorn', exactDegree: 28 },
+  jupiter: { sign: 'cancer', exactDegree: 15 },
+  saturn: { sign: 'libra', exactDegree: 21 },
   // Outer planets - various traditions
-  uranus: { sign: "scorpio", exactDegree: 15 }, // Some traditions
-  neptune: { sign: "cancer", exactDegree: 15 }, // Some traditions
-  pluto: { sign: "leo", exactDegree: 15 }, // Some traditions
+  uranus: { sign: 'scorpio', exactDegree: 15 }, // Some traditions
+  neptune: { sign: 'cancer', exactDegree: 15 }, // Some traditions
+  pluto: { sign: 'leo', exactDegree: 15 }, // Some traditions
 }
 
 /**
@@ -99,17 +97,17 @@ export function isInExaltation(planet: PlanetId, sign: ZodiacSign): boolean {
  * The planet is uncomfortable/weakened here.
  * Points: -5
  */
-export const DETRIMENT: Partial<Record<PlanetId, ZodiacSign[]>> = {
-  sun: ["aquarius"],
-  moon: ["capricorn"],
-  mercury: ["sagittarius", "pisces"],
-  venus: ["aries", "scorpio"],
-  mars: ["taurus", "libra"],
-  jupiter: ["gemini", "virgo"],
-  saturn: ["cancer", "leo"],
-  uranus: ["leo"],
-  neptune: ["virgo"],
-  pluto: ["taurus"],
+export const DETRIMENT: Partial<Record<PlanetId, Array<ZodiacSign>>> = {
+  sun: ['aquarius'],
+  moon: ['capricorn'],
+  mercury: ['sagittarius', 'pisces'],
+  venus: ['aries', 'scorpio'],
+  mars: ['taurus', 'libra'],
+  jupiter: ['gemini', 'virgo'],
+  saturn: ['cancer', 'leo'],
+  uranus: ['leo'],
+  neptune: ['virgo'],
+  pluto: ['taurus'],
 }
 
 /**
@@ -129,16 +127,16 @@ export function isInDetriment(planet: PlanetId, sign: ZodiacSign): boolean {
  * Points: -4
  */
 export const FALL: Partial<Record<PlanetId, ZodiacSign>> = {
-  sun: "libra",
-  moon: "scorpio",
-  mercury: "pisces",
-  venus: "virgo",
-  mars: "cancer",
-  jupiter: "capricorn",
-  saturn: "aries",
-  uranus: "taurus", // Some traditions
-  neptune: "capricorn", // Some traditions
-  pluto: "aquarius", // Some traditions
+  sun: 'libra',
+  moon: 'scorpio',
+  mercury: 'pisces',
+  venus: 'virgo',
+  mars: 'cancer',
+  jupiter: 'capricorn',
+  saturn: 'aries',
+  uranus: 'taurus', // Some traditions
+  neptune: 'capricorn', // Some traditions
+  pluto: 'aquarius', // Some traditions
 }
 
 /**
@@ -155,19 +153,19 @@ export function isInFall(planet: PlanetId, sign: ZodiacSign): boolean {
 /**
  * Elements for each sign.
  */
-export const SIGN_ELEMENTS: Record<ZodiacSign, "fire" | "earth" | "air" | "water"> = {
-  aries: "fire",
-  leo: "fire",
-  sagittarius: "fire",
-  taurus: "earth",
-  virgo: "earth",
-  capricorn: "earth",
-  gemini: "air",
-  libra: "air",
-  aquarius: "air",
-  cancer: "water",
-  scorpio: "water",
-  pisces: "water",
+export const SIGN_ELEMENTS: Record<ZodiacSign, 'fire' | 'earth' | 'air' | 'water'> = {
+  aries: 'fire',
+  leo: 'fire',
+  sagittarius: 'fire',
+  taurus: 'earth',
+  virgo: 'earth',
+  capricorn: 'earth',
+  gemini: 'air',
+  libra: 'air',
+  aquarius: 'air',
+  cancer: 'water',
+  scorpio: 'water',
+  pisces: 'water',
 }
 
 /**
@@ -179,13 +177,13 @@ export const SIGN_ELEMENTS: Record<ZodiacSign, "fire" | "earth" | "air" | "water
  * Participating ruler always applies (weaker).
  */
 export const TRIPLICITY_DOROTHEAN: Record<
-  "fire" | "earth" | "air" | "water",
+  'fire' | 'earth' | 'air' | 'water',
   { day: PlanetId; night: PlanetId; participating: PlanetId }
 > = {
-  fire: { day: "sun", night: "jupiter", participating: "saturn" },
-  earth: { day: "venus", night: "moon", participating: "mars" },
-  air: { day: "saturn", night: "mercury", participating: "jupiter" },
-  water: { day: "venus", night: "mars", participating: "moon" },
+  fire: { day: 'sun', night: 'jupiter', participating: 'saturn' },
+  earth: { day: 'venus', night: 'moon', participating: 'mars' },
+  air: { day: 'saturn', night: 'mercury', participating: 'jupiter' },
+  water: { day: 'venus', night: 'mars', participating: 'moon' },
 }
 
 /**
@@ -199,14 +197,14 @@ export const TRIPLICITY_DOROTHEAN: Record<
 export function getTriplicityStatus(
   planet: PlanetId,
   sign: ZodiacSign,
-  isDay: boolean
-): "day" | "night" | "participating" | null {
+  isDay: boolean,
+): 'day' | 'night' | 'participating' | null {
   const element = SIGN_ELEMENTS[sign]
   const triplicity = TRIPLICITY_DOROTHEAN[element]
 
-  if (isDay && triplicity.day === planet) return "day"
-  if (!isDay && triplicity.night === planet) return "night"
-  if (triplicity.participating === planet) return "participating"
+  if (isDay && triplicity.day === planet) return 'day'
+  if (!isDay && triplicity.night === planet) return 'night'
+  if (triplicity.participating === planet) return 'participating'
 
   return null
 }
@@ -214,11 +212,7 @@ export function getTriplicityStatus(
 /**
  * Check if a planet is a triplicity ruler.
  */
-export function isTriplicityRuler(
-  planet: PlanetId,
-  sign: ZodiacSign,
-  isDay: boolean
-): boolean {
+export function isTriplicityRuler(planet: PlanetId, sign: ZodiacSign, isDay: boolean): boolean {
   return getTriplicityStatus(planet, sign, isDay) !== null
 }
 
@@ -232,11 +226,11 @@ export function isTriplicityRuler(
 export function getDignities(
   planet: PlanetId,
   sign: ZodiacSign,
-  isDay: boolean
+  isDay: boolean,
 ): {
   domicile: boolean
   exaltation: boolean
-  triplicity: "day" | "night" | "participating" | null
+  triplicity: 'day' | 'night' | 'participating' | null
   detriment: boolean
   fall: boolean
 } {

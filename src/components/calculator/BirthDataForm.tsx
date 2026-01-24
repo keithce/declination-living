@@ -83,9 +83,7 @@ export function BirthDataForm({ onSubmit, isLoading }: BirthDataFormProps) {
             errors.birthDate ? 'border-red-500/50' : 'border-slate-700'
           }`}
         />
-        {errors.birthDate && (
-          <p className="mt-2 text-sm text-red-400">{errors.birthDate}</p>
-        )}
+        {errors.birthDate && <p className="mt-2 text-sm text-red-400">{errors.birthDate}</p>}
       </div>
 
       {/* Birth Time */}
@@ -102,9 +100,7 @@ export function BirthDataForm({ onSubmit, isLoading }: BirthDataFormProps) {
             errors.birthTime ? 'border-red-500/50' : 'border-slate-700'
           }`}
         />
-        {errors.birthTime && (
-          <p className="mt-2 text-sm text-red-400">{errors.birthTime}</p>
-        )}
+        {errors.birthTime && <p className="mt-2 text-sm text-red-400">{errors.birthTime}</p>}
         <p className="mt-2 text-xs text-slate-500 flex items-start gap-1">
           <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
           Precise birth time ensures accurate Moon position and house placements

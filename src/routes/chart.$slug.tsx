@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
-import { api } from '../../convex/_generated/api'
 import { motion } from 'framer-motion'
-import { Calendar, MapPin, ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
-import { DeclinationTable, type Declinations } from '@/components/calculator/DeclinationTable'
+import { AlertCircle, ArrowLeft, Calendar, Loader2, MapPin } from 'lucide-react'
+import { api } from '../../convex/_generated/api'
+import type { Declinations } from '@/components/calculator/DeclinationTable'
+import { DeclinationTable } from '@/components/calculator/DeclinationTable'
 import { ResultsPanel } from '@/components/calculator/ResultsPanel'
 import { GlobeView } from '@/components/globe'
 
@@ -58,9 +59,7 @@ function SharedChartPage() {
           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
             <AlertCircle className="w-10 h-10 text-red-400" />
           </div>
-          <h1 className="font-display text-2xl font-semibold text-white mb-4">
-            Chart Not Found
-          </h1>
+          <h1 className="font-display text-2xl font-semibold text-white mb-4">Chart Not Found</h1>
           <p className="text-slate-400 mb-8">
             This chart may have been deleted or the link is invalid.
           </p>
@@ -77,9 +76,7 @@ function SharedChartPage() {
   }
 
   // Find dominant planet for accent color
-  const dominantPlanet = Object.entries(chart.weights).reduce((a, b) =>
-    a[1] > b[1] ? a : b
-  )[0]
+  const dominantPlanet = Object.entries(chart.weights).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
 
   // Create mock latitude data for visualization (since we don't store full results)
   const mockLatitudes = Object.entries(chart.declinations)
@@ -124,10 +121,7 @@ function SharedChartPage() {
           className="text-center mb-12"
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            <span
-              className="text-4xl"
-              style={{ color: PLANET_COLORS[dominantPlanet] }}
-            >
+            <span className="text-4xl" style={{ color: PLANET_COLORS[dominantPlanet] }}>
               {PLANET_SYMBOLS[dominantPlanet]}
             </span>
           </div>
@@ -158,9 +152,7 @@ function SharedChartPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <DeclinationTable
-              declinations={chart.declinations as Declinations}
-            />
+            <DeclinationTable declinations={chart.declinations as Declinations} />
           </motion.div>
 
           {/* Globe */}
@@ -190,10 +182,7 @@ function SharedChartPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <ResultsPanel
-              optimalLatitudes={mockLatitudes}
-              latitudeBands={mockBands}
-            />
+            <ResultsPanel optimalLatitudes={mockLatitudes} latitudeBands={mockBands} />
           </motion.div>
 
           {/* Weights used */}
@@ -203,24 +192,15 @@ function SharedChartPage() {
             transition={{ delay: 0.4 }}
             className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-6"
           >
-            <h3 className="font-display text-lg font-semibold text-white mb-4">
-              Planet Weights
-            </h3>
+            <h3 className="font-display text-lg font-semibold text-white mb-4">Planet Weights</h3>
             <div className="grid grid-cols-5 gap-4">
               {Object.entries(chart.weights).map(([planet, weight]) => (
                 <div key={planet} className="text-center">
-                  <span
-                    className="text-2xl block mb-1"
-                    style={{ color: PLANET_COLORS[planet] }}
-                  >
+                  <span className="text-2xl block mb-1" style={{ color: PLANET_COLORS[planet] }}>
                     {PLANET_SYMBOLS[planet]}
                   </span>
-                  <span className="text-xs text-slate-500 capitalize">
-                    {planet}
-                  </span>
-                  <div className="text-sm font-medium text-white">
-                    {(weight as number).toFixed(1)}x
-                  </div>
+                  <span className="text-xs text-slate-500 capitalize">{planet}</span>
+                  <div className="text-sm font-medium text-white">{weight.toFixed(1)}x</div>
                 </div>
               ))}
             </div>
@@ -233,9 +213,7 @@ function SharedChartPage() {
             transition={{ delay: 0.5 }}
             className="text-center py-8"
           >
-            <p className="text-slate-400 mb-4">
-              Want to calculate your own optimal locations?
-            </p>
+            <p className="text-slate-400 mb-4">Want to calculate your own optimal locations?</p>
             <Link
               to="/calculator"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-xl hover:shadow-[0_0_30px_rgba(251,191,36,0.3)] transition-all"
