@@ -1,0 +1,435 @@
+/**
+ * Enhanced Globe Canvas - 3D globe with declination visualization layers.
+ *
+ * Renders the Earth with multiple visualization layers:
+ * - Zenith bands (declination latitudes)
+ * - ACG lines (ASC/DSC/MC/IC)
+ * - Paran intersection points
+ * - Heatmap overlay
+ */
+
+import { useRef, useEffect, useCallback } from "react"
+import * as THREE from "three"
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
+import type { ExtendedGlobeCanvasProps, LayerGroup } from "./layers/types"
+import type { UseGlobeStateReturn } from "./hooks/useGlobeState"
+import {
+  createZenithBandLayer,
+  updateZenithBandVisibility,
+} from "./layers/ZenithBandLayer"
+import {
+  createACGLineLayer,
+  updateACGLineVisibility,
+} from "./layers/ACGLineLayer"
+import {
+  createParanPointLayer,
+  updateParanPointVisibility,
+} from "./layers/ParanPointLayer"
+import { createHeatmapLayer, updateHeatmap } from "./layers/HeatmapLayer"
+import { PLANET_IDS } from "./layers/types"
+
+// =============================================================================
+// Types
+// =============================================================================
+
+interface EnhancedGlobeCanvasProps extends ExtendedGlobeCanvasProps {
+  /** Globe state from useGlobeState hook */
+  globeState: UseGlobeStateReturn
+  /** Optional class name */
+  className?: string
+}
+
+interface SceneRefs {
+  scene: THREE.Scene
+  camera: THREE.PerspectiveCamera
+  renderer: THREE.WebGLRenderer
+  controls: OrbitControls
+  animationId: number
+  layers: {
+    zenithBands?: LayerGroup
+    acgLines?: LayerGroup
+    paranPoints?: LayerGroup
+    heatmap?: LayerGroup
+  }
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Convert lat/lon to 3D position on sphere.
+ */
+function latLonToVector3(
+  lat: number,
+  lon: number,
+  radius: number
+): THREE.Vector3 {
+  const phi = ((90 - lat) * Math.PI) / 180
+  const theta = ((lon + 180) * Math.PI) / 180
+
+  return new THREE.Vector3(
+    -radius * Math.sin(phi) * Math.cos(theta),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.sin(theta)
+  )
+}
+
+/**
+ * Create stars background.
+ */
+function createStars(): THREE.Points {
+  const starsGeometry = new THREE.BufferGeometry()
+  const starsPositions: number[] = []
+
+  for (let i = 0; i < 2000; i++) {
+    const x = (Math.random() - 0.5) * 100
+    const y = (Math.random() - 0.5) * 100
+    const z = (Math.random() - 0.5) * 100
+
+    if (Math.sqrt(x * x + y * y + z * z) > 20) {
+      starsPositions.push(x, y, z)
+    }
+  }
+
+  starsGeometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(starsPositions, 3)
+  )
+
+  const starsMaterial = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.05,
+    transparent: true,
+    opacity: 0.8,
+  })
+
+  return new THREE.Points(starsGeometry, starsMaterial)
+}
+
+// =============================================================================
+// Main Component
+// =============================================================================
+
+export function EnhancedGlobeCanvas({
+  optimalLatitudes,
+  latitudeBands,
+  birthLocation,
+  declinations,
+  acgLines,
+  parans,
+  globeState,
+  className = "",
+}: EnhancedGlobeCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const sceneRef = useRef<SceneRefs | null>(null)
+
+  // ==========================================================================
+  // Scene Setup
+  // ==========================================================================
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const container = containerRef.current
+    const width = container.clientWidth
+    const height = container.clientHeight
+
+    // Scene
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color("#0a0f1f")
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000)
+    camera.position.z = 4
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer.setSize(width, height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    container.appendChild(renderer.domElement)
+
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping = true
+    controls.dampingFactor = 0.05
+    controls.minDistance = 2
+    controls.maxDistance = 8
+    controls.enablePan = false
+
+    // Earth sphere
+    const earthGeometry = new THREE.SphereGeometry(1, 64, 64)
+    const earthMaterial = new THREE.MeshPhongMaterial({
+      color: 0x1e3a5f,
+      emissive: 0x112244,
+      emissiveIntensity: 0.2,
+      shininess: 5,
+    })
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial)
+    scene.add(earth)
+
+    // Wireframe overlay
+    const wireframeGeometry = new THREE.SphereGeometry(1.001, 32, 32)
+    const wireframeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x334455,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.3,
+    })
+    const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
+    scene.add(wireframe)
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+    scene.add(ambientLight)
+
+    const pointLight = new THREE.PointLight(0xffeedd, 1, 100)
+    pointLight.position.set(5, 3, 5)
+    scene.add(pointLight)
+
+    // Stars
+    const stars = createStars()
+    scene.add(stars)
+
+    // Birth location marker
+    if (birthLocation) {
+      const markerGeometry = new THREE.SphereGeometry(0.03, 16, 16)
+      const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff4444 })
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial)
+
+      const pos = latLonToVector3(
+        birthLocation.latitude,
+        birthLocation.longitude,
+        1.02
+      )
+      marker.position.copy(pos)
+      scene.add(marker)
+
+      // Pulsing ring
+      const pulseGeometry = new THREE.RingGeometry(0.03, 0.05, 32)
+      const pulseMaterial = new THREE.MeshBasicMaterial({
+        color: 0xff4444,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.5,
+      })
+      const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial)
+      pulse.position.copy(pos)
+      pulse.lookAt(0, 0, 0)
+      scene.add(pulse)
+    }
+
+    // Store refs
+    sceneRef.current = {
+      scene,
+      camera,
+      renderer,
+      controls,
+      animationId: 0,
+      layers: {},
+    }
+
+    // Animation loop
+    let time = 0
+    const animate = () => {
+      const animationId = requestAnimationFrame(animate)
+      if (sceneRef.current) {
+        sceneRef.current.animationId = animationId
+      }
+
+      time += 0.016 // ~60fps
+      controls.update()
+
+      // Update layer animations
+      const layers = sceneRef.current?.layers
+      if (layers) {
+        layers.zenithBands?.update?.(time)
+        layers.paranPoints?.update?.(time)
+        layers.heatmap?.update?.(time)
+      }
+
+      renderer.render(scene, camera)
+    }
+
+    animate()
+
+    // Handle resize
+    const handleResize = () => {
+      const newWidth = container.clientWidth
+      const newHeight = container.clientHeight
+
+      camera.aspect = newWidth / newHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(newWidth, newHeight)
+    }
+
+    window.addEventListener("resize", handleResize)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      if (sceneRef.current) {
+        cancelAnimationFrame(sceneRef.current.animationId)
+
+        // Dispose layers
+        Object.values(sceneRef.current.layers).forEach((layer) => {
+          layer?.dispose()
+        })
+      }
+      renderer.dispose()
+      container.removeChild(renderer.domElement)
+    }
+  }, [birthLocation])
+
+  // ==========================================================================
+  // Layer Management
+  // ==========================================================================
+
+  // Update zenith bands when data or visibility changes
+  useEffect(() => {
+    if (!sceneRef.current || !declinations) return
+
+    const { scene, layers } = sceneRef.current
+
+    // Remove existing layer
+    if (layers.zenithBands) {
+      scene.remove(layers.zenithBands.group)
+      layers.zenithBands.dispose()
+    }
+
+    // Create zenith line data from declinations
+    const zenithLines = PLANET_IDS.map((planet) => ({
+      planet,
+      latitude: declinations[planet] ?? 0,
+      orbMin: (declinations[planet] ?? 0) - 1,
+      orbMax: (declinations[planet] ?? 0) + 1,
+    }))
+
+    // Create new layer
+    const layer = createZenithBandLayer(zenithLines, globeState.planets)
+    layer.group.visible = globeState.layers.zenithBands
+    scene.add(layer.group)
+    layers.zenithBands = layer
+  }, [declinations, globeState.planets, globeState.layers.zenithBands])
+
+  // Update ACG lines when data or visibility changes
+  useEffect(() => {
+    if (!sceneRef.current || !acgLines) return
+
+    const { scene, layers } = sceneRef.current
+
+    // Remove existing layer
+    if (layers.acgLines) {
+      scene.remove(layers.acgLines.group)
+      layers.acgLines.dispose()
+    }
+
+    // Create new layer
+    const layer = createACGLineLayer(
+      acgLines,
+      globeState.planets,
+      globeState.acgLineTypes
+    )
+    layer.group.visible = globeState.layers.acgLines
+    scene.add(layer.group)
+    layers.acgLines = layer
+  }, [
+    acgLines,
+    globeState.planets,
+    globeState.acgLineTypes,
+    globeState.layers.acgLines,
+  ])
+
+  // Update paran points when data or visibility changes
+  useEffect(() => {
+    if (!sceneRef.current || !parans) return
+
+    const { scene, layers } = sceneRef.current
+
+    // Remove existing layer
+    if (layers.paranPoints) {
+      scene.remove(layers.paranPoints.group)
+      layers.paranPoints.dispose()
+    }
+
+    // Create new layer
+    const layer = createParanPointLayer(parans, globeState.planets)
+    layer.group.visible = globeState.layers.paranPoints
+    scene.add(layer.group)
+    layers.paranPoints = layer
+  }, [parans, globeState.planets, globeState.layers.paranPoints])
+
+  // Update heatmap when data or settings change
+  useEffect(() => {
+    if (!sceneRef.current || !declinations) return
+
+    const { scene, layers } = sceneRef.current
+
+    // Remove existing layer
+    if (layers.heatmap) {
+      scene.remove(layers.heatmap.group)
+      layers.heatmap.dispose()
+    }
+
+    if (!globeState.layers.heatmap) return
+
+    // Create weights from planet visibility
+    const weights = PLANET_IDS.reduce(
+      (acc, planet) => ({
+        ...acc,
+        [planet]: globeState.planets[planet] ? 5 : 0,
+      }),
+      {} as Record<string, number>
+    )
+
+    // Create new heatmap layer
+    const layer = createHeatmapLayer({
+      declinations,
+      weights,
+      intensity: globeState.heatmapIntensity,
+      sigma: globeState.heatmapSpread,
+    })
+    scene.add(layer.group)
+    layers.heatmap = layer
+  }, [
+    declinations,
+    globeState.planets,
+    globeState.layers.heatmap,
+    globeState.heatmapIntensity,
+    globeState.heatmapSpread,
+  ])
+
+  // Update visibility when layer toggles change
+  useEffect(() => {
+    if (!sceneRef.current) return
+
+    const { layers } = sceneRef.current
+
+    if (layers.zenithBands) {
+      layers.zenithBands.group.visible = globeState.layers.zenithBands
+      updateZenithBandVisibility(layers.zenithBands.group, globeState.planets)
+    }
+
+    if (layers.acgLines) {
+      layers.acgLines.group.visible = globeState.layers.acgLines
+      updateACGLineVisibility(
+        layers.acgLines.group,
+        globeState.planets,
+        globeState.acgLineTypes
+      )
+    }
+
+    if (layers.paranPoints) {
+      layers.paranPoints.group.visible = globeState.layers.paranPoints
+      updateParanPointVisibility(layers.paranPoints.group, globeState.planets)
+    }
+
+    if (layers.heatmap) {
+      layers.heatmap.group.visible = globeState.layers.heatmap
+    }
+  }, [globeState.layers, globeState.planets, globeState.acgLineTypes])
+
+  return <div ref={containerRef} className={`w-full h-full ${className}`} />
+}
+
+export default EnhancedGlobeCanvas
