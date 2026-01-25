@@ -14,6 +14,7 @@ import {
   formatLongitude,
 } from '../shared/constants'
 import type { ACGLine, PlanetId } from '@/../convex/calculations/core/types'
+import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -22,6 +23,8 @@ import type { ACGLine, PlanetId } from '@/../convex/calculations/core/types'
 export interface ACGLinesTabProps {
   /** ACG lines from calculations */
   acgLines: Array<ACGLine>
+  /** Results state for synchronization */
+  resultsState?: ResultsState
 }
 
 type LineTypeFilter = 'all' | 'MC' | 'IC' | 'ASC' | 'DSC'
@@ -30,7 +33,7 @@ type LineTypeFilter = 'all' | 'MC' | 'IC' | 'ASC' | 'DSC'
 // Helper Functions
 // =============================================================================
 
-function groupLinesByPlanet(lines: Array<ACGLine>): Record<PlanetId, Array<ACGLine>> {
+function groupLinesByPlanet(lines: Array<ACGLine>): Partial<Record<PlanetId, Array<ACGLine>>> {
   const grouped: Partial<Record<PlanetId, Array<ACGLine>>> = {}
 
   for (const line of lines) {
@@ -40,7 +43,7 @@ function groupLinesByPlanet(lines: Array<ACGLine>): Record<PlanetId, Array<ACGLi
     grouped[line.planet]!.push(line)
   }
 
-  return grouped as Record<PlanetId, Array<ACGLine>>
+  return grouped
 }
 
 // =============================================================================
@@ -60,14 +63,15 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
 
     const filtered: Partial<Record<PlanetId, Array<ACGLine>>> = {}
     for (const [planet, lines] of Object.entries(groupedLines) as Array<
-      [PlanetId, Array<ACGLine>]
+      [PlanetId, Array<ACGLine> | undefined]
     >) {
+      if (!lines) continue
       const filteredLines = lines.filter((line) => line.lineType === lineTypeFilter)
       if (filteredLines.length > 0) {
         filtered[planet] = filteredLines
       }
     }
-    return filtered as Record<PlanetId, Array<ACGLine>>
+    return filtered
   }, [groupedLines, lineTypeFilter])
 
   // Toggle planet expansion
@@ -106,6 +110,7 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
             {(['all', 'MC', 'IC', 'ASC', 'DSC'] as Array<LineTypeFilter>).map((type) => (
               <button
                 key={type}
+                type="button"
                 onClick={() => setLineTypeFilter(type)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
                   lineTypeFilter === type
@@ -120,12 +125,14 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={expandAll}
             className="px-3 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >
             Expand All
           </button>
           <button
+            type="button"
             onClick={collapseAll}
             className="px-3 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >
@@ -149,6 +156,7 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
             >
               {/* Planet Header */}
               <button
+                type="button"
                 onClick={() => togglePlanet(planet)}
                 className="w-full flex items-center justify-between p-4 hover:bg-slate-700/30 transition-colors"
               >

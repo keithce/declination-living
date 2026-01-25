@@ -5,8 +5,15 @@
 import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { Globe, MapPin, Sparkles, TrendingUp } from 'lucide-react'
-import { PLANET_COLORS, PLANET_NAMES, PLANET_SYMBOLS } from '../shared/constants'
+import {
+  PLANET_COLORS,
+  PLANET_NAMES,
+  PLANET_SYMBOLS,
+  formatLatitude,
+  formatLongitude,
+} from '../shared/constants'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
+import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -15,22 +22,10 @@ import type { GridCell } from '@/../convex/calculations/geospatial/grid'
 export interface OverviewTabProps {
   /** Scoring grid data */
   scoringGrid: Array<GridCell>
+  /** Results state for synchronization */
+  resultsState?: ResultsState
   /** Top N locations to display */
   topN?: number
-}
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-function formatLatitude(lat: number): string {
-  const direction = lat >= 0 ? 'N' : 'S'
-  return `${Math.abs(lat).toFixed(1)}° ${direction}`
-}
-
-function formatLongitude(lon: number): string {
-  const direction = lon >= 0 ? 'E' : 'W'
-  return `${Math.abs(lon).toFixed(1)}° ${direction}`
 }
 
 // =============================================================================
@@ -38,11 +33,11 @@ function formatLongitude(lon: number): string {
 // =============================================================================
 
 export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }: OverviewTabProps) {
-  // Calculate statistics
+  // Calculate statistics with empty array handling
   const totalCells = scoringGrid.length
   const scores = scoringGrid.map((c) => c.score)
-  const maxScore = Math.max(...scores)
-  const avgScore = scores.reduce((a, b) => a + b, 0) / totalCells
+  const maxScore = scores.length > 0 ? Math.max(...scores) : 0
+  const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / totalCells : 0
 
   // Get top locations
   const topLocations = [...scoringGrid].sort((a, b) => b.score - a.score).slice(0, topN)

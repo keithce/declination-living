@@ -12,6 +12,7 @@ import { ACGLinesTab } from './tabs/ACGLinesTab'
 import { ZenithTab } from './tabs/ZenithTab'
 import { ScoringTab } from './tabs/ScoringTab'
 import { ParansTab } from './tabs/ParansTab'
+import { useResultsState } from './hooks/useResultsState'
 import type { ACGLine, ParanPoint, ZenithLine } from '@/../convex/calculations/core/types'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
 import type { GlobeState } from '../globe/hooks/useGlobeState'
@@ -53,8 +54,11 @@ export const ResultsTabs = memo(function ResultsTabs({
   zenithLines,
   parans,
   scoringGrid,
-  globeState: _globeState, // TODO: Use for globe-results synchronization in Task #13
+  globeState: _globeState, // Future: Sync with globe visualization
 }: ResultsTabsProps) {
+  // Initialize results state for synchronization
+  const resultsState = useResultsState()
+
   // Calculate summary statistics
   const acgCount = acgLines.length
   const paranCount = parans.length
@@ -100,23 +104,23 @@ export const ResultsTabs = memo(function ResultsTabs({
 
       <div className="mt-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
         <TabsContent value="overview" className="m-0">
-          <OverviewTab scoringGrid={scoringGrid} topN={10} />
+          <OverviewTab scoringGrid={scoringGrid} resultsState={resultsState} topN={10} />
         </TabsContent>
 
         <TabsContent value="acg" className="m-0">
-          <ACGLinesTab acgLines={acgLines} />
+          <ACGLinesTab acgLines={acgLines} resultsState={resultsState} />
         </TabsContent>
 
         <TabsContent value="zenith" className="m-0">
-          <ZenithTab zenithLines={zenithLines} initialOrb={1.0} />
+          <ZenithTab zenithLines={zenithLines} resultsState={resultsState} initialOrb={1.0} />
         </TabsContent>
 
         <TabsContent value="scoring" className="m-0">
-          <ScoringTab scoringGrid={scoringGrid} displayLimit={50} />
+          <ScoringTab scoringGrid={scoringGrid} resultsState={resultsState} displayLimit={50} />
         </TabsContent>
 
         <TabsContent value="parans" className="m-0">
-          <ParansTab parans={parans} displayLimit={100} />
+          <ParansTab parans={parans} resultsState={resultsState} displayLimit={100} />
         </TabsContent>
       </div>
     </Tabs>

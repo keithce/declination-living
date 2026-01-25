@@ -5,8 +5,15 @@
 import { memo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Zap } from 'lucide-react'
-import { PLANET_COLORS, PLANET_NAMES, PLANET_SYMBOLS, formatLatitude } from '../shared/constants'
+import {
+  PLANET_COLORS,
+  PLANET_NAMES,
+  PLANET_SYMBOLS,
+  formatDeclination,
+  formatLatitude,
+} from '../shared/constants'
 import type { ZenithLine } from '@/../convex/calculations/core/types'
+import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -15,6 +22,8 @@ import type { ZenithLine } from '@/../convex/calculations/core/types'
 export interface ZenithTabProps {
   /** Zenith lines from calculations */
   zenithLines: Array<ZenithLine>
+  /** Results state for synchronization */
+  resultsState?: ResultsState
   /** Initial orb value */
   initialOrb?: number
 }
@@ -49,10 +58,13 @@ export const ZenithTab = memo(function ZenithTab({
       {/* Orb Control */}
       <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
         <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-medium text-white">Zenith Band Orb</label>
+          <label htmlFor="zenith-orb-range" className="text-sm font-medium text-white">
+            Zenith Band Orb
+          </label>
           <span className="text-sm font-mono text-blue-400">{orb.toFixed(1)}°</span>
         </div>
         <input
+          id="zenith-orb-range"
           type="range"
           min="0.5"
           max="5.0"
@@ -106,7 +118,9 @@ export const ZenithTab = memo(function ZenithTab({
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-mono">{formatLatitude(line.declination)}</div>
+                      <div className="text-white font-mono">
+                        {formatDeclination(line.declination)}
+                      </div>
                     </div>
                   </div>
                   <div className="text-xs text-slate-400">
@@ -141,7 +155,7 @@ export const ZenithTab = memo(function ZenithTab({
                   <span className="text-white font-medium">{PLANET_NAMES[line.planet]}</span>
                 </div>
                 <div className="text-right">
-                  <div className="text-white font-mono">{formatLatitude(line.declination)}</div>
+                  <div className="text-white font-mono">{formatDeclination(line.declination)}</div>
                   <div className="text-xs text-slate-500">
                     {formatLatitude(orbMin)} to {formatLatitude(orbMax)}
                   </div>

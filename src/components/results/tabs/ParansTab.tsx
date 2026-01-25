@@ -13,6 +13,7 @@ import {
   formatLatitude,
 } from '../shared/constants'
 import type { ParanPoint, PlanetId } from '@/../convex/calculations/core/types'
+import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -21,6 +22,8 @@ import type { ParanPoint, PlanetId } from '@/../convex/calculations/core/types'
 export interface ParansTabProps {
   /** Paran points from calculations */
   parans: Array<ParanPoint>
+  /** Results state for synchronization */
+  resultsState?: ResultsState
   /** Number of parans to display */
   displayLimit?: number
 }
@@ -147,6 +150,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
               (type) => (
                 <button
                   key={type}
+                  type="button"
                   onClick={() => setEventFilter(type)}
                   className={`px-3 py-1 text-xs font-medium rounded transition-colors capitalize ${
                     eventFilter === type
@@ -166,6 +170,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
           <span className="text-sm text-slate-400">Planet:</span>
           <div className="flex gap-1 flex-wrap">
             <button
+              type="button"
               onClick={() => setSelectedPlanet('all')}
               className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
                 selectedPlanet === 'all'
@@ -178,6 +183,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
             {involvedPlanets.map((planet) => (
               <button
                 key={planet}
+                type="button"
                 onClick={() => setSelectedPlanet(planet)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
                   selectedPlanet === planet

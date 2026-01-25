@@ -420,11 +420,7 @@ describe('Geospatial Scoring Engine', () => {
     it('should return top optimal latitudes', () => {
       const result = generateSearchBands(TEST_DECLINATIONS, TEST_POSITIONS, VARIED_WEIGHTS, 3)
 
-      // Should return up to 10 optimal latitudes
-      expect(result.optimalLatitudes.length).toBeLessThanOrEqual(10)
-      expect(result.optimalLatitudes.length).toBeGreaterThan(0)
-
-      // Should return optimal latitudes (includes both zenith and paran-derived)
+      // Should return between 1 and 10 optimal latitudes
       expect(result.optimalLatitudes.length).toBeGreaterThan(0)
       expect(result.optimalLatitudes.length).toBeLessThanOrEqual(10)
 

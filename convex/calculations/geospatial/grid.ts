@@ -125,6 +125,22 @@ export function generateScoringGrid(
         dominantPlanet = zenithResult.contributions[0].planet
       } else if (dominantFactor === 'acg') {
         dominantPlanet = acgResult.dominantPlanet
+      } else if (dominantFactor === 'paran' && parans.length > 0) {
+        // Find closest paran and use higher-weighted planet
+        let closestParan = parans[0]
+        let closestDistance = Math.abs(lat - closestParan.latitude)
+        for (const paran of parans) {
+          const distance = Math.abs(lat - paran.latitude)
+          if (distance < closestDistance) {
+            closestDistance = distance
+            closestParan = paran
+          }
+        }
+        // Use the higher-weighted planet from the paran pair
+        dominantPlanet =
+          weights[closestParan.planet1] >= weights[closestParan.planet2]
+            ? closestParan.planet1
+            : closestParan.planet2
       }
 
       grid.push({

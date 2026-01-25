@@ -13,6 +13,7 @@ import {
   formatLongitude,
 } from '../shared/constants'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
+import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -21,6 +22,8 @@ import type { GridCell } from '@/../convex/calculations/geospatial/grid'
 export interface ScoringTabProps {
   /** Scoring grid data */
   scoringGrid: Array<GridCell>
+  /** Results state for synchronization */
+  resultsState?: ResultsState
   /** Number of rows to display */
   displayLimit?: number
 }
@@ -91,6 +94,7 @@ export const ScoringTab = memo(function ScoringTab({
               (factor) => (
                 <button
                   key={factor}
+                  type="button"
                   onClick={() => setFactorFilter(factor)}
                   className={`px-3 py-1 text-xs font-medium rounded transition-colors capitalize ${
                     factorFilter === factor
@@ -112,6 +116,7 @@ export const ScoringTab = memo(function ScoringTab({
             {(['score', 'zenith', 'acg', 'paran'] as Array<SortField>).map((field) => (
               <button
                 key={field}
+                type="button"
                 onClick={() => setSortField(field)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors capitalize ${
                   sortField === field
@@ -148,6 +153,7 @@ export const ScoringTab = memo(function ScoringTab({
             >
               {/* Cell Header */}
               <button
+                type="button"
                 onClick={() => toggleCell(cell)}
                 className="w-full flex items-center justify-between p-3 hover:bg-slate-700/30 transition-colors"
               >

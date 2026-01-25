@@ -262,32 +262,37 @@ describe('Phase 2 Integration', () => {
     it('should score based on paran proximity', () => {
       const paranResult = calculateAllParans(SUMMER_POSITIONS)
 
-      if (paranResult.points.length > 0) {
-        // Test that proximity scoring works - score should be > 0 at paran latitude
-        const firstParan = paranResult.points[0]
-        const scoreAtParan = scoreParanProximity(
-          firstParan.latitude,
-          paranResult.points,
-          EQUAL_WEIGHTS,
-          1.0,
-        )
-        expect(scoreAtParan).toBeGreaterThan(0)
+      // Explicit check: if no parans found, fail with clear message
+      // (SUMMER_POSITIONS should produce parans; if not, test data needs review)
+      expect(
+        paranResult.points.length,
+        'Expected calculateAllParans to produce paran points for SUMMER_POSITIONS',
+      ).toBeGreaterThan(0)
 
-        // Test that score decreases with distance (use 0.5° orb for tighter control)
-        const scoreNearby = scoreParanProximity(
-          firstParan.latitude + 0.25,
-          paranResult.points,
-          EQUAL_WEIGHTS,
-          0.5,
-        )
-        const scoreFar = scoreParanProximity(
-          firstParan.latitude + 1.0,
-          paranResult.points,
-          EQUAL_WEIGHTS,
-          0.5,
-        )
-        expect(scoreNearby).toBeGreaterThan(scoreFar)
-      }
+      // Test that proximity scoring works - score should be > 0 at paran latitude
+      const firstParan = paranResult.points[0]
+      const scoreAtParan = scoreParanProximity(
+        firstParan.latitude,
+        paranResult.points,
+        EQUAL_WEIGHTS,
+        1.0,
+      )
+      expect(scoreAtParan).toBeGreaterThan(0)
+
+      // Test that score decreases with distance (use 0.5° orb for tighter control)
+      const scoreNearby = scoreParanProximity(
+        firstParan.latitude + 0.25,
+        paranResult.points,
+        EQUAL_WEIGHTS,
+        0.5,
+      )
+      const scoreFar = scoreParanProximity(
+        firstParan.latitude + 1.0,
+        paranResult.points,
+        EQUAL_WEIGHTS,
+        0.5,
+      )
+      expect(scoreNearby).toBeGreaterThan(scoreFar)
     })
 
     it('should combine all scoring factors correctly', () => {
