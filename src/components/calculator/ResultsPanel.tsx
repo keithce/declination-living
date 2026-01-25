@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { Compass, TrendingUp } from 'lucide-react'
+import { PLANET_COLORS, PLANET_SYMBOLS } from '@/lib/planet-constants'
 
 interface LatitudeScore {
   latitude: number
@@ -17,32 +18,6 @@ interface LatitudeBand {
 interface ResultsPanelProps {
   optimalLatitudes: Array<LatitudeScore>
   latitudeBands: Array<LatitudeBand>
-}
-
-const PLANET_COLORS: Record<string, string> = {
-  sun: '#fbbf24',
-  moon: '#e2e8f0',
-  mercury: '#a78bfa',
-  venus: '#f472b6',
-  mars: '#ef4444',
-  jupiter: '#f97316',
-  saturn: '#78716c',
-  uranus: '#22d3ee',
-  neptune: '#818cf8',
-  pluto: '#a3a3a3',
-}
-
-const PLANET_SYMBOLS: Record<string, string> = {
-  sun: '☉',
-  moon: '☽',
-  mercury: '☿',
-  venus: '♀',
-  mars: '♂',
-  jupiter: '♃',
-  saturn: '♄',
-  uranus: '♅',
-  neptune: '♆',
-  pluto: '♇',
 }
 
 export const ResultsPanel = memo(function ResultsPanel({

@@ -48,6 +48,7 @@ import type * as calculations_parans_solver from "../calculations/parans/solver.
 import type * as calculations_phase2_actions from "../calculations/phase2_actions.js";
 import type * as calculations_safety_filter from "../calculations/safety/filter.js";
 import type * as calculations_safety_index from "../calculations/safety/index.js";
+import type * as calculations_validators from "../calculations/validators.js";
 import type * as calculations_vibes_index from "../calculations/vibes/index.js";
 import type * as calculations_vibes_translator from "../calculations/vibes/translator.js";
 import type * as charts_mutations from "../charts/mutations.js";
@@ -105,6 +106,7 @@ declare const fullApi: ApiFromModules<{
   "calculations/phase2_actions": typeof calculations_phase2_actions;
   "calculations/safety/filter": typeof calculations_safety_filter;
   "calculations/safety/index": typeof calculations_safety_index;
+  "calculations/validators": typeof calculations_validators;
   "calculations/vibes/index": typeof calculations_vibes_index;
   "calculations/vibes/translator": typeof calculations_vibes_translator;
   "charts/mutations": typeof charts_mutations;

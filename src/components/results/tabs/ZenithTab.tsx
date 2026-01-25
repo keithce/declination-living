@@ -63,9 +63,6 @@ export const ZenithTab = memo(function ZenithTab({
           step="0.1"
           value={orb}
           onChange={(e) => setOrb(Number.parseFloat(e.target.value))}
-          aria-valuemin={0.5}
-          aria-valuemax={5.0}
-          aria-valuenow={orb}
           className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
         />
         <div className="flex justify-between text-xs text-slate-500 mt-1">

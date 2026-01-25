@@ -3,6 +3,10 @@
  */
 
 import type * as THREE from 'three'
+import { PLANET_COLORS } from '@/lib/planet-constants'
+
+// Re-export for convenience
+export { PLANET_COLORS }
 
 // =============================================================================
 // Planet Types
@@ -34,21 +38,8 @@ export const PLANET_IDS: ReadonlyArray<PlanetId> = [
 ] as const
 
 // =============================================================================
-// Color Mapping
+// Color Mapping (Hex format for Three.js)
 // =============================================================================
-
-export const PLANET_COLORS: Record<PlanetId, string> = {
-  sun: '#fbbf24',
-  moon: '#e2e8f0',
-  mercury: '#a78bfa',
-  venus: '#f472b6',
-  mars: '#ef4444',
-  jupiter: '#f97316',
-  saturn: '#78716c',
-  uranus: '#22d3ee',
-  neptune: '#818cf8',
-  pluto: '#a3a3a3',
-}
 
 export const PLANET_COLORS_HEX: Record<PlanetId, number> = {
   sun: 0xfbbf24,

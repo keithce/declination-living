@@ -108,34 +108,10 @@ interface CompleteEnhancedResult {
 }
 
 // =============================================================================
-// Validators
+// Validators (imported from shared)
 // =============================================================================
 
-const planetWeightsValidator = v.object({
-  sun: v.number(),
-  moon: v.number(),
-  mercury: v.number(),
-  venus: v.number(),
-  mars: v.number(),
-  jupiter: v.number(),
-  saturn: v.number(),
-  uranus: v.number(),
-  neptune: v.number(),
-  pluto: v.number(),
-})
-
-const planetDeclinationsValidator = v.object({
-  sun: v.number(),
-  moon: v.number(),
-  mercury: v.number(),
-  venus: v.number(),
-  mars: v.number(),
-  jupiter: v.number(),
-  saturn: v.number(),
-  uranus: v.number(),
-  neptune: v.number(),
-  pluto: v.number(),
-})
+import { planetDeclinationsValidator, planetWeightsValidator } from './validators'
 
 // =============================================================================
 // Enhanced Position Actions

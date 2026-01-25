@@ -10,14 +10,13 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Layers, X } from 'lucide-react'
 import type { PlanetId } from '@/components/globe/layers/types'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
-import type {BackendACGLine, BackendParanPoint} from '@/components/globe/utils';
 import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { GlobeControls } from '@/components/globe/controls'
 import {
-  
-  
   transformACGLines,
-  transformParans
+  transformParans,
+  type BackendACGLine,
+  type BackendParanPoint,
 } from '@/components/globe/utils'
 
 // =============================================================================

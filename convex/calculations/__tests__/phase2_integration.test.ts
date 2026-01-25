@@ -12,13 +12,12 @@ import { generateScoringGrid, getGridStatistics, getTopLocations } from '../geos
 import { scoreLocationForACG, scoreParanProximity } from '../geospatial/search'
 import { calculateAllParans } from '../parans/solver'
 import {
-  
-  PLANET_IDS
-  
-  
-  
+  PLANET_IDS,
+  type EquatorialCoordinates,
+  type PlanetDeclinations,
+  type PlanetId,
+  type PlanetWeights,
 } from '../core/types'
-import type {EquatorialCoordinates, PlanetDeclinations, PlanetId, PlanetWeights} from '../core/types';
 
 // =============================================================================
 // Test Data
