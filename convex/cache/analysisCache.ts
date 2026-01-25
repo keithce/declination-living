@@ -6,15 +6,16 @@
  */
 import { v } from 'convex/values'
 import { internalMutation, internalQuery, mutation, query } from '../_generated/server'
+import type { MutationCtx, QueryCtx } from '../_generated/server'
 
 // Cache TTL in milliseconds (24 hours)
 const CACHE_TTL = 24 * 60 * 60 * 1000
 
 // Shared cache lookup logic
-async function lookupCache(ctx: { db: any }, cacheKey: string): Promise<unknown | null> {
+async function lookupCache(ctx: Pick<QueryCtx, 'db'>, cacheKey: string): Promise<unknown | null> {
   const cached = await ctx.db
     .query('calculationCache')
-    .withIndex('by_cache_key', (q: any) => q.eq('cacheKey', cacheKey))
+    .withIndex('by_cache_key', (q) => q.eq('cacheKey', cacheKey))
     .first()
 
   if (!cached) return null
@@ -52,24 +53,34 @@ export const getCachedResultInternal = internalQuery({
   },
 })
 
+// Calculation type union
+const calculationTypeValidator = v.union(
+  v.literal('full'),
+  v.literal('declinations'),
+  v.literal('parans'),
+  v.literal('acg'),
+  v.literal('vibes'),
+)
+type CalculationType = 'full' | 'declinations' | 'parans' | 'acg' | 'vibes'
+
 // Cache set args validator
 const setCacheArgs = {
   cacheKey: v.string(),
   inputHash: v.string(),
   result: v.any(),
-  calculationType: v.string(),
+  calculationType: calculationTypeValidator,
   userId: v.optional(v.id('users')),
   anonymousUserId: v.optional(v.id('anonymousUsers')),
 }
 
 // Shared cache set logic
 async function setCache(
-  ctx: { db: any },
+  ctx: Pick<MutationCtx, 'db'>,
   args: {
     cacheKey: string
     inputHash: string
     result: unknown
-    calculationType: string
+    calculationType: CalculationType
     userId?: any
     anonymousUserId?: any
   },
@@ -77,7 +88,7 @@ async function setCache(
   // Delete existing cache with same key
   const existing = await ctx.db
     .query('calculationCache')
-    .withIndex('by_cache_key', (q: any) => q.eq('cacheKey', args.cacheKey))
+    .withIndex('by_cache_key', (q) => q.eq('cacheKey', args.cacheKey))
     .first()
 
   if (existing) {
@@ -208,13 +219,13 @@ export function hashWeights(weights: Record<string, number>): string {
     .map((k) => `${k}:${weights[k]}`)
     .join(',')
 
-  // Simple hash
+  // Simple hash (djb2 variant)
   let hash = 0
   for (let i = 0; i < sorted.length; i++) {
     const char = sorted.charCodeAt(i)
     hash = (hash << 5) - hash + char
-    hash = hash & hash
+    hash = hash >>> 0 // Convert to unsigned 32-bit integer
   }
 
-  return Math.abs(hash).toString(36)
+  return hash.toString(36)
 }

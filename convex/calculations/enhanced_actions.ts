@@ -583,9 +583,9 @@ export const calculateCompleteEnhanced = action({
       cacheKey,
       inputHash: weightsHash,
       result,
-      calculationType: 'full',
-      userId: userId as any,
-      anonymousUserId: anonymousUserId as any,
+      calculationType: 'full' as const,
+      ...(userId ? { userId: userId as any } : {}),
+      ...(anonymousUserId ? { anonymousUserId: anonymousUserId as any } : {}),
     })
 
     return result

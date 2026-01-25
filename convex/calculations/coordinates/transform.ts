@@ -139,6 +139,9 @@ export function cartesianToGeo(
  * @returns Hour Angle in degrees (-180 to +180)
  */
 export function calculateHourAngle(lst: number, ra: number): number {
+  if (!Number.isFinite(lst) || !Number.isFinite(ra)) {
+    throw new Error(`calculateHourAngle: invalid inputs lst=${lst}, ra=${ra}`)
+  }
   let ha = lst - ra
   // Normalize to -180 to +180
   while (ha > 180) ha -= 360

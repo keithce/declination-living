@@ -189,7 +189,7 @@ const DeclinationsSection = memo(function DeclinationsSection({
                 <div className="text-right">
                   <div className="text-white font-mono">{formatDeclination(dec.value)}</div>
                   <div className="text-xs text-amber-400">
-                    +{dec.oobDegrees?.toFixed(2)}° beyond limit
+                    {dec.oobDegrees != null ? `+${dec.oobDegrees.toFixed(2)}°` : 'N/A'} beyond limit
                   </div>
                 </div>
               </div>
@@ -350,18 +350,24 @@ const ParansSection = memo(function ParansSection({
                 <span style={{ color: PLANET_COLORS[paran.planet1] }}>
                   {PLANET_SYMBOLS[paran.planet1]}
                 </span>
-                <span className="text-xs text-slate-500">{EVENT_LABELS[paran.event1]}</span>
+                <span className="text-xs text-slate-500">
+                  {EVENT_LABELS[paran.event1] ?? paran.event1}
+                </span>
                 <span className="text-slate-500">×</span>
                 <span style={{ color: PLANET_COLORS[paran.planet2] }}>
                   {PLANET_SYMBOLS[paran.planet2]}
                 </span>
-                <span className="text-xs text-slate-500">{EVENT_LABELS[paran.event2]}</span>
+                <span className="text-xs text-slate-500">
+                  {EVENT_LABELS[paran.event2] ?? paran.event2}
+                </span>
               </div>
               <div className="text-white font-mono text-sm">{formatLatitude(paran.latitude)}</div>
             </div>
             <div className="text-xs text-slate-400">
-              {PLANET_NAMES[paran.planet1]} {EVENT_LABELS[paran.event1].toLowerCase()} as{' '}
-              {PLANET_NAMES[paran.planet2]} is {EVENT_LABELS[paran.event2].toLowerCase()}
+              {PLANET_NAMES[paran.planet1]}{' '}
+              {(EVENT_LABELS[paran.event1] ?? paran.event1).toLowerCase()} as{' '}
+              {PLANET_NAMES[paran.planet2]} is{' '}
+              {(EVENT_LABELS[paran.event2] ?? paran.event2).toLowerCase()}
             </div>
           </motion.div>
         ))}
@@ -384,7 +390,7 @@ const LocationsSection = memo(function LocationsSection({
       <div className="space-y-2">
         {optimalLatitudes.slice(0, 15).map((loc, index) => (
           <motion.div
-            key={loc.latitude}
+            key={`${loc.latitude}-${loc.score}-${idx}`}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.03 }}

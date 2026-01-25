@@ -85,18 +85,24 @@ export async function calculateParallaxCorrection(
   bodyId: number,
   observer: TopocentricObserver,
 ): Promise<{ decCorrection: number; raCorrection: number }> {
-  const swe = SwissEphService.getInstance()
-  await swe.initialize()
+  try {
+    const swe = SwissEphService.getInstance()
+    await swe.initialize()
 
-  // Get geocentric position
-  const geocentric = await swe.getEquatorialPosition(jd, bodyId)
+    // Get geocentric position
+    const geocentric = await swe.getEquatorialPosition(jd, bodyId)
 
-  // Get topocentric position
-  const topocentric = await getTopocentricPosition(jd, bodyId, observer)
+    // Get topocentric position
+    const topocentric = await getTopocentricPosition(jd, bodyId, observer)
 
-  return {
-    decCorrection: topocentric.declination - geocentric.declination,
-    raCorrection: topocentric.rightAscension - geocentric.rightAscension,
+    return {
+      decCorrection: topocentric.declination - geocentric.declination,
+      raCorrection: topocentric.rightAscension - geocentric.rightAscension,
+    }
+  } catch (error) {
+    throw new Error(
+      `Parallax calculation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 }
 

@@ -86,6 +86,9 @@ export async function checkAllOutOfBounds(
 
   for (const planet of planets) {
     const dec = declinations[planet]
+    if (!Number.isFinite(dec)) {
+      throw new Error(`Invalid declination for ${planet}: ${dec}`)
+    }
     const absDec = Math.abs(dec)
     const isOOB = absDec > trueObliquity
 

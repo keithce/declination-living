@@ -4,8 +4,8 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'node',
-    include: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
+    environment: 'jsdom',
+    include: ['**/__tests__/**/*.test.{ts,tsx}', '**/*.test.{ts,tsx}'],
     exclude: ['node_modules', 'dist', '.output'],
   },
   resolve: {

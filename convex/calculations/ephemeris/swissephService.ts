@@ -117,6 +117,11 @@ class SwissEphService {
     const swe = await this.ensureInitialized()
     const result = swe.swe_calc_ut(jd, bodyId, flags)
 
+    // Validate result contains valid numbers
+    if (!Number.isFinite(result[0]) || !Number.isFinite(result[1])) {
+      throw new Error(`Swiss Ephemeris returned invalid data for body ${bodyId}`)
+    }
+
     return {
       longitude: result[0],
       latitude: result[1],

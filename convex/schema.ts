@@ -190,7 +190,13 @@ export default defineSchema({
     anonymousUserId: v.optional(v.id('anonymousUsers')),
     inputHash: v.string(),
     result: v.any(),
-    calculationType: v.string(), // 'full' | 'declinations' | 'parans' | 'acg' | 'vibes'
+    calculationType: v.union(
+      v.literal('full'),
+      v.literal('declinations'),
+      v.literal('parans'),
+      v.literal('acg'),
+      v.literal('vibes'),
+    ),
     createdAt: v.number(),
     expiresAt: v.number(),
   })

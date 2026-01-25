@@ -1,9 +1,51 @@
 import { useCallback, useEffect, useState } from 'react'
+import { z } from 'zod'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { Declinations } from '@/components/calculator/DeclinationTable'
 import { DEFAULT_WEIGHTS } from '@/components/calculator/PlanetWeights'
 
 type Step = 'birth-data' | 'weights' | 'results'
+
+// Zod schemas for runtime validation
+const BirthDataSchema = z.object({
+  birthDate: z.string(),
+  birthTime: z.string(),
+  birthCity: z.string(),
+  birthCountry: z.string(),
+  birthLatitude: z.number(),
+  birthLongitude: z.number(),
+  birthTimezone: z.string(),
+})
+
+const PlanetWeightsSchema = z.object({
+  sun: z.number(),
+  moon: z.number(),
+  mercury: z.number(),
+  venus: z.number(),
+  mars: z.number(),
+  jupiter: z.number(),
+  saturn: z.number(),
+  uranus: z.number(),
+  neptune: z.number(),
+  pluto: z.number(),
+})
+
+const CalculatorStateSchema = z.object({
+  step: z.enum(['birth-data', 'weights', 'results']),
+  birthData: BirthDataSchema.nullable(),
+  weights: PlanetWeightsSchema,
+  result: z
+    .object({
+      declinations: z.record(z.number()),
+      optimalLatitudes: z.array(
+        z.object({ latitude: z.number(), score: z.number(), dominantPlanet: z.string() }),
+      ),
+      latitudeBands: z.array(
+        z.object({ min: z.number(), max: z.number(), dominantPlanet: z.string() }),
+      ),
+    })
+    .nullable(),
+})
 
 export interface BirthDataState {
   birthDate: string
@@ -44,22 +86,24 @@ function loadState(): CalculatorState {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (!saved) return DEFAULT_STATE
 
-    const parsed = JSON.parse(saved) as CalculatorState
+    const json = JSON.parse(saved)
+    const parsed = CalculatorStateSchema.safeParse(json)
 
-    // Validate step is a valid value
-    if (!['birth-data', 'weights', 'results'].includes(parsed.step)) {
+    if (!parsed.success) {
       return DEFAULT_STATE
     }
+
+    const state = parsed.data
 
     // Validate state consistency: if step is 'weights' but no birthData, reset
-    if (parsed.step === 'weights' && !parsed.birthData) {
+    if (state.step === 'weights' && !state.birthData) {
       return DEFAULT_STATE
     }
-    if (parsed.step === 'results' && (!parsed.birthData || !parsed.result)) {
-      return { ...parsed, step: 'birth-data' }
+    if (state.step === 'results' && (!state.birthData || !state.result)) {
+      return { ...state, step: 'birth-data' }
     }
 
-    return parsed
+    return state
   } catch {
     return DEFAULT_STATE
   }
