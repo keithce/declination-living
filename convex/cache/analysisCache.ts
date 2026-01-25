@@ -10,7 +10,8 @@
 import { v } from 'convex/values'
 import { internalMutation, internalQuery, mutation, query } from '../_generated/server'
 import { auth } from '../auth'
-import type { Id, MutationCtx, QueryCtx } from '../_generated/server'
+import type { MutationCtx, QueryCtx } from '../_generated/server'
+import type { Id } from '../_generated/dataModel'
 
 // Cache TTL in milliseconds (24 hours)
 const CACHE_TTL = 24 * 60 * 60 * 1000
