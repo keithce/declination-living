@@ -29,6 +29,7 @@ export * from './ephemeris/oob'
 // ACG lines
 export * from './acg/zenith'
 export * from './acg/line_solver'
+export * from './acg/actions'
 
 // Parans
 export * from './parans/solver'
@@ -44,6 +45,7 @@ export * from './vibes/translator'
 
 // Geospatial search
 export * from './geospatial/search'
+export * from './geospatial/grid'
 
 // Safety filter
 export * from './safety/filter'

@@ -117,6 +117,15 @@ type ACGAndZenithResult = {
 }
 
 /**
+ * Type guard for ACGAndZenithResult
+ */
+function isValidACGAndZenithResult(value: unknown): value is ACGAndZenithResult {
+  if (!value || typeof value !== 'object') return false
+  const obj = value as Record<string, unknown>
+  return Array.isArray(obj.acgLines) && Array.isArray(obj.zenithLines)
+}
+
+/**
  * Calculate ACG lines and zenith lines with caching.
  *
  * @param julianDay - Julian Day for GMST calculation
@@ -137,14 +146,11 @@ export const calculateACGAndZenith = internalAction({
     const cacheKey = generateACGCacheKey(args)
 
     // 2. Check cache
-    const cached: ACGAndZenithResult | null = (await ctx.runQuery(
-      internal.cache.analysisCache.getCachedResultInternal,
-      {
-        cacheKey,
-      },
-    )) as ACGAndZenithResult | null
+    const cached = await ctx.runQuery(internal.cache.analysisCache.getCachedResultInternal, {
+      cacheKey,
+    })
 
-    if (cached) {
+    if (cached && isValidACGAndZenithResult(cached)) {
       return cached
     }
 

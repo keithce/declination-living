@@ -166,7 +166,7 @@ describe('Geospatial Scoring Engine', () => {
     it('should create targets for all weighted planets', () => {
       const targets = calculateZenithLatitudes(TEST_DECLINATIONS, EQUAL_WEIGHTS, 1.0)
 
-      // All 10 planets should create targets
+      // At least 10 targets (one per planet, possibly more if overlaps create additional targets)
       expect(targets.length).toBeGreaterThanOrEqual(10)
 
       // Each planet's declination should appear as a target

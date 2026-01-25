@@ -10,7 +10,9 @@ import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../core/constants'
 import { gaussian } from '../core/math'
 import { findZenithOverlaps } from '../acg/zenith'
 import { calculateAllParans } from '../parans/solver'
+import { greatCircleDistanceKm } from '../coordinates/transform'
 import type {
+  ACGLine,
   EquatorialCoordinates,
   GeospatialSearchResult,
   ParanPoint,
@@ -361,7 +363,7 @@ export function scoreLatitude(
 export function scoreLocationForACG(
   latitude: number,
   longitude: number,
-  acgLines: Array<import('../core/types').ACGLine>,
+  acgLines: Array<ACGLine>,
   weights: PlanetWeights,
   orb: number = 2.0,
 ): {
@@ -373,8 +375,6 @@ export function scoreLocationForACG(
   }>
   dominantPlanet?: PlanetId
 } {
-  const { greatCircleDistanceKm } = require('../coordinates/transform')
-
   let totalScore = 0
   const contributions: Array<{
     planet: PlanetId
@@ -390,9 +390,10 @@ export function scoreLocationForACG(
 
     // Find closest point on this line
     for (const point of line.points) {
-      // Use great circle distance for accuracy
-      const distance =
-        greatCircleDistanceKm(latitude, longitude, point.latitude, point.longitude) / 111 // Convert km to degrees (approximate)
+      // Use great circle distance converted to angular degrees
+      // Formula: angularDeg = (km / earthRadiusKm) * (180 / π)
+      const distanceKm = greatCircleDistanceKm(latitude, longitude, point.latitude, point.longitude)
+      const distance = (distanceKm / 6371) * (180 / Math.PI)
 
       if (distance < minDistance) {
         minDistance = distance
