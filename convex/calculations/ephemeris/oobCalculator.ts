@@ -154,10 +154,10 @@ export const PLANET_MAX_DECLINATIONS: Record<PlanetId, number> = {
   sun: 23.44, // By definition (obliquity)
   moon: 28.58, // Moon's orbit inclined 5.14° to ecliptic, so max = 23.44 + 5.14
   mercury: 27.1, // Orbital inclination ~7°
-  venus: 26.7, // Orbital inclination ~3.4°
-  mars: 25.2, // Orbital inclination ~1.85°
+  venus: 28.0, // Orbital inclination ~3.4°, observed max ~28°
+  mars: 28.9, // Orbital inclination ~1.85°, observed historical max ~28°54′
   jupiter: 23.5, // Orbital inclination ~1.3°
-  saturn: 26.7, // Orbital inclination ~2.5°
+  saturn: 23.44, // Orbital inclination ~2.5° but max matches obliquity
   uranus: 24.0, // Orbital inclination ~0.77°
   neptune: 23.6, // Orbital inclination ~1.77°
   pluto: 40.0, // Orbital inclination ~17°, frequently OOB!

@@ -85,14 +85,13 @@ export function dateToJulianDay(
   timeStr: string,
   timezone: string = 'UTC',
 ): number {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  const [hours, minutes] = timeStr.split(':').map(Number)
-
-  // Create a date representing the local time in the user's timezone
-  const localDate = new Date(year, month - 1, day, hours, minutes)
+  // Create an ISO datetime string representing the local time
+  // fromZonedTime will interpret this as a time in the specified timezone
+  const isoString = `${dateStr}T${timeStr}:00`
 
   // Convert from the specified timezone to UTC
-  const utcDate = fromZonedTime(localDate, timezone)
+  // fromZonedTime takes a datetime and timezone, returns UTC Date
+  const utcDate = fromZonedTime(isoString, timezone)
 
   // Extract UTC components for Julian Day calculation
   const utcYear = utcDate.getUTCFullYear()

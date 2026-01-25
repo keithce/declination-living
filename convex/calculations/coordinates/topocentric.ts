@@ -107,14 +107,25 @@ export async function calculateParallaxCorrection(
  * For the Sun, about 8.8" (negligible)
  *
  * @param distanceAU - Distance to body in AU
- * @returns Maximum horizontal parallax in degrees
+ * @returns Maximum horizontal parallax in degrees, or 0 for invalid input
  */
 export function calculateMaxParallax(distanceAU: number): number {
   // Earth's equatorial radius in AU
   const EARTH_RADIUS_AU = 4.2635e-5
 
+  // Validate input to prevent NaN from Math.asin
+  if (!Number.isFinite(distanceAU) || distanceAU <= 0) {
+    return 0
+  }
+
   // Horizontal parallax: sin(p) = R_earth / distance
   const sinParallax = EARTH_RADIUS_AU / distanceAU
+
+  // Clamp to valid range for asin (prevents NaN for very close objects)
+  if (sinParallax >= 1) {
+    return 90 // Maximum possible parallax
+  }
+
   return Math.asin(sinParallax) * (180 / Math.PI)
 }
 

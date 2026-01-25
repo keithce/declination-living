@@ -24,4 +24,5 @@
 ## Environment Variables
 
 - Client-side: Must have `VITE_` prefix, defined in `src/env.ts` with T3Env
-- Convex: `VITE_CONVEX_URL` and `CONVEX_DEPLOYMENT` required in `.env.local`
+- Convex: Only `VITE_CONVEX_URL` is required in `.env.local` for frontend usage
+- Note: `CONVEX_DEPLOYMENT` is used by the Convex CLI, not the frontend application
