@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { calendarToJulianDay, J2000_JD, julianCenturiesFromJ2000 } from '../ephemeris/julian'
-import { getMeanObliquity, isOutOfBounds, getOOBStatus } from '../ephemeris/oob'
+import { J2000_JD, calendarToJulianDay, julianCenturiesFromJ2000 } from '../ephemeris/julian'
+import { getMeanObliquity, getOOBStatus, isOutOfBounds } from '../ephemeris/oob'
 import { eclipticToEquatorial, equatorialToEcliptic } from '../coordinates/transform'
 import { calculateSDA, getDiurnalArcHours } from '../coordinates/sda'
-import { sinDeg, cosDeg, acosDeg, normalizeDegrees } from '../core/math'
+import { acosDeg, cosDeg, normalizeDegrees, sinDeg } from '../core/math'
 
 describe('Integration Tests - Astronomical Calculations', () => {
   describe('J2000.0 Reference Epoch', () => {

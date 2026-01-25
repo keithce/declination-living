@@ -111,17 +111,11 @@ function ResultsPage() {
               </TabsContent>
 
               <TabsContent value="dignities" className="mt-4">
-                <DignityScores
-                  dignities={analysis.dignities}
-                  sect={analysis.metadata.sect}
-                />
+                <DignityScores dignities={analysis.dignities} sect={analysis.metadata.sect} />
               </TabsContent>
 
               <TabsContent value="parans" className="mt-4">
-                <ParanList
-                  parans={analysis.parans}
-                  summary={analysis.paranSummary}
-                />
+                <ParanList parans={analysis.parans} summary={analysis.paranSummary} />
               </TabsContent>
             </Tabs>
           </div>
@@ -137,17 +131,27 @@ function ResultsPage() {
 **File**: `src/components/results/DeclinationTable.tsx`
 
 ```tsx
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { PlanetId } from '@/convex/calculations/core/types'
 
 interface DeclinationTableProps {
-  declinations: Record<PlanetId, {
-    value: number
-    isOOB: boolean
-    oobDegrees?: number
-  }>
+  declinations: Record<
+    PlanetId,
+    {
+      value: number
+      isOOB: boolean
+      oobDegrees?: number
+    }
+  >
   obliquity: number
 }
 
@@ -219,9 +223,7 @@ export function DeclinationTable({ declinations, obliquity }: DeclinationTablePr
                     <TooltipContent>{PLANET_NAMES[planet]}</TooltipContent>
                   </Tooltip>
                 </TableCell>
-                <TableCell className="font-mono">
-                  {formatDeclination(data.value)}
-                </TableCell>
+                <TableCell className="font-mono">{formatDeclination(data.value)}</TableCell>
                 <TableCell>{direction}</TableCell>
                 <TableCell className="text-right">
                   {data.isOOB ? (
@@ -264,8 +266,16 @@ interface DignityScoresProps {
 }
 
 const PLANET_SYMBOLS: Record<PlanetId, string> = {
-  sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂',
-  jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇',
+  sun: '☉',
+  moon: '☽',
+  mercury: '☿',
+  venus: '♀',
+  mars: '♂',
+  jupiter: '♃',
+  saturn: '♄',
+  uranus: '♅',
+  neptune: '♆',
+  pluto: '♇',
 }
 
 const INDICATOR_LABELS: Record<string, string> = {
@@ -302,9 +312,7 @@ export function DignityScores({ dignities, sect }: DignityScoresProps) {
   const planets = Object.keys(dignities) as PlanetId[]
 
   // Sort by total score descending
-  const sorted = [...planets].sort(
-    (a, b) => dignities[b].total - dignities[a].total
-  )
+  const sorted = [...planets].sort((a, b) => dignities[b].total - dignities[a].total)
 
   return (
     <div className="space-y-4">
@@ -316,7 +324,9 @@ export function DignityScores({ dignities, sect }: DignityScoresProps) {
           {Object.entries(INDICATOR_LABELS).map(([key, label]) => (
             <span key={key} className="flex items-center gap-1">
               <span className={`w-2 h-2 rounded-full ${INDICATOR_COLORS[key]}`} />
-              <span className="text-muted-foreground">{key}: {label}</span>
+              <span className="text-muted-foreground">
+                {key}: {label}
+              </span>
             </span>
           ))}
         </div>
@@ -351,12 +361,17 @@ export function DignityScores({ dignities, sect }: DignityScoresProps) {
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <span className={`font-mono ${
-                  dignity.total > 0 ? 'text-green-600' :
-                  dignity.total < 0 ? 'text-red-600' :
-                  'text-muted-foreground'
-                }`}>
-                  {dignity.total > 0 ? '+' : ''}{dignity.total}
+                <span
+                  className={`font-mono ${
+                    dignity.total > 0
+                      ? 'text-green-600'
+                      : dignity.total < 0
+                        ? 'text-red-600'
+                        : 'text-muted-foreground'
+                  }`}
+                >
+                  {dignity.total > 0 ? '+' : ''}
+                  {dignity.total}
                 </span>
               </div>
               <Progress value={normalized} className="h-2" />
@@ -394,8 +409,16 @@ interface ParanListProps {
 }
 
 const PLANET_SYMBOLS: Record<string, string> = {
-  sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂',
-  jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇',
+  sun: '☉',
+  moon: '☽',
+  mercury: '☿',
+  venus: '♀',
+  mars: '♂',
+  jupiter: '♃',
+  saturn: '♄',
+  uranus: '♅',
+  neptune: '♆',
+  pluto: '♇',
 }
 
 const EVENT_LABELS: Record<string, string> = {
@@ -464,9 +487,7 @@ export function ParanList({ parans }: ParanListProps) {
                 <div className="flex items-center gap-3">
                   <Badge variant="outline">{formatLatitude(paran.latitude)}</Badge>
                   <div className="flex items-center gap-1">
-                    <div
-                      className={`w-2 h-2 rounded-full ${getStrengthColor(strength)}`}
-                    />
+                    <div className={`w-2 h-2 rounded-full ${getStrengthColor(strength)}`} />
                     <span className="text-xs text-muted-foreground">
                       {(strength * 100).toFixed(0)}%
                     </span>
@@ -534,9 +555,7 @@ export function CityRankings({ cities, onCityClick }: CityRankingsProps) {
   const [sortBy, setSortBy] = useState<SortOption>('score')
   const [tierFilter, setTierFilter] = useState<string>('all')
 
-  const filteredCities = cities.filter(
-    c => tierFilter === 'all' || c.city.tier === tierFilter
-  )
+  const filteredCities = cities.filter((c) => tierFilter === 'all' || c.city.tier === tierFilter)
 
   const sortedCities = [...filteredCities].sort((a, b) => {
     switch (sortBy) {
@@ -635,11 +654,15 @@ function CityCard({
           </div>
           {safetyScore && (
             <div className="flex items-center gap-1 text-sm">
-              <Shield className={`h-3 w-3 ${
-                safetyScore.overall >= 70 ? 'text-green-500' :
-                safetyScore.overall >= 50 ? 'text-yellow-500' :
-                'text-red-500'
-              }`} />
+              <Shield
+                className={`h-3 w-3 ${
+                  safetyScore.overall >= 70
+                    ? 'text-green-500'
+                    : safetyScore.overall >= 50
+                      ? 'text-yellow-500'
+                      : 'text-red-500'
+                }`}
+              />
               <span className="text-muted-foreground">{safetyScore.overall}%</span>
             </div>
           )}
@@ -685,13 +708,14 @@ import Globe from 'react-globe.gl'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { Slider } from '@/components/ui/slider'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Settings, Layers, Eye, EyeOff } from 'lucide-react'
-import type { ZenithLine, ACGLine, ParanPoint, PlanetWeights } from '@/convex/calculations/core/types'
+import type {
+  ZenithLine,
+  ACGLine,
+  ParanPoint,
+  PlanetWeights,
+} from '@/convex/calculations/core/types'
 
 interface GlobeContainerProps {
   zenithLines: ZenithLine[]
@@ -713,12 +737,7 @@ const PLANET_COLORS: Record<string, string> = {
   pluto: '#800080',
 }
 
-export function GlobeContainer({
-  zenithLines,
-  acgLines,
-  parans,
-  weights,
-}: GlobeContainerProps) {
+export function GlobeContainer({ zenithLines, acgLines, parans, weights }: GlobeContainerProps) {
   const globeRef = useRef<any>()
 
   // Layer visibility
@@ -795,11 +814,7 @@ export function GlobeContainer({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Zenith Bands</span>
-                  <Toggle
-                    pressed={showZenith}
-                    onPressedChange={setShowZenith}
-                    size="sm"
-                  >
+                  <Toggle pressed={showZenith} onPressedChange={setShowZenith} size="sm">
                     {showZenith ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                   </Toggle>
                 </div>
@@ -816,33 +831,21 @@ export function GlobeContainer({
 
               <div className="flex items-center justify-between">
                 <span className="text-sm">ACG Lines</span>
-                <Toggle
-                  pressed={showACG}
-                  onPressedChange={setShowACG}
-                  size="sm"
-                >
+                <Toggle pressed={showACG} onPressedChange={setShowACG} size="sm">
                   {showACG ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                 </Toggle>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-sm">Paran Points</span>
-                <Toggle
-                  pressed={showParans}
-                  onPressedChange={setShowParans}
-                  size="sm"
-                >
+                <Toggle pressed={showParans} onPressedChange={setShowParans} size="sm">
                   {showParans ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                 </Toggle>
               </div>
 
               <div className="flex items-center justify-between">
                 <span className="text-sm">Heatmap</span>
-                <Toggle
-                  pressed={showHeatmap}
-                  onPressedChange={setShowHeatmap}
-                  size="sm"
-                >
+                <Toggle pressed={showHeatmap} onPressedChange={setShowHeatmap} size="sm">
                   {showHeatmap ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                 </Toggle>
               </div>
@@ -876,12 +879,14 @@ export function GlobeContainer({
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-background/80 rounded-lg p-2 text-xs">
         <div className="grid grid-cols-5 gap-2">
-          {Object.entries(PLANET_COLORS).slice(0, 5).map(([planet, color]) => (
-            <div key={planet} className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-              <span className="capitalize">{planet.slice(0, 3)}</span>
-            </div>
-          ))}
+          {Object.entries(PLANET_COLORS)
+            .slice(0, 5)
+            .map(([planet, color]) => (
+              <div key={planet} className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <span className="capitalize">{planet.slice(0, 3)}</span>
+              </div>
+            ))}
         </div>
       </div>
     </div>

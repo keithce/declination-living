@@ -18,6 +18,7 @@ ACG lines show where planets are angular (on ASC, DSC, MC, or IC) around the glo
 ### Key Formulas
 
 **MC/IC Line** (meridian crossing):
+
 ```
 At any longitude λ, the planet is on MC/IC when:
   Local Sidereal Time = Right Ascension (for MC)
@@ -27,6 +28,7 @@ Solving for latitude where this occurs at each longitude.
 ```
 
 **ASC/DSC Line** (horizon crossing):
+
 ```
 For a planet to be rising/setting at latitude φ:
   cos(H) = -tan(δ) × tan(φ)
@@ -40,6 +42,7 @@ Solving: given RA, dec, and LST, find latitude where altitude = 0
 ```
 
 **Zenith Line**:
+
 ```
 A planet is directly overhead (zenith) when:
   Observer latitude = Planet declination
@@ -61,9 +64,9 @@ const RAD_TO_DEG = 180 / Math.PI
 
 interface ACGSolverInput {
   planetId: PlanetId
-  ra: number      // Right ascension in degrees
-  dec: number     // Declination in degrees
-  gst: number     // Greenwich Sidereal Time in degrees
+  ra: number // Right ascension in degrees
+  dec: number // Declination in degrees
+  gst: number // Greenwich Sidereal Time in degrees
 }
 
 /**
@@ -101,8 +104,10 @@ function solveMCLine(input: ACGSolverInput): GeoLocation[] {
 
     // If HA is near 0 (within tolerance), planet is on MC at this longitude
     const haTolerance = 1 // degree
-    if (Math.abs(hourAngle % 360) < haTolerance ||
-        Math.abs((hourAngle % 360) - 360) < haTolerance) {
+    if (
+      Math.abs(hourAngle % 360) < haTolerance ||
+      Math.abs((hourAngle % 360) - 360) < haTolerance
+    ) {
       // MC line exists at this longitude for all latitudes
       // Sample latitudes
       for (let lat = -80; lat <= 80; lat += 5) {
@@ -121,8 +126,8 @@ function solveICLine(input: ACGSolverInput): GeoLocation[] {
   // IC is 180° from MC
   return solveMCLine({
     ...input,
-    ra: (input.ra + 180) % 360
-  }).map(p => ({ ...p }))
+    ra: (input.ra + 180) % 360,
+  }).map((p) => ({ ...p }))
 }
 
 /**
@@ -319,8 +324,8 @@ function altitude(ha: number, dec: number, lat: number): number {
   const decRad = dec * DEG_TO_RAD
   const latRad = lat * DEG_TO_RAD
 
-  const sinAlt = Math.sin(decRad) * Math.sin(latRad) +
-                 Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad)
+  const sinAlt =
+    Math.sin(decRad) * Math.sin(latRad) + Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad)
 
   return Math.asin(Math.max(-1, Math.min(1, sinAlt))) * RAD_TO_DEG
 }
@@ -328,10 +333,7 @@ function altitude(ha: number, dec: number, lat: number): number {
 /**
  * Find latitude where altitude = 0 (rising/setting) using bisection
  */
-export function bisectRisingLatitude(
-  input: BisectionInput,
-  isRising: boolean
-): number | null {
+export function bisectRisingLatitude(input: BisectionInput, isRising: boolean): number | null {
   const { ra, dec, gst, longitude } = input
 
   // Calculate LST at this longitude
@@ -381,11 +383,7 @@ export function bisectRisingLatitude(
 /**
  * Find longitude where MC/IC occurs for a given latitude
  */
-export function bisectMeridianLongitude(
-  ra: number,
-  gst: number,
-  isIC: boolean
-): number {
+export function bisectMeridianLongitude(ra: number, gst: number, isIC: boolean): number {
   // MC occurs when LST = RA
   // IC occurs when LST = RA + 180
   const targetRA = isIC ? (ra + 180) % 360 : ra
@@ -409,7 +407,7 @@ export function generatePreciseACGLine(
   ra: number,
   dec: number,
   gst: number,
-  lineType: 'ASC' | 'DSC' | 'MC' | 'IC'
+  lineType: 'ASC' | 'DSC' | 'MC' | 'IC',
 ): Array<{ latitude: number; longitude: number }> {
   const points: Array<{ latitude: number; longitude: number }> = []
 
@@ -425,10 +423,7 @@ export function generatePreciseACGLine(
     const isRising = lineType === 'ASC'
 
     for (let lon = -180; lon <= 180; lon += 1) {
-      const lat = bisectRisingLatitude(
-        { ra, dec, gst, longitude: lon },
-        isRising
-      )
+      const lat = bisectRisingLatitude({ ra, dec, gst, longitude: lon }, isRising)
 
       if (lat !== null) {
         points.push({ latitude: lat, longitude: lon })
@@ -456,7 +451,7 @@ const DEFAULT_ORB = 1.0 // degrees
  */
 export function calculateZenithLines(
   declinations: PlanetDeclinations,
-  orb: number = DEFAULT_ORB
+  orb: number = DEFAULT_ORB,
 ): ZenithLine[] {
   const zenithLines: ZenithLine[] = []
 
@@ -479,20 +474,14 @@ export function calculateZenithLines(
 /**
  * Check if a location is within a zenith band
  */
-export function isInZenithBand(
-  latitude: number,
-  zenithLine: ZenithLine
-): boolean {
+export function isInZenithBand(latitude: number, zenithLine: ZenithLine): boolean {
   return latitude >= zenithLine.orbMin && latitude <= zenithLine.orbMax
 }
 
 /**
  * Calculate distance from zenith line in degrees
  */
-export function distanceFromZenith(
-  latitude: number,
-  zenithLine: ZenithLine
-): number {
+export function distanceFromZenith(latitude: number, zenithLine: ZenithLine): number {
   return Math.abs(latitude - zenithLine.declination)
 }
 
@@ -503,11 +492,11 @@ export function distanceFromZenith(
 export function zenithScore(
   latitude: number,
   zenithLine: ZenithLine,
-  orb: number = DEFAULT_ORB
+  orb: number = DEFAULT_ORB,
 ): number {
   const distance = distanceFromZenith(latitude, zenithLine)
   if (distance > orb) return 0
-  return 1 - (distance / orb)
+  return 1 - distance / orb
 }
 
 /**
@@ -516,11 +505,9 @@ export function zenithScore(
 export function findOverlappingZeniths(
   minLat: number,
   maxLat: number,
-  zenithLines: ZenithLine[]
+  zenithLines: ZenithLine[],
 ): ZenithLine[] {
-  return zenithLines.filter(zl =>
-    zl.orbMax >= minLat && zl.orbMin <= maxLat
-  )
+  return zenithLines.filter((zl) => zl.orbMax >= minLat && zl.orbMin <= maxLat)
 }
 ```
 
@@ -535,7 +522,7 @@ import type {
   PlanetDeclinations,
   ZenithLine,
   ACGLine,
-  ParanPoint
+  ParanPoint,
 } from '../core/types'
 import { calculateZenithLines, zenithScore } from '../acg/zenith'
 
@@ -575,7 +562,7 @@ function calculateACGScore(
   lon: number,
   acgLines: ACGLine[],
   weights: PlanetWeights,
-  orb: number = DEFAULT_ACG_ORB
+  orb: number = DEFAULT_ACG_ORB,
 ): { score: number; contributions: Array<{ planet: PlanetId; score: number }> } {
   let totalScore = 0
   const contributions: Array<{ planet: PlanetId; score: number }> = []
@@ -609,7 +596,7 @@ function calculateZenithScore(
   lat: number,
   zenithLines: ZenithLine[],
   weights: PlanetWeights,
-  orb: number = DEFAULT_ZENITH_ORB
+  orb: number = DEFAULT_ZENITH_ORB,
 ): { score: number; contributions: Array<{ planet: PlanetId; score: number }> } {
   let totalScore = 0
   const contributions: Array<{ planet: PlanetId; score: number }> = []
@@ -634,7 +621,7 @@ function calculateParanScore(
   lat: number,
   parans: ParanPoint[],
   weights: PlanetWeights,
-  orb: number = DEFAULT_PARAN_ORB
+  orb: number = DEFAULT_PARAN_ORB,
 ): { score: number; contributions: Array<{ planet: PlanetId; score: number }> } {
   let totalScore = 0
   const contributions: Array<{ planet: PlanetId; score: number }> = []
@@ -700,7 +687,7 @@ export function generateScoringGrid(
   acgLines: ACGLine[],
   parans: ParanPoint[],
   latStep: number = 5,
-  lonStep: number = 10
+  lonStep: number = 10,
 ): Array<{ lat: number; lon: number; score: number }> {
   const grid: Array<{ lat: number; lon: number; score: number }> = []
 
@@ -737,11 +724,13 @@ import type { PlanetId, ACGLine, ZenithLine } from '../core/types'
 
 export const calculateACGAndZenith = internalAction({
   args: {
-    celestialBodies: v.array(v.object({
-      planetId: v.string(),
-      ra: v.number(),
-      dec: v.number(),
-    })),
+    celestialBodies: v.array(
+      v.object({
+        planetId: v.string(),
+        ra: v.number(),
+        dec: v.number(),
+      }),
+    ),
     gst: v.number(),
   },
   handler: async (ctx, args) => {
@@ -764,9 +753,7 @@ export const calculateACGAndZenith = internalAction({
     }
 
     // Calculate zenith lines
-    const zenithLines = calculateZenithLines(
-      declinations as Record<PlanetId, number>
-    )
+    const zenithLines = calculateZenithLines(declinations as Record<PlanetId, number>)
 
     return {
       acgLines,
@@ -796,7 +783,7 @@ describe('ACG Line Solver', () => {
       gst: 0,
     })
 
-    const types = lines.map(l => l.lineType)
+    const types = lines.map((l) => l.lineType)
     expect(types).toContain('MC')
     expect(types).toContain('IC')
     expect(types).toContain('ASC')
@@ -817,12 +804,15 @@ describe('ACG Line Solver', () => {
   })
 
   it('finds rising latitude for Sun at equinox', () => {
-    const lat = bisectRisingLatitude({
-      ra: 0,
-      dec: 0,
-      gst: 90,
-      longitude: 0,
-    }, true)
+    const lat = bisectRisingLatitude(
+      {
+        ra: 0,
+        dec: 0,
+        gst: 90,
+        longitude: 0,
+      },
+      true,
+    )
 
     // At equinox, Sun rises due east at equator
     expect(lat).not.toBeNull()
@@ -860,7 +850,7 @@ describe('Zenith Line Calculator', () => {
 
   it('zenith latitude equals declination', () => {
     const zenithLines = calculateZenithLines(testDeclinations)
-    const sunZenith = zenithLines.find(z => z.planet === 'sun')
+    const sunZenith = zenithLines.find((z) => z.planet === 'sun')
 
     expect(sunZenith).toBeDefined()
     expect(sunZenith!.declination).toBe(23.44)
@@ -868,7 +858,7 @@ describe('Zenith Line Calculator', () => {
 
   it('detects location in zenith band', () => {
     const zenithLines = calculateZenithLines(testDeclinations, 1.0)
-    const sunZenith = zenithLines.find(z => z.planet === 'sun')!
+    const sunZenith = zenithLines.find((z) => z.planet === 'sun')!
 
     expect(isInZenithBand(23.44, sunZenith)).toBe(true)
     expect(isInZenithBand(23.0, sunZenith)).toBe(true)
@@ -877,7 +867,7 @@ describe('Zenith Line Calculator', () => {
 
   it('calculates zenith score correctly', () => {
     const zenithLines = calculateZenithLines(testDeclinations, 1.0)
-    const sunZenith = zenithLines.find(z => z.planet === 'sun')!
+    const sunZenith = zenithLines.find((z) => z.planet === 'sun')!
 
     // Exact zenith = 1.0
     expect(zenithScore(23.44, sunZenith)).toBeCloseTo(1.0, 2)

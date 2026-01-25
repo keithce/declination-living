@@ -33,9 +33,9 @@ This document outlines the comprehensive testing approach for the Declination Li
 describe('Julian Day Calculations', () => {
   // Reference cases from astronomical almanac
   const testCases = [
-    { date: [2000, 1, 1, 12, 0], jd: 2451545.0 },     // J2000.0
-    { date: [1957, 10, 4, 19, 28], jd: 2436116.31 },  // Sputnik launch
-    { date: [1985, 7, 21, 0, 0], jd: 2446264.5 },     // Random date
+    { date: [2000, 1, 1, 12, 0], jd: 2451545.0 }, // J2000.0
+    { date: [1957, 10, 4, 19, 28], jd: 2436116.31 }, // Sputnik launch
+    { date: [1985, 7, 21, 0, 0], jd: 2446264.5 }, // Random date
   ]
 
   testCases.forEach(({ date, jd }) => {
@@ -100,7 +100,7 @@ describe('Paran Bisection Solver', () => {
       { planetId: 'sun', ra: 0, dec: 10 },
       'rise',
       { planetId: 'moon', ra: 45, dec: 20 },
-      'culminate'
+      'culminate',
     )
 
     if (result) {
@@ -114,7 +114,8 @@ describe('Paran Bisection Solver', () => {
       'rise',
       { planetId: 'moon', ra: 0, dec: -89 },
       'rise',
-      60, 90 // High latitudes where both are circumpolar
+      60,
+      90, // High latitudes where both are circumpolar
     )
 
     // Should find no valid paran or return null
@@ -125,12 +126,14 @@ describe('Paran Bisection Solver', () => {
 
     for (const e1 of events) {
       for (const e2 of events) {
-        expect(() => findParanLatitude(
-          { planetId: 'sun', ra: 0, dec: 10 },
-          e1 as any,
-          { planetId: 'moon', ra: 90, dec: 15 },
-          e2 as any
-        )).not.toThrow()
+        expect(() =>
+          findParanLatitude(
+            { planetId: 'sun', ra: 0, dec: 10 },
+            e1 as any,
+            { planetId: 'moon', ra: 90, dec: 15 },
+            e2 as any,
+          ),
+        ).not.toThrow()
       }
     }
   })
@@ -286,7 +289,7 @@ describe('Calculate Complete Action', () => {
     await expect(
       t.action(api.actions.calculate.calculateComplete, {
         chartId: 'invalid_id' as any,
-      })
+      }),
     ).rejects.toThrow()
   })
 })
@@ -628,10 +631,10 @@ jobs:
 
 ## 8. Coverage Requirements
 
-| Category | Minimum Coverage |
-|----------|------------------|
-| Calculation functions | 90% |
-| Components | 80% |
-| Queries/Mutations | 85% |
-| Actions | 75% |
-| Overall | 80% |
+| Category              | Minimum Coverage |
+| --------------------- | ---------------- |
+| Calculation functions | 90%              |
+| Components            | 80%              |
+| Queries/Mutations     | 85%              |
+| Actions               | 75%              |
+| Overall               | 80%              |

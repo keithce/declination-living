@@ -24,18 +24,18 @@ The recommendation system combines all previous calculations to suggest optimal 
 
 The PDF defines these primary vibe categories:
 
-| Vibe | Primary Planets | Focus |
-|------|-----------------|-------|
-| Wealth | Jupiter, Sun, Venus | Financial abundance |
-| Love | Venus, Moon, Neptune | Relationships, romance |
-| Career | Saturn, Sun, Mars | Professional success |
-| Creativity | Venus, Neptune, Mercury | Artistic expression |
-| Spirituality | Neptune, Moon, Jupiter | Inner development |
-| Adventure | Mars, Jupiter, Uranus | Exploration, risk |
-| Healing | Moon, Neptune, Chiron* | Health, recovery |
-| Learning | Mercury, Jupiter, Uranus | Education, knowledge |
+| Vibe         | Primary Planets          | Focus                  |
+| ------------ | ------------------------ | ---------------------- |
+| Wealth       | Jupiter, Sun, Venus      | Financial abundance    |
+| Love         | Venus, Moon, Neptune     | Relationships, romance |
+| Career       | Saturn, Sun, Mars        | Professional success   |
+| Creativity   | Venus, Neptune, Mercury  | Artistic expression    |
+| Spirituality | Neptune, Moon, Jupiter   | Inner development      |
+| Adventure    | Mars, Jupiter, Uranus    | Exploration, risk      |
+| Healing      | Moon, Neptune, Chiron\*  | Health, recovery       |
+| Learning     | Mercury, Jupiter, Uranus | Education, knowledge   |
 
-*Note: Chiron not included in current 10-planet system
+\*Note: Chiron not included in current 10-planet system
 
 ## Tasks
 
@@ -55,7 +55,7 @@ const DEFAULT_WEIGHT = 0.5
 function createWeights(
   primary: PlanetId[],
   primaryWeight: number = 2.0,
-  secondaryWeight: number = 1.0
+  secondaryWeight: number = 1.0,
 ): PlanetWeights {
   const weights: PlanetWeights = {
     sun: DEFAULT_WEIGHT,
@@ -169,18 +169,24 @@ export function matchVibeFromKeywords(input: string): VibeCategory | null {
  * Get vibe by ID
  */
 export function getVibeById(id: string): VibeCategory | undefined {
-  return PRESET_VIBES.find(v => v.id === id)
+  return PRESET_VIBES.find((v) => v.id === id)
 }
 
 /**
  * Blend multiple vibes into custom weights
  */
-export function blendVibes(
-  vibes: Array<{ vibe: VibeCategory; weight: number }>
-): PlanetWeights {
+export function blendVibes(vibes: Array<{ vibe: VibeCategory; weight: number }>): PlanetWeights {
   const blended: PlanetWeights = {
-    sun: 0, moon: 0, mercury: 0, venus: 0, mars: 0,
-    jupiter: 0, saturn: 0, uranus: 0, neptune: 0, pluto: 0,
+    sun: 0,
+    moon: 0,
+    mercury: 0,
+    venus: 0,
+    mars: 0,
+    jupiter: 0,
+    saturn: 0,
+    uranus: 0,
+    neptune: 0,
+    pluto: 0,
   }
 
   let totalWeight = 0
@@ -253,7 +259,7 @@ const BAND_SIZE = 5 // degrees
 function scoreBand(
   minLat: number,
   maxLat: number,
-  input: OptimizationInput
+  input: OptimizationInput,
 ): { score: number; dominantPlanets: PlanetId[]; reasons: string[] } {
   const { zenithLines, parans, weights } = input
   const midLat = (minLat + maxLat) / 2
@@ -345,8 +351,8 @@ export function findOptimalBands(input: OptimizationInput): OptimizationResult {
 
   // Get optimal latitudes (top 5 from each category)
   const optimalLatitudes = [
-    ...bands.slice(0, 5).map(b => (b.minLat + b.maxLat) / 2),
-    ...paranLatitudes.slice(0, 5).map(p => p.latitude),
+    ...bands.slice(0, 5).map((b) => (b.minLat + b.maxLat) / 2),
+    ...paranLatitudes.slice(0, 5).map((p) => p.latitude),
   ]
 
   return { bands, paranLatitudes, optimalLatitudes: [...new Set(optimalLatitudes)] }
@@ -357,7 +363,7 @@ export function findOptimalBands(input: OptimizationInput): OptimizationResult {
  */
 export function scoreLocation(
   location: GeoLocation,
-  input: OptimizationInput
+  input: OptimizationInput,
 ): { score: number; breakdown: Record<string, number> } {
   const { zenithLines, acgLines, parans, weights } = input
   const { latitude, longitude } = location
@@ -492,7 +498,9 @@ export function calculateSafetyScore(input: SafetyInput): SafetyScore {
       if (MALEFICS.includes(aspect.planet)) {
         if (aspect.aspect === 'conjunction') {
           penaltyPoints += 20
-          warnings.push(`${aspect.planet} conjunct ${aspect.angle} - intense but challenging energy`)
+          warnings.push(
+            `${aspect.planet} conjunct ${aspect.angle} - intense but challenging energy`,
+          )
         } else if (aspect.aspect === 'square') {
           penaltyPoints += 15
           warnings.push(`${aspect.planet} square ${aspect.angle} - friction with life direction`)
@@ -519,10 +527,7 @@ export function calculateSafetyScore(input: SafetyInput): SafetyScore {
 /**
  * Check if a location passes minimum safety threshold
  */
-export function meetsMinimumSafety(
-  safetyScore: SafetyScore,
-  threshold: number = 60
-): boolean {
+export function meetsMinimumSafety(safetyScore: SafetyScore, threshold: number = 60): boolean {
   return safetyScore.overall >= threshold
 }
 
@@ -603,29 +608,22 @@ export function rankCities(input: RankingInput): RankedCity[] {
     // Calculate location score
     const locationResult = scoreLocation(
       { latitude: city.latitude, longitude: city.longitude },
-      { zenithLines, acgLines, parans, weights }
+      { zenithLines, acgLines, parans, weights },
     )
 
     // Calculate safety score (simplified without house data)
-    const safetyInput = dignities ? {
-      dignities: Object.fromEntries(
-        Object.entries(dignities).map(([planet, d]) => [
-          planet,
-          { total: d.total } as any
-        ])
-      )
-    } : {}
+    const safetyInput = dignities
+      ? {
+          dignities: Object.fromEntries(
+            Object.entries(dignities).map(([planet, d]) => [planet, { total: d.total } as any]),
+          ),
+        }
+      : {}
 
     const safety = calculateSafetyScore(safetyInput)
 
     // Generate highlights
-    const highlights = generateHighlights(
-      city,
-      zenithLines,
-      acgLines,
-      parans,
-      weights
-    )
+    const highlights = generateHighlights(city, zenithLines, acgLines, parans, weights)
 
     // Apply safety filter
     if (safety.overall >= safetyThreshold || !dignities) {
@@ -654,7 +652,7 @@ function generateHighlights(
   zenithLines: ZenithLine[],
   acgLines: ACGLine[],
   parans: ParanPoint[],
-  weights: PlanetWeights
+  weights: PlanetWeights,
 ): string[] {
   const highlights: string[] = []
   const { latitude, longitude } = city
@@ -663,17 +661,18 @@ function generateHighlights(
   for (const zl of zenithLines) {
     if (Math.abs(latitude - zl.declination) <= 1.0) {
       if (weights[zl.planet] >= 1.5) {
-        highlights.push(`${zl.planet.charAt(0).toUpperCase() + zl.planet.slice(1)} overhead (zenith)`)
+        highlights.push(
+          `${zl.planet.charAt(0).toUpperCase() + zl.planet.slice(1)} overhead (zenith)`,
+        )
       }
     }
   }
 
   // Check ACG lines (simplified - would need actual crossing check)
-  const nearbyLines = acgLines.filter(line =>
-    line.points.some(p =>
-      Math.abs(latitude - p.latitude) <= 3 &&
-      Math.abs(longitude - p.longitude) <= 10
-    )
+  const nearbyLines = acgLines.filter((line) =>
+    line.points.some(
+      (p) => Math.abs(latitude - p.latitude) <= 3 && Math.abs(longitude - p.longitude) <= 10,
+    ),
   )
 
   for (const line of nearbyLines.slice(0, 2)) {
@@ -681,13 +680,13 @@ function generateHighlights(
       ASC: 'Rising',
       DSC: 'Setting',
       MC: 'Culminating',
-      IC: 'Nadir'
+      IC: 'Nadir',
     }
     highlights.push(`${line.planet} ${lineTypeNames[line.lineType]} line nearby`)
   }
 
   // Check parans
-  const nearbyParans = parans.filter(p => Math.abs(latitude - p.latitude) <= 1.0)
+  const nearbyParans = parans.filter((p) => Math.abs(latitude - p.latitude) <= 1.0)
 
   for (const paran of nearbyParans.slice(0, 2)) {
     if ((paran.strength ?? 0) >= 0.8) {
@@ -703,15 +702,13 @@ function generateHighlights(
  */
 export function getCitiesInBands(
   cities: CityData[],
-  bands: Array<{ minLat: number; maxLat: number; score: number }>
+  bands: Array<{ minLat: number; maxLat: number; score: number }>,
 ): Map<string, CityData[]> {
   const result = new Map<string, CityData[]>()
 
   for (const band of bands) {
     const key = `${band.minLat}-${band.maxLat}`
-    const citiesInBand = cities.filter(
-      c => c.latitude >= band.minLat && c.latitude < band.maxLat
-    )
+    const citiesInBand = cities.filter((c) => c.latitude >= band.minLat && c.latitude < band.maxLat)
     result.set(key, citiesInBand)
   }
 
@@ -723,12 +720,12 @@ export function getCitiesInBands(
  */
 export function filterByTier(
   cities: CityData[],
-  minTier: 'major' | 'medium' | 'minor' | 'small'
+  minTier: 'major' | 'medium' | 'minor' | 'small',
 ): CityData[] {
   const tierOrder = ['major', 'medium', 'minor', 'small']
   const minIndex = tierOrder.indexOf(minTier)
 
-  return cities.filter(c => tierOrder.indexOf(c.tier) <= minIndex)
+  return cities.filter((c) => tierOrder.indexOf(c.tier) <= minIndex)
 }
 ```
 
@@ -763,40 +760,50 @@ export const matchVibe = internalAction({
 export const calculateRecommendations = internalAction({
   args: {
     vibeId: v.optional(v.string()),
-    customWeights: v.optional(v.object({
-      sun: v.number(),
-      moon: v.number(),
-      mercury: v.number(),
-      venus: v.number(),
-      mars: v.number(),
-      jupiter: v.number(),
-      saturn: v.number(),
-      uranus: v.number(),
-      neptune: v.number(),
-      pluto: v.number(),
-    })),
-    zenithLines: v.array(v.object({
-      planet: v.string(),
-      declination: v.number(),
-      orbMin: v.number(),
-      orbMax: v.number(),
-    })),
-    acgLines: v.array(v.object({
-      planet: v.string(),
-      lineType: v.string(),
-      points: v.array(v.object({
+    customWeights: v.optional(
+      v.object({
+        sun: v.number(),
+        moon: v.number(),
+        mercury: v.number(),
+        venus: v.number(),
+        mars: v.number(),
+        jupiter: v.number(),
+        saturn: v.number(),
+        uranus: v.number(),
+        neptune: v.number(),
+        pluto: v.number(),
+      }),
+    ),
+    zenithLines: v.array(
+      v.object({
+        planet: v.string(),
+        declination: v.number(),
+        orbMin: v.number(),
+        orbMax: v.number(),
+      }),
+    ),
+    acgLines: v.array(
+      v.object({
+        planet: v.string(),
+        lineType: v.string(),
+        points: v.array(
+          v.object({
+            latitude: v.number(),
+            longitude: v.number(),
+          }),
+        ),
+      }),
+    ),
+    parans: v.array(
+      v.object({
+        planet1: v.string(),
+        event1: v.string(),
+        planet2: v.string(),
+        event2: v.string(),
         latitude: v.number(),
-        longitude: v.number(),
-      })),
-    })),
-    parans: v.array(v.object({
-      planet1: v.string(),
-      event1: v.string(),
-      planet2: v.string(),
-      event2: v.string(),
-      latitude: v.number(),
-      strength: v.optional(v.number()),
-    })),
+        strength: v.optional(v.number()),
+      }),
+    ),
     latitudeRange: v.optional(v.array(v.number())),
   },
   handler: async (ctx, args) => {
@@ -813,14 +820,22 @@ export const calculateRecommendations = internalAction({
     if (!weights) {
       // Default equal weights
       weights = {
-        sun: 1, moon: 1, mercury: 1, venus: 1, mars: 1,
-        jupiter: 1, saturn: 1, uranus: 1, neptune: 1, pluto: 1,
+        sun: 1,
+        moon: 1,
+        mercury: 1,
+        venus: 1,
+        mars: 1,
+        jupiter: 1,
+        saturn: 1,
+        uranus: 1,
+        neptune: 1,
+        pluto: 1,
       }
     }
 
     // Find optimal bands
     const latRange = args.latitudeRange
-      ? [args.latitudeRange[0], args.latitudeRange[1]] as [number, number]
+      ? ([args.latitudeRange[0], args.latitudeRange[1]] as [number, number])
       : undefined
 
     const optimization = findOptimalBands({
@@ -872,8 +887,8 @@ describe('Vibe Categories', () => {
   })
 
   it('blends vibes correctly', () => {
-    const wealth = PRESET_VIBES.find(v => v.id === 'wealth')!
-    const love = PRESET_VIBES.find(v => v.id === 'love')!
+    const wealth = PRESET_VIBES.find((v) => v.id === 'wealth')!
+    const love = PRESET_VIBES.find((v) => v.id === 'love')!
 
     const blended = blendVibes([
       { vibe: wealth, weight: 0.5 },

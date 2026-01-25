@@ -9,6 +9,7 @@ Complete reference for all Convex actions, mutations, and queries in the Declina
 Main entry point for chart calculations. Computes all planetary data, dignities, ACG lines, parans, and recommendations.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -16,6 +17,7 @@ Main entry point for chart calculations. Computes all planetary data, dignities,
 ```
 
 **Returns:**
+
 ```typescript
 {
   celestialBodies: CelestialBody[]
@@ -37,9 +39,10 @@ Main entry point for chart calculations. Computes all planetary data, dignities,
 ```
 
 **Example:**
+
 ```typescript
 const result = await ctx.runAction(api.actions.calculate.calculateComplete, {
-  chartId: 'kx7j9d8s...'
+  chartId: 'kx7j9d8s...',
 })
 ```
 
@@ -50,6 +53,7 @@ const result = await ctx.runAction(api.actions.calculate.calculateComplete, {
 Calculates positions for a specific date without saving to database.
 
 **Arguments:**
+
 ```typescript
 {
   year: number
@@ -63,6 +67,7 @@ Calculates positions for a specific date without saving to database.
 ```
 
 **Returns:**
+
 ```typescript
 {
   celestialBodies: CelestialBody[]
@@ -82,6 +87,7 @@ Calculates positions for a specific date without saving to database.
 Geocodes a city name using the Geoapify API.
 
 **Arguments:**
+
 ```typescript
 {
   query: string
@@ -90,6 +96,7 @@ Geocodes a city name using the Geoapify API.
 ```
 
 **Returns:**
+
 ```typescript
 {
   results: Array<{
@@ -110,6 +117,7 @@ Geocodes a city name using the Geoapify API.
 Matches a natural language query to a vibe category.
 
 **Arguments:**
+
 ```typescript
 {
   query: string
@@ -117,6 +125,7 @@ Matches a natural language query to a vibe category.
 ```
 
 **Returns:**
+
 ```typescript
 {
   matched: VibeCategory | null
@@ -134,6 +143,7 @@ Matches a natural language query to a vibe category.
 Creates a new chart with birth data.
 
 **Arguments:**
+
 ```typescript
 {
   name: string
@@ -151,6 +161,7 @@ Creates a new chart with birth data.
 ```
 
 **Returns:**
+
 ```typescript
 Id<'charts'>
 ```
@@ -162,6 +173,7 @@ Id<'charts'>
 Updates an existing chart.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -173,6 +185,7 @@ Updates an existing chart.
 ```
 
 **Returns:**
+
 ```typescript
 void
 ```
@@ -184,6 +197,7 @@ void
 Deletes a chart and associated analysis data.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -191,6 +205,7 @@ Deletes a chart and associated analysis data.
 ```
 
 **Returns:**
+
 ```typescript
 void
 ```
@@ -202,6 +217,7 @@ void
 Generates a unique sharing slug for a chart.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -209,6 +225,7 @@ Generates a unique sharing slug for a chart.
 ```
 
 **Returns:**
+
 ```typescript
 string // The generated slug
 ```
@@ -220,6 +237,7 @@ string // The generated slug
 Creates a custom vibe preset.
 
 **Arguments:**
+
 ```typescript
 {
   name: string
@@ -232,6 +250,7 @@ Creates a custom vibe preset.
 ```
 
 **Returns:**
+
 ```typescript
 Id<'vibes'>
 ```
@@ -243,6 +262,7 @@ Id<'vibes'>
 Updates default weights for user profile.
 
 **Arguments:**
+
 ```typescript
 {
   weights: PlanetWeights
@@ -250,6 +270,7 @@ Updates default weights for user profile.
 ```
 
 **Returns:**
+
 ```typescript
 void
 ```
@@ -263,6 +284,7 @@ void
 Gets a chart by ID.
 
 **Arguments:**
+
 ```typescript
 {
   id: Id<'charts'>
@@ -270,6 +292,7 @@ Gets a chart by ID.
 ```
 
 **Returns:**
+
 ```typescript
 Chart | null
 ```
@@ -281,6 +304,7 @@ Chart | null
 Gets a public chart by its share slug.
 
 **Arguments:**
+
 ```typescript
 {
   slug: string
@@ -288,6 +312,7 @@ Gets a public chart by its share slug.
 ```
 
 **Returns:**
+
 ```typescript
 Chart | null
 ```
@@ -299,6 +324,7 @@ Chart | null
 Lists all charts for the current user.
 
 **Arguments:**
+
 ```typescript
 {
   limit?: number
@@ -307,6 +333,7 @@ Lists all charts for the current user.
 ```
 
 **Returns:**
+
 ```typescript
 {
   charts: Chart[]
@@ -321,6 +348,7 @@ Lists all charts for the current user.
 Gets the computed analysis for a chart.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -328,6 +356,7 @@ Gets the computed analysis for a chart.
 ```
 
 **Returns:**
+
 ```typescript
 AnalysisResult | null
 ```
@@ -339,6 +368,7 @@ AnalysisResult | null
 Searches cities by name.
 
 **Arguments:**
+
 ```typescript
 {
   query: string
@@ -347,6 +377,7 @@ Searches cities by name.
 ```
 
 **Returns:**
+
 ```typescript
 City[]
 ```
@@ -358,6 +389,7 @@ City[]
 Gets cities within a latitude range.
 
 **Arguments:**
+
 ```typescript
 {
   minLat: number
@@ -368,6 +400,7 @@ Gets cities within a latitude range.
 ```
 
 **Returns:**
+
 ```typescript
 City[]
 ```
@@ -379,6 +412,7 @@ City[]
 Gets a city by ID.
 
 **Arguments:**
+
 ```typescript
 {
   id: Id<'cities'>
@@ -386,6 +420,7 @@ Gets a city by ID.
 ```
 
 **Returns:**
+
 ```typescript
 City | null
 ```
@@ -397,6 +432,7 @@ City | null
 Gets cities near a specific location.
 
 **Arguments:**
+
 ```typescript
 {
   latitude: number
@@ -407,6 +443,7 @@ Gets cities near a specific location.
 ```
 
 **Returns:**
+
 ```typescript
 Array<City & { distance: number }>
 ```
@@ -418,11 +455,14 @@ Array<City & { distance: number }>
 Gets all preset vibe categories.
 
 **Arguments:**
+
 ```typescript
-{}
+{
+}
 ```
 
 **Returns:**
+
 ```typescript
 VibeCategory[]
 ```
@@ -434,6 +474,7 @@ VibeCategory[]
 Gets a vibe by ID.
 
 **Arguments:**
+
 ```typescript
 {
   id: string
@@ -441,6 +482,7 @@ Gets a vibe by ID.
 ```
 
 **Returns:**
+
 ```typescript
 VibeCategory | null
 ```
@@ -452,11 +494,14 @@ VibeCategory | null
 Lists custom vibes created by user.
 
 **Arguments:**
+
 ```typescript
-{}
+{
+}
 ```
 
 **Returns:**
+
 ```typescript
 VibeCategory[]
 ```
@@ -468,6 +513,7 @@ VibeCategory[]
 Gets full paran data for a chart.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -475,6 +521,7 @@ Gets full paran data for a chart.
 ```
 
 **Returns:**
+
 ```typescript
 {
   points: ParanPoint[]
@@ -489,6 +536,7 @@ Gets full paran data for a chart.
 Gets full ACG line data for a chart.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -496,6 +544,7 @@ Gets full ACG line data for a chart.
 ```
 
 **Returns:**
+
 ```typescript
 ACGLine[]
 ```
@@ -507,6 +556,7 @@ ACGLine[]
 Gets ranked cities for a chart.
 
 **Arguments:**
+
 ```typescript
 {
   chartId: Id<'charts'>
@@ -516,6 +566,7 @@ Gets ranked cities for a chart.
 ```
 
 **Returns:**
+
 ```typescript
 RankedCity[]
 ```
@@ -558,8 +609,16 @@ Scores a batch of locations.
 
 ```typescript
 type PlanetId =
-  | 'sun' | 'moon' | 'mercury' | 'venus' | 'mars'
-  | 'jupiter' | 'saturn' | 'uranus' | 'neptune' | 'pluto'
+  | 'sun'
+  | 'moon'
+  | 'mercury'
+  | 'venus'
+  | 'mars'
+  | 'jupiter'
+  | 'saturn'
+  | 'uranus'
+  | 'neptune'
+  | 'pluto'
 ```
 
 ### `PlanetWeights`
@@ -583,14 +642,14 @@ interface EnhancedDeclination {
 ```typescript
 interface DignityScore {
   planet: PlanetId
-  domicile: number    // +5
-  exaltation: number  // +4
-  triplicity: number  // +3
-  terms: number       // +2
-  face: number        // +1
-  detriment: number   // -5
-  fall: number        // -4
-  peregrine: number   // -5
+  domicile: number // +5
+  exaltation: number // +4
+  triplicity: number // +3
+  terms: number // +2
+  face: number // +1
+  detriment: number // -5
+  fall: number // -4
+  peregrine: number // -5
   total: number
   indicator: 'R' | 'E' | 'd' | 'f' | '-'
   breakdown: string[]
@@ -693,22 +752,22 @@ interface SafetyScore {
 
 ## Error Codes
 
-| Code | Description |
-|------|-------------|
-| `CHART_NOT_FOUND` | Chart ID does not exist |
-| `UNAUTHORIZED` | User not authenticated or lacks permission |
-| `INVALID_DATE` | Birth date format invalid |
-| `CITY_NOT_FOUND` | City could not be geocoded |
-| `CALCULATION_ERROR` | Ephemeris calculation failed |
-| `RATE_LIMITED` | Too many requests |
+| Code                | Description                                |
+| ------------------- | ------------------------------------------ |
+| `CHART_NOT_FOUND`   | Chart ID does not exist                    |
+| `UNAUTHORIZED`      | User not authenticated or lacks permission |
+| `INVALID_DATE`      | Birth date format invalid                  |
+| `CITY_NOT_FOUND`    | City could not be geocoded                 |
+| `CALCULATION_ERROR` | Ephemeris calculation failed               |
+| `RATE_LIMITED`      | Too many requests                          |
 
 ---
 
 ## Rate Limits
 
-| Endpoint | Limit |
-|----------|-------|
-| `calculateComplete` | 10/minute |
-| `cities.search` | 60/minute |
-| `vibes.matchFromQuery` | 30/minute |
-| Other queries | 100/minute |
+| Endpoint               | Limit      |
+| ---------------------- | ---------- |
+| `calculateComplete`    | 10/minute  |
+| `cities.search`        | 60/minute  |
+| `vibes.matchFromQuery` | 30/minute  |
+| Other queries          | 100/minute |

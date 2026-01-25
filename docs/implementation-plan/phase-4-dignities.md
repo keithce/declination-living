@@ -15,20 +15,21 @@
 
 Essential dignities are a classical astrological scoring system that evaluates planet strength based on zodiac position. The PDF specifies a comprehensive scoring system:
 
-| Dignity | Points | Description |
-|---------|--------|-------------|
-| Domicile | +5 | Planet in sign it rules |
-| Exaltation | +4 | Planet in sign of exaltation |
-| Triplicity | +3 | Planet ruling element (by sect) |
-| Terms/Bounds | +2 | Planet in its terms |
-| Face/Decan | +1 | Planet in its face |
-| Detriment | -5 | Planet opposite its domicile |
-| Fall | -4 | Planet opposite its exaltation |
-| Peregrine | -5 | No positive dignity |
+| Dignity      | Points | Description                     |
+| ------------ | ------ | ------------------------------- |
+| Domicile     | +5     | Planet in sign it rules         |
+| Exaltation   | +4     | Planet in sign of exaltation    |
+| Triplicity   | +3     | Planet ruling element (by sect) |
+| Terms/Bounds | +2     | Planet in its terms             |
+| Face/Decan   | +1     | Planet in its face              |
+| Detriment    | -5     | Planet opposite its domicile    |
+| Fall         | -4     | Planet opposite its exaltation  |
+| Peregrine    | -5     | No positive dignity             |
 
 ### Indicators
 
 The PDF specifies single-character indicators:
+
 - **R** = Ruler (Domicile)
 - **E** = Exalted
 - **d** = Detriment
@@ -45,9 +46,18 @@ The PDF specifies single-character indicators:
 import type { ZodiacSign, SignPosition } from '../core/types'
 
 export const ZODIAC_SIGNS: ZodiacSign[] = [
-  'aries', 'taurus', 'gemini', 'cancer',
-  'leo', 'virgo', 'libra', 'scorpio',
-  'sagittarius', 'capricorn', 'aquarius', 'pisces'
+  'aries',
+  'taurus',
+  'gemini',
+  'cancer',
+  'leo',
+  'virgo',
+  'libra',
+  'scorpio',
+  'sagittarius',
+  'capricorn',
+  'aquarius',
+  'pisces',
 ]
 
 /**
@@ -63,7 +73,7 @@ export function longitudeToSign(longitude: number): SignPosition {
   const sign = ZODIAC_SIGNS[signIndex]
 
   // Degree within sign (0-30)
-  const totalDegree = lon - (signIndex * 30)
+  const totalDegree = lon - signIndex * 30
   const degree = Math.floor(totalDegree)
   const minute = Math.floor((totalDegree - degree) * 60)
 
@@ -136,7 +146,10 @@ export const EXALTATION: Partial<Record<PlanetId, ZodiacSign>> = {
  * Triplicity rulers by element and sect
  * Day = Sun above horizon, Night = Sun below horizon
  */
-export const TRIPLICITY: Record<string, { day: PlanetId; night: PlanetId; participating: PlanetId }> = {
+export const TRIPLICITY: Record<
+  string,
+  { day: PlanetId; night: PlanetId; participating: PlanetId }
+> = {
   fire: { day: 'sun', night: 'jupiter', participating: 'saturn' },
   earth: { day: 'venus', night: 'moon', participating: 'mars' },
   air: { day: 'saturn', night: 'mercury', participating: 'jupiter' },
@@ -166,18 +179,90 @@ export const SIGN_ELEMENT: Record<ZodiacSign, string> = {
  * Each entry is [planet, endDegree] where the term starts after previous end
  */
 export const TERMS_EGYPTIAN: Record<ZodiacSign, Array<[PlanetId, number]>> = {
-  aries: [['jupiter', 6], ['venus', 12], ['mercury', 20], ['mars', 25], ['saturn', 30]],
-  taurus: [['venus', 8], ['mercury', 14], ['jupiter', 22], ['saturn', 27], ['mars', 30]],
-  gemini: [['mercury', 6], ['jupiter', 12], ['venus', 17], ['mars', 24], ['saturn', 30]],
-  cancer: [['mars', 7], ['venus', 13], ['mercury', 19], ['jupiter', 26], ['saturn', 30]],
-  leo: [['jupiter', 6], ['venus', 11], ['saturn', 18], ['mercury', 24], ['mars', 30]],
-  virgo: [['mercury', 7], ['venus', 17], ['jupiter', 21], ['mars', 28], ['saturn', 30]],
-  libra: [['saturn', 6], ['mercury', 14], ['jupiter', 21], ['venus', 28], ['mars', 30]],
-  scorpio: [['mars', 7], ['venus', 11], ['mercury', 19], ['jupiter', 24], ['saturn', 30]],
-  sagittarius: [['jupiter', 12], ['venus', 17], ['mercury', 21], ['saturn', 26], ['mars', 30]],
-  capricorn: [['mercury', 7], ['jupiter', 14], ['venus', 22], ['saturn', 26], ['mars', 30]],
-  aquarius: [['mercury', 7], ['venus', 13], ['jupiter', 20], ['mars', 25], ['saturn', 30]],
-  pisces: [['venus', 12], ['jupiter', 16], ['mercury', 19], ['mars', 28], ['saturn', 30]],
+  aries: [
+    ['jupiter', 6],
+    ['venus', 12],
+    ['mercury', 20],
+    ['mars', 25],
+    ['saturn', 30],
+  ],
+  taurus: [
+    ['venus', 8],
+    ['mercury', 14],
+    ['jupiter', 22],
+    ['saturn', 27],
+    ['mars', 30],
+  ],
+  gemini: [
+    ['mercury', 6],
+    ['jupiter', 12],
+    ['venus', 17],
+    ['mars', 24],
+    ['saturn', 30],
+  ],
+  cancer: [
+    ['mars', 7],
+    ['venus', 13],
+    ['mercury', 19],
+    ['jupiter', 26],
+    ['saturn', 30],
+  ],
+  leo: [
+    ['jupiter', 6],
+    ['venus', 11],
+    ['saturn', 18],
+    ['mercury', 24],
+    ['mars', 30],
+  ],
+  virgo: [
+    ['mercury', 7],
+    ['venus', 17],
+    ['jupiter', 21],
+    ['mars', 28],
+    ['saturn', 30],
+  ],
+  libra: [
+    ['saturn', 6],
+    ['mercury', 14],
+    ['jupiter', 21],
+    ['venus', 28],
+    ['mars', 30],
+  ],
+  scorpio: [
+    ['mars', 7],
+    ['venus', 11],
+    ['mercury', 19],
+    ['jupiter', 24],
+    ['saturn', 30],
+  ],
+  sagittarius: [
+    ['jupiter', 12],
+    ['venus', 17],
+    ['mercury', 21],
+    ['saturn', 26],
+    ['mars', 30],
+  ],
+  capricorn: [
+    ['mercury', 7],
+    ['jupiter', 14],
+    ['venus', 22],
+    ['saturn', 26],
+    ['mars', 30],
+  ],
+  aquarius: [
+    ['mercury', 7],
+    ['venus', 13],
+    ['jupiter', 20],
+    ['mars', 25],
+    ['saturn', 30],
+  ],
+  pisces: [
+    ['venus', 12],
+    ['jupiter', 16],
+    ['mercury', 19],
+    ['mars', 28],
+    ['saturn', 30],
+  ],
 }
 
 /**
@@ -226,10 +311,7 @@ export function getFaceRuler(sign: ZodiacSign, degree: number): PlanetId {
 /**
  * Get triplicity ruler based on element and sect
  */
-export function getTriplicityRuler(
-  sign: ZodiacSign,
-  sect: 'day' | 'night'
-): PlanetId {
+export function getTriplicityRuler(sign: ZodiacSign, sect: 'day' | 'night'): PlanetId {
   const element = SIGN_ELEMENT[sign]
   return TRIPLICITY[element][sect]
 }
@@ -242,13 +324,7 @@ export function getTriplicityRuler(
 ```typescript
 import type { PlanetId, DignityScore, ZodiacSign, SignPosition } from '../core/types'
 import { longitudeToSign, getOppositeSign } from './position'
-import {
-  DOMICILE,
-  EXALTATION,
-  getTermRuler,
-  getFaceRuler,
-  getTriplicityRuler,
-} from './tables'
+import { DOMICILE, EXALTATION, getTermRuler, getFaceRuler, getTriplicityRuler } from './tables'
 
 // Point values
 const DOMICILE_POINTS = 5
@@ -362,8 +438,7 @@ export function calculateDignity(input: DignityInput): DignityScore {
     breakdown.push(`Peregrine (${PEREGRINE_POINTS})`)
   }
 
-  const total = domicile + exaltation + triplicity + terms + face +
-                detriment + fall + peregrine
+  const total = domicile + exaltation + triplicity + terms + face + detriment + fall + peregrine
 
   return {
     planet: planetId,
@@ -396,7 +471,7 @@ export function getDignityIndicator(score: DignityScore): string {
  */
 export function calculateAllDignities(
   longitudes: Record<PlanetId, number>,
-  sect: 'day' | 'night'
+  sect: 'day' | 'night',
 ): Record<PlanetId, DignityScore> {
   const dignities: Partial<Record<PlanetId, DignityScore>> = {}
 
@@ -452,10 +527,7 @@ export function sectFromSunAltitude(sunAltitude: number): 'day' | 'night' {
  * Calculate sect from Sun longitude and Ascendant
  * Day = Sun in upper hemisphere (ASC to DSC going up)
  */
-export function sectFromPositions(
-  sunLongitude: number,
-  ascendant: number
-): 'day' | 'night' {
+export function sectFromPositions(sunLongitude: number, ascendant: number): 'day' | 'night' {
   // Normalize
   let sun = sunLongitude % 360
   let asc = ascendant % 360
@@ -469,10 +541,10 @@ export function sectFromPositions(
   // Upper hemisphere: from ASC going through MC to DSC (clockwise)
   if (asc < desc) {
     // Normal case
-    return (sun >= asc && sun < desc) ? 'day' : 'night'
+    return sun >= asc && sun < desc ? 'day' : 'night'
   } else {
     // Wraps around 360
-    return (sun >= asc || sun < desc) ? 'day' : 'night'
+    return sun >= asc || sun < desc ? 'day' : 'night'
   }
 }
 
@@ -490,10 +562,7 @@ export const SECT_PLANETS: Record<'day' | 'night', PlanetId[]> = {
 /**
  * Check if a planet is in sect (matches chart sect)
  */
-export function isPlanetInSect(
-  planetId: PlanetId,
-  chartSect: 'day' | 'night'
-): boolean | null {
+export function isPlanetInSect(planetId: PlanetId, chartSect: 'day' | 'night'): boolean | null {
   // Mercury is neutral
   if (planetId === 'mercury') return null
 
@@ -507,10 +576,7 @@ export function isPlanetInSect(
  * Get sect bonus/malus for dignity calculation
  * In-sect planets are strengthened, out-of-sect weakened
  */
-export function getSectModifier(
-  planetId: PlanetId,
-  chartSect: 'day' | 'night'
-): number {
+export function getSectModifier(planetId: PlanetId, chartSect: 'day' | 'night'): number {
   const inSect = isPlanetInSect(planetId, chartSect)
 
   if (inSect === null) return 0 // Neutral
@@ -539,7 +605,7 @@ const planetIdValidator = v.union(
   v.literal('saturn'),
   v.literal('uranus'),
   v.literal('neptune'),
-  v.literal('pluto')
+  v.literal('pluto'),
 )
 
 export const calculateDignities = internalAction({
@@ -748,32 +814,32 @@ describe('Sect Calculations', () => {
 
 ### Domicile Rulers (Quick Reference)
 
-| Sign | Ruler(s) |
-|------|----------|
-| Aries | Mars |
-| Taurus | Venus |
-| Gemini | Mercury |
-| Cancer | Moon |
-| Leo | Sun |
-| Virgo | Mercury |
-| Libra | Venus |
-| Scorpio | Mars (Pluto) |
-| Sagittarius | Jupiter |
-| Capricorn | Saturn |
-| Aquarius | Saturn (Uranus) |
-| Pisces | Jupiter (Neptune) |
+| Sign        | Ruler(s)          |
+| ----------- | ----------------- |
+| Aries       | Mars              |
+| Taurus      | Venus             |
+| Gemini      | Mercury           |
+| Cancer      | Moon              |
+| Leo         | Sun               |
+| Virgo       | Mercury           |
+| Libra       | Venus             |
+| Scorpio     | Mars (Pluto)      |
+| Sagittarius | Jupiter           |
+| Capricorn   | Saturn            |
+| Aquarius    | Saturn (Uranus)   |
+| Pisces      | Jupiter (Neptune) |
 
 ### Exaltation Signs
 
-| Planet | Exaltation |
-|--------|------------|
-| Sun | Aries |
-| Moon | Taurus |
-| Mercury | Virgo |
-| Venus | Pisces |
-| Mars | Capricorn |
-| Jupiter | Cancer |
-| Saturn | Libra |
+| Planet  | Exaltation |
+| ------- | ---------- |
+| Sun     | Aries      |
+| Moon    | Taurus     |
+| Mercury | Virgo      |
+| Venus   | Pisces     |
+| Mars    | Capricorn  |
+| Jupiter | Cancer     |
+| Saturn  | Libra      |
 
 ## Next Phase
 

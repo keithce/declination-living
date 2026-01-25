@@ -9,35 +9,38 @@ This multi-phase plan transforms the current rudimentary implementation into a c
 ### What's Already Built
 
 **Backend (Convex)**:
+
 - Basic schema with charts, cities, analysis cache, vibes, presets
 - Calculation modules structure in `convex/calculations/`
 - Authentication tables via @convex-dev/auth
 - City database with population tiers and timezone support
 
 **Frontend**:
+
 - TanStack Start router setup
 - Basic calculator page with 3-step flow (birth data → weights → results)
 - 3D globe visualization with three-globe
 - shadcn/ui component integration
 
 **Types & Interfaces**:
+
 - Comprehensive type definitions in `core/types.ts`
 - Planet IDs, coordinate types, ACG/Paran/Dignity structures defined
 
 ### Gap Analysis
 
-| Feature | PDF Spec | Current State | Gap |
-|---------|----------|---------------|-----|
-| Swiss Ephemeris | Full WASM integration with lazy-loading | Basic stub/placeholder | **Major** |
-| ACG Line Solver | Circumpolar handling, 361-point resolution | Skeleton implementation | **Major** |
-| Paran Solver | Bisection method, ±10⁻⁶ precision | Not implemented | **Critical** |
-| Dignity Engine | Full essential dignity with bounds | Basic structure only | **Major** |
-| OOB Detection | Dynamic obliquity calculation | Flag in types | **Minor** |
-| Vibe Search | NLP keywords, weighted scoring | Schema exists | **Moderate** |
-| Safety Filter | House/aspect warnings | Types defined only | **Major** |
-| UI Results | Full analysis display | Minimal globe view | **Critical** |
-| Heatmaps | Latitude-longitude scoring grid | Not implemented | **Major** |
-| City Recommendations | Ranked list with details | Top locations array | **Moderate** |
+| Feature              | PDF Spec                                   | Current State           | Gap          |
+| -------------------- | ------------------------------------------ | ----------------------- | ------------ |
+| Swiss Ephemeris      | Full WASM integration with lazy-loading    | Basic stub/placeholder  | **Major**    |
+| ACG Line Solver      | Circumpolar handling, 361-point resolution | Skeleton implementation | **Major**    |
+| Paran Solver         | Bisection method, ±10⁻⁶ precision          | Not implemented         | **Critical** |
+| Dignity Engine       | Full essential dignity with bounds         | Basic structure only    | **Major**    |
+| OOB Detection        | Dynamic obliquity calculation              | Flag in types           | **Minor**    |
+| Vibe Search          | NLP keywords, weighted scoring             | Schema exists           | **Moderate** |
+| Safety Filter        | House/aspect warnings                      | Types defined only      | **Major**    |
+| UI Results           | Full analysis display                      | Minimal globe view      | **Critical** |
+| Heatmaps             | Latitude-longitude scoring grid            | Not implemented         | **Major**    |
+| City Recommendations | Ranked list with details                   | Top locations array     | **Moderate** |
 
 ## Plan Structure
 
@@ -91,15 +94,15 @@ This implementation plan is divided into 6 phases across 11 detailed documents:
 
 ## Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| Frontend | TanStack Start + React 19 | SSR/SPA framework |
-| Styling | Tailwind CSS v4 + shadcn/ui | UI components |
-| 3D Visualization | three-globe + Three.js | Globe rendering |
-| Backend | Convex | Real-time database & functions |
-| Ephemeris | swisseph-wasm | Planetary calculations |
-| Geocoding | Geoapify | City search & coordinates |
-| Auth | @convex-dev/auth | Anonymous + authenticated users |
+| Layer            | Technology                  | Purpose                         |
+| ---------------- | --------------------------- | ------------------------------- |
+| Frontend         | TanStack Start + React 19   | SSR/SPA framework               |
+| Styling          | Tailwind CSS v4 + shadcn/ui | UI components                   |
+| 3D Visualization | three-globe + Three.js      | Globe rendering                 |
+| Backend          | Convex                      | Real-time database & functions  |
+| Ephemeris        | swisseph-wasm               | Planetary calculations          |
+| Geocoding        | Geoapify                    | City search & coordinates       |
+| Auth             | @convex-dev/auth            | Anonymous + authenticated users |
 
 ## Success Metrics
 
@@ -191,5 +194,5 @@ convex/
 
 ---
 
-*Plan created: January 2026*
-*Target completion: March 2026*
+_Plan created: January 2026_
+_Target completion: March 2026_

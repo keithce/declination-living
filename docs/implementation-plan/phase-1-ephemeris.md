@@ -18,17 +18,20 @@ The Swiss Ephemeris provides sub-arcsecond precision for planetary positions. Th
 ### Key Formulas
 
 **Julian Day Number** (from PDF):
+
 ```
 JD = 367*Y - INT(7*(Y+INT((M+9)/12))/4) + INT(275*M/9) + D + 1721013.5 + UT/24
 ```
 
 **Obliquity of the Ecliptic** (mean obliquity, J2000):
+
 ```
 ε = 23°26'21.448" - 46.8150"T - 0.00059"T² + 0.001813"T³
 where T = (JD - 2451545.0) / 36525
 ```
 
 **Ecliptic to Equatorial Transformation**:
+
 ```
 sin(δ) = sin(β)cos(ε) + cos(β)sin(ε)sin(λ)
 cos(α)cos(δ) = cos(β)cos(λ)
@@ -78,9 +81,9 @@ export const SE_NEPTUNE = 8
 export const SE_PLUTO = 9
 
 // Calculation flags
-export const SEFLG_SPEED = 256        // Include speed in output
-export const SEFLG_EQUATORIAL = 2048  // Return equatorial coordinates
-export const SEFLG_SWIEPH = 2         // Use Swiss Ephemeris files
+export const SEFLG_SPEED = 256 // Include speed in output
+export const SEFLG_EQUATORIAL = 2048 // Return equatorial coordinates
+export const SEFLG_SWIEPH = 2 // Use Swiss Ephemeris files
 
 export const calculatePlanetPosition = internalAction({
   args: {
@@ -90,17 +93,13 @@ export const calculatePlanetPosition = internalAction({
   },
   handler: async (ctx, args) => {
     const swe = await getSwisseph()
-    const flags = args.flags ?? (SEFLG_SPEED | SEFLG_SWIEPH)
+    const flags = args.flags ?? SEFLG_SPEED | SEFLG_SWIEPH
 
     // Calculate ecliptic coordinates
     const eclipticResult = swe.calc_ut(args.julianDay, args.planetId, flags)
 
     // Calculate equatorial coordinates
-    const equatorialResult = swe.calc_ut(
-      args.julianDay,
-      args.planetId,
-      flags | SEFLG_EQUATORIAL
-    )
+    const equatorialResult = swe.calc_ut(args.julianDay, args.planetId, flags | SEFLG_EQUATORIAL)
 
     return {
       ecliptic: {
@@ -139,7 +138,7 @@ export function dateToJulianDay(
   day: number,
   hour: number = 0,
   minute: number = 0,
-  second: number = 0
+  second: number = 0,
 ): number {
   // Adjust for January/February
   let y = year
@@ -154,9 +153,7 @@ export function dateToJulianDay(
   const b = 2 - a + Math.floor(a / 4)
 
   // Calculate JD
-  const jd = Math.floor(365.25 * (y + 4716)) +
-             Math.floor(30.6001 * (m + 1)) +
-             day + b - 1524.5
+  const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524.5
 
   // Add fractional day
   const dayFraction = (hour + minute / 60 + second / 3600) / 24
@@ -216,7 +213,7 @@ export function nowJulianDay(): number {
     now.getUTCDate(),
     now.getUTCHours(),
     now.getUTCMinutes(),
-    now.getUTCSeconds()
+    now.getUTCSeconds(),
   )
 }
 
@@ -229,13 +226,13 @@ export function localToUTC(
   day: number,
   hour: number,
   minute: number,
-  timezoneOffset: number
+  timezoneOffset: number,
 ): { year: number; month: number; day: number; hour: number; minute: number } {
   // Create date in local time
   const localDate = new Date(year, month - 1, day, hour, minute)
 
   // Adjust for timezone (offset is hours from UTC, positive = east)
-  const utcMs = localDate.getTime() - (timezoneOffset * 60 * 60 * 1000)
+  const utcMs = localDate.getTime() - timezoneOffset * 60 * 60 * 1000
   const utcDate = new Date(utcMs)
 
   return {
@@ -274,10 +271,8 @@ export function calculateObliquity(jd: number): number {
   const epsilon0 = 23.439291111 // degrees at J2000.0
 
   // Polynomial terms
-  const obliquity = epsilon0 -
-    (46.815 / 3600) * T -
-    (0.00059 / 3600) * T * T +
-    (0.001813 / 3600) * T * T * T
+  const obliquity =
+    epsilon0 - (46.815 / 3600) * T - (0.00059 / 3600) * T * T + (0.001813 / 3600) * T * T * T
 
   return obliquity
 }
@@ -292,20 +287,19 @@ export function calculateObliquity(jd: number): number {
 export function eclipticToEquatorial(
   longitude: number,
   latitude: number,
-  obliquity: number
+  obliquity: number,
 ): { ra: number; dec: number } {
   const lambda = longitude * DEG_TO_RAD
   const beta = latitude * DEG_TO_RAD
   const epsilon = obliquity * DEG_TO_RAD
 
   // Calculate declination
-  const sinDec = Math.sin(beta) * Math.cos(epsilon) +
-                 Math.cos(beta) * Math.sin(epsilon) * Math.sin(lambda)
+  const sinDec =
+    Math.sin(beta) * Math.cos(epsilon) + Math.cos(beta) * Math.sin(epsilon) * Math.sin(lambda)
   const dec = Math.asin(sinDec) * RAD_TO_DEG
 
   // Calculate right ascension
-  const y = Math.sin(lambda) * Math.cos(epsilon) -
-            Math.tan(beta) * Math.sin(epsilon)
+  const y = Math.sin(lambda) * Math.cos(epsilon) - Math.tan(beta) * Math.sin(epsilon)
   const x = Math.cos(lambda)
   let ra = Math.atan2(y, x) * RAD_TO_DEG
 
@@ -327,7 +321,7 @@ export function equatorialToHorizontal(
   ra: number,
   dec: number,
   latitude: number,
-  lst: number
+  lst: number,
 ): { altitude: number; azimuth: number } {
   // Hour angle
   const ha = (lst - ra) * DEG_TO_RAD
@@ -335,14 +329,13 @@ export function equatorialToHorizontal(
   const latRad = latitude * DEG_TO_RAD
 
   // Calculate altitude
-  const sinAlt = Math.sin(decRad) * Math.sin(latRad) +
-                 Math.cos(decRad) * Math.cos(latRad) * Math.cos(ha)
+  const sinAlt =
+    Math.sin(decRad) * Math.sin(latRad) + Math.cos(decRad) * Math.cos(latRad) * Math.cos(ha)
   const altitude = Math.asin(sinAlt) * RAD_TO_DEG
 
   // Calculate azimuth
   const y = -Math.cos(decRad) * Math.sin(ha)
-  const x = Math.sin(decRad) * Math.cos(latRad) -
-            Math.cos(decRad) * Math.sin(latRad) * Math.cos(ha)
+  const x = Math.sin(decRad) * Math.cos(latRad) - Math.cos(decRad) * Math.sin(latRad) * Math.cos(ha)
   let azimuth = Math.atan2(y, x) * RAD_TO_DEG
 
   // Normalize to 0-360 (N=0, E=90)
@@ -361,10 +354,8 @@ export function greenwichSiderealTime(jd: number): number {
   const T = (jd - 2451545.0) / 36525
 
   // Mean sidereal time at Greenwich (in degrees)
-  let gst = 280.46061837 +
-            360.98564736629 * (jd - 2451545.0) +
-            0.000387933 * T * T -
-            T * T * T / 38710000
+  let gst =
+    280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T - (T * T * T) / 38710000
 
   // Normalize to 0-360
   gst = gst % 360
@@ -394,7 +385,7 @@ export function localSiderealTime(gst: number, longitude: number): number {
  */
 export function semiDiurnalArc(
   dec: number,
-  latitude: number
+  latitude: number,
 ): { sda: number; neverSets: boolean; neverRises: boolean } {
   const decRad = dec * DEG_TO_RAD
   const latRad = latitude * DEG_TO_RAD
@@ -425,7 +416,7 @@ export function semiDiurnalArc(
  */
 export function checkOutOfBounds(
   dec: number,
-  obliquity: number
+  obliquity: number,
 ): { isOOB: boolean; oobDegrees: number } {
   const absDec = Math.abs(dec)
   if (absDec > obliquity) {
@@ -447,19 +438,34 @@ import {
   calculateObliquity,
   eclipticToEquatorial,
   greenwichSiderealTime,
-  checkOutOfBounds
+  checkOutOfBounds,
 } from './coordinates'
 import { PLANET_IDS, type PlanetId, type CelestialBody } from '../core/types'
 
 const PLANET_SE_IDS: Record<PlanetId, number> = {
-  sun: 0, moon: 1, mercury: 2, venus: 3, mars: 4,
-  jupiter: 5, saturn: 6, uranus: 7, neptune: 8, pluto: 9
+  sun: 0,
+  moon: 1,
+  mercury: 2,
+  venus: 3,
+  mars: 4,
+  jupiter: 5,
+  saturn: 6,
+  uranus: 7,
+  neptune: 8,
+  pluto: 9,
 }
 
 const PLANET_NAMES: Record<PlanetId, string> = {
-  sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus',
-  mars: 'Mars', jupiter: 'Jupiter', saturn: 'Saturn',
-  uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto'
+  sun: 'Sun',
+  moon: 'Moon',
+  mercury: 'Mercury',
+  venus: 'Venus',
+  mars: 'Mars',
+  jupiter: 'Jupiter',
+  saturn: 'Saturn',
+  uranus: 'Uranus',
+  neptune: 'Neptune',
+  pluto: 'Pluto',
 }
 
 export const calculateAllPlanets = internalAction({
@@ -474,10 +480,7 @@ export const calculateAllPlanets = internalAction({
   },
   handler: async (ctx, args) => {
     // Calculate Julian Day
-    const jd = dateToJulianDay(
-      args.year, args.month, args.day,
-      args.hour, args.minute
-    )
+    const jd = dateToJulianDay(args.year, args.month, args.day, args.hour, args.minute)
 
     // Calculate obliquity
     const obliquity = calculateObliquity(jd)
@@ -494,7 +497,7 @@ export const calculateAllPlanets = internalAction({
       // Call Swiss Ephemeris for this planet
       const position = await ctx.runAction(
         'calculations/ephemeris/swisseph:calculatePlanetPosition',
-        { julianDay: jd, planetId: PLANET_SE_IDS[planetId] }
+        { julianDay: jd, planetId: PLANET_SE_IDS[planetId] },
       )
 
       // Check OOB status
@@ -537,7 +540,7 @@ export const calculateAllPlanets = internalAction({
         julianDay: jd,
         obliquity,
         greenwichSiderealTime: gst,
-      }
+      },
     }
   },
 })
@@ -569,8 +572,11 @@ describe('Julian Day Calculations', () => {
   it('round-trips date correctly', () => {
     const original = { year: 1985, month: 7, day: 21, hour: 14, minute: 30 }
     const jd = dateToJulianDay(
-      original.year, original.month, original.day,
-      original.hour, original.minute
+      original.year,
+      original.month,
+      original.day,
+      original.hour,
+      original.minute,
     )
     const result = julianDayToDate(jd)
 
@@ -590,7 +596,7 @@ import {
   calculateObliquity,
   eclipticToEquatorial,
   semiDiurnalArc,
-  checkOutOfBounds
+  checkOutOfBounds,
 } from '../coordinates'
 
 describe('Coordinate Transformations', () => {

@@ -18,6 +18,7 @@ Parans (from Greek "paranatellonta" - rising alongside) are powerful configurati
 ### Key Concepts
 
 **Angular Events**:
+
 - **Rise**: Planet crosses eastern horizon (altitude = 0, ascending)
 - **Set**: Planet crosses western horizon (altitude = 0, descending)
 - **Culminate (MC)**: Planet reaches highest point (hour angle = 0)
@@ -29,6 +30,7 @@ At a specific latitude, two different planets experience angular events simultan
 ### Key Formula
 
 **Hour Angle at Rising/Setting**:
+
 ```
 cos(H) = -tan(δ) × tan(φ)
 
@@ -40,6 +42,7 @@ where:
 
 **Bisection Method**:
 To find the latitude where two planets have simultaneous angular events:
+
 1. Start with latitude bounds [lat_low, lat_high]
 2. Calculate event times for both planets at midpoint
 3. If Planet1 event occurs before Planet2 event, adjust bounds
@@ -71,11 +74,7 @@ export interface EventTime {
 /**
  * Calculate the LST at which a planet rises at a given latitude
  */
-export function calculateRiseTime(
-  ra: number,
-  dec: number,
-  latitude: number
-): EventTime {
+export function calculateRiseTime(ra: number, dec: number, latitude: number): EventTime {
   const decRad = dec * DEG_TO_RAD
   const latRad = latitude * DEG_TO_RAD
 
@@ -124,11 +123,7 @@ export function calculateRiseTime(
 /**
  * Calculate the LST at which a planet sets at a given latitude
  */
-export function calculateSetTime(
-  ra: number,
-  dec: number,
-  latitude: number
-): EventTime {
+export function calculateSetTime(ra: number, dec: number, latitude: number): EventTime {
   const decRad = dec * DEG_TO_RAD
   const latRad = latitude * DEG_TO_RAD
 
@@ -205,7 +200,7 @@ export function calculateAllEventTimes(
   planetId: PlanetId,
   ra: number,
   dec: number,
-  latitude: number
+  latitude: number,
 ): EventTime[] {
   const rise = calculateRiseTime(ra, dec, latitude)
   const set = calculateSetTime(ra, dec, latitude)
@@ -266,12 +261,7 @@ interface ParanSearchResult {
 /**
  * Get event time for a specific event type
  */
-function getEventTime(
-  ra: number,
-  dec: number,
-  latitude: number,
-  event: AngularEvent
-): EventTime {
+function getEventTime(ra: number, dec: number, latitude: number, event: AngularEvent): EventTime {
   switch (event) {
     case 'rise':
       return calculateRiseTime(ra, dec, latitude)
@@ -293,7 +283,7 @@ function signedTimeDifference(
   event1: AngularEvent,
   planet2: PlanetData,
   event2: AngularEvent,
-  latitude: number
+  latitude: number,
 ): number | null {
   const time1 = getEventTime(planet1.ra, planet1.dec, latitude, event1)
   const time2 = getEventTime(planet2.ra, planet2.dec, latitude, event2)
@@ -323,7 +313,7 @@ export function findParanLatitude(
   planet2: PlanetData,
   event2: AngularEvent,
   latLow: number = -85,
-  latHigh: number = 85
+  latHigh: number = 85,
 ): ParanSearchResult | null {
   // Check if there's a sign change in the time difference
   const diffLow = signedTimeDifference(planet1, event1, planet2, event2, latLow)
@@ -432,12 +422,9 @@ export function findParanLatitude(
  * 1.0 = exact (0° time difference)
  * 0.0 = at threshold (e.g., 1° time difference)
  */
-export function calculateParanStrength(
-  timeDifference: number,
-  maxOrb: number = 1.0
-): number {
+export function calculateParanStrength(timeDifference: number, maxOrb: number = 1.0): number {
   if (timeDifference > maxOrb) return 0
-  return 1 - (timeDifference / maxOrb)
+  return 1 - timeDifference / maxOrb
 }
 ```
 
@@ -479,7 +466,7 @@ function categorizeEventPair(event1: AngularEvent, event2: AngularEvent): EventP
  */
 export function findAllParans(
   positions: PlanetPosition[],
-  strengthThreshold: number = 0.5
+  strengthThreshold: number = 0.5,
 ): ParanResult {
   const points: ParanPoint[] = []
   const summary = {
@@ -506,12 +493,7 @@ export function findAllParans(
           }
 
           // Find paran latitude for this combination
-          const result = findParanLatitude(
-            { ...planet1 },
-            event1,
-            { ...planet2 },
-            event2
-          )
+          const result = findParanLatitude({ ...planet1 }, event1, { ...planet2 }, event2)
 
           if (result !== null) {
             const strength = calculateParanStrength(result.timeDifference)
@@ -548,23 +530,15 @@ export function findAllParans(
 /**
  * Get the top N parans by strength
  */
-export function getTopParans(
-  result: ParanResult,
-  limit: number = 20
-): ParanPoint[] {
+export function getTopParans(result: ParanResult, limit: number = 20): ParanPoint[] {
   return result.points.slice(0, limit)
 }
 
 /**
  * Find parans involving a specific planet
  */
-export function getParansForPlanet(
-  result: ParanResult,
-  planetId: PlanetId
-): ParanPoint[] {
-  return result.points.filter(
-    p => p.planet1 === planetId || p.planet2 === planetId
-  )
+export function getParansForPlanet(result: ParanResult, planetId: PlanetId): ParanPoint[] {
+  return result.points.filter((p) => p.planet1 === planetId || p.planet2 === planetId)
 }
 
 /**
@@ -573,11 +547,9 @@ export function getParansForPlanet(
 export function getParansAtLatitude(
   result: ParanResult,
   latitude: number,
-  orb: number = 2.0
+  orb: number = 2.0,
 ): ParanPoint[] {
-  return result.points.filter(
-    p => Math.abs(p.latitude - latitude) <= orb
-  )
+  return result.points.filter((p) => Math.abs(p.latitude - latitude) <= orb)
 }
 
 /**
@@ -585,7 +557,7 @@ export function getParansAtLatitude(
  */
 export function groupParansByLatitude(
   result: ParanResult,
-  bandSize: number = 5
+  bandSize: number = 5,
 ): Map<number, ParanPoint[]> {
   const groups = new Map<number, ParanPoint[]>()
 
@@ -623,16 +595,18 @@ const planetIdValidator = v.union(
   v.literal('saturn'),
   v.literal('uranus'),
   v.literal('neptune'),
-  v.literal('pluto')
+  v.literal('pluto'),
 )
 
 export const calculateParans = internalAction({
   args: {
-    positions: v.array(v.object({
-      planetId: planetIdValidator,
-      ra: v.number(),
-      dec: v.number(),
-    })),
+    positions: v.array(
+      v.object({
+        planetId: planetIdValidator,
+        ra: v.number(),
+        dec: v.number(),
+      }),
+    ),
     strengthThreshold: v.optional(v.number()),
     topLimit: v.optional(v.number()),
   },
@@ -656,14 +630,16 @@ export const calculateParans = internalAction({
 export const getParansForLocation = internalAction({
   args: {
     parans: v.object({
-      points: v.array(v.object({
-        planet1: planetIdValidator,
-        event1: v.string(),
-        planet2: planetIdValidator,
-        event2: v.string(),
-        latitude: v.number(),
-        strength: v.optional(v.number()),
-      })),
+      points: v.array(
+        v.object({
+          planet1: planetIdValidator,
+          event1: v.string(),
+          planet2: planetIdValidator,
+          event2: v.string(),
+          latitude: v.number(),
+          strength: v.optional(v.number()),
+        }),
+      ),
       summary: v.object({
         riseRise: v.number(),
         riseCulminate: v.number(),
@@ -680,7 +656,7 @@ export const getParansForLocation = internalAction({
     const orb = args.orb ?? 2.0
 
     const relevantParans = args.parans.points.filter(
-      p => Math.abs(p.latitude - args.latitude) <= orb
+      (p) => Math.abs(p.latitude - args.latitude) <= orb,
     )
 
     return {
@@ -704,7 +680,7 @@ import {
   calculateRiseTime,
   calculateSetTime,
   calculateCulminateTime,
-  lstDifference
+  lstDifference,
 } from '../events'
 
 describe('Event Time Calculations', () => {
@@ -755,7 +731,7 @@ describe('Paran Bisection Solver', () => {
       { planetId: 'sun', ra: 0, dec: 10 },
       'rise',
       { planetId: 'moon', ra: 90, dec: 15 },
-      'culminate'
+      'culminate',
     )
 
     expect(result).not.toBeNull()
@@ -774,7 +750,7 @@ describe('Paran Bisection Solver', () => {
       { planetId: 'moon', ra: 0, dec: -80 },
       'rise',
       60, // Both circumpolar at these latitudes
-      85
+      85,
     )
 
     // This should either find a paran or return null
@@ -855,6 +831,7 @@ describe('Paran Catalog', () => {
 ## Performance Notes
 
 The paran solver iterates through:
+
 - 10 planets × 9 other planets = 90 pairs (actually 45 unique pairs)
 - 4 events × 4 events = 16 combinations per pair
 - Total: ~720 paran searches per chart

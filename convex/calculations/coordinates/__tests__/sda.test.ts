@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateSDA,
   getCircumpolarLatitude,
-  isCircumpolar,
-  neverRises,
-  latitudeForHourAngle,
   getDiurnalArcHours,
   getNocturnalArcHours,
   getRiseSetLatitudeRange,
   hourAngleAtAltitude,
+  isCircumpolar,
+  latitudeForHourAngle,
+  neverRises,
 } from '../sda'
 
 describe('Semi-Diurnal Arc Calculations', () => {

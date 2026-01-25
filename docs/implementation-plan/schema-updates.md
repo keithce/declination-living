@@ -427,27 +427,24 @@ export const planetIdValidator = v.union(
   v.literal('saturn'),
   v.literal('uranus'),
   v.literal('neptune'),
-  v.literal('pluto')
+  v.literal('pluto'),
 )
 
 export const angularEventValidator = v.union(
   v.literal('rise'),
   v.literal('set'),
   v.literal('culminate'),
-  v.literal('anti_culminate')
+  v.literal('anti_culminate'),
 )
 
-export const sectValidator = v.union(
-  v.literal('day'),
-  v.literal('night')
-)
+export const sectValidator = v.union(v.literal('day'), v.literal('night'))
 
 export const dignityIndicatorValidator = v.union(
   v.literal('R'),
   v.literal('E'),
   v.literal('d'),
   v.literal('f'),
-  v.literal('-')
+  v.literal('-'),
 )
 ```
 
@@ -455,14 +452,14 @@ export const dignityIndicatorValidator = v.union(
 
 ### Estimated Data Sizes
 
-| Table | Avg Row Size | Expected Rows | Total Size |
-|-------|--------------|---------------|------------|
-| charts | 2 KB | 10,000 | 20 MB |
-| analysisResults | 5 KB | 10,000 | 50 MB |
-| chartParans | 50 KB | 10,000 | 500 MB |
-| chartACGLines | 100 KB | 10,000 | 1 GB |
-| cities | 0.5 KB | 50,000 | 25 MB |
-| vibes | 1 KB | 1,000 | 1 MB |
+| Table           | Avg Row Size | Expected Rows | Total Size |
+| --------------- | ------------ | ------------- | ---------- |
+| charts          | 2 KB         | 10,000        | 20 MB      |
+| analysisResults | 5 KB         | 10,000        | 50 MB      |
+| chartParans     | 50 KB        | 10,000        | 500 MB     |
+| chartACGLines   | 100 KB       | 10,000        | 1 GB       |
+| cities          | 0.5 KB       | 50,000        | 25 MB      |
+| vibes           | 1 KB         | 1,000         | 1 MB       |
 
 ### Optimization Strategies
 

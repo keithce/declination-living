@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  calculateHourAngle,
+  cartesianToGeo,
   eclipticToEquatorial,
   equatorialToEcliptic,
-  geoToCartesian,
-  cartesianToGeo,
-  calculateHourAngle,
   equatorialToHorizontal,
+  geoToCartesian,
   greatCircleDistance,
   greatCircleDistanceKm,
 } from '../transform'
@@ -88,7 +88,7 @@ describe('Coordinate Transformations', () => {
         const ecliptic = equatorialToEcliptic(
           equatorial.rightAscension,
           equatorial.declination,
-          OBLIQUITY
+          OBLIQUITY,
         )
         expect(ecliptic.longitude).toBeCloseTo(tc.lon, 3)
         expect(ecliptic.latitude).toBeCloseTo(tc.lat, 3)

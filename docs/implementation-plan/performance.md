@@ -4,13 +4,13 @@ This document outlines performance optimization strategies for the Declination L
 
 ## Performance Targets
 
-| Metric | Target | Critical |
-|--------|--------|----------|
+| Metric                 | Target  | Critical |
+| ---------------------- | ------- | -------- |
 | Full chart calculation | < 500ms | < 1000ms |
-| City search | < 100ms | < 300ms |
-| Globe render (initial) | < 2s | < 3s |
-| Tab switch (results) | < 200ms | < 500ms |
-| Time to interactive | < 3s | < 5s |
+| City search            | < 100ms | < 300ms  |
+| Globe render (initial) | < 2s    | < 3s     |
+| Tab switch (results)   | < 200ms | < 500ms  |
+| Time to interactive    | < 3s    | < 5s     |
 
 ## Calculation Optimization
 
@@ -33,6 +33,7 @@ async function getEphemeris(): Promise<SwissEph> {
 ```
 
 **Metrics**:
+
 - First load: ~200ms (WASM initialization)
 - Subsequent: ~5ms (cached instance)
 
@@ -47,7 +48,7 @@ for (const planet of planets) {
 }
 
 // Parallel (fast)
-const promises = planets.map(planet => calculatePosition(planet, jd))
+const promises = planets.map((planet) => calculatePosition(planet, jd))
 const results = await Promise.all(promises)
 ```
 
@@ -84,9 +85,9 @@ function getCacheKey(p1: PlanetData, e1: AngularEvent, p2: PlanetData, e2: Angul
 
 ```typescript
 function getACGLineResolution(zoomLevel: number): number {
-  if (zoomLevel < 2) return 5    // 72 points per line
-  if (zoomLevel < 4) return 2    // 180 points per line
-  return 1                        // 360 points per line
+  if (zoomLevel < 2) return 5 // 72 points per line
+  if (zoomLevel < 4) return 2 // 180 points per line
+  return 1 // 360 points per line
 }
 ```
 
@@ -251,10 +252,7 @@ const result = await ctx.action(api.getChartComplete, { chartId: id })
 
 ```typescript
 // Load essential data first
-const { chart, declinations, dignities } = await ctx.action(
-  api.getChartEssentials,
-  { chartId }
-)
+const { chart, declinations, dignities } = await ctx.action(api.getChartEssentials, { chartId })
 
 // Load heavy data in background
 const analysisPromise = ctx.query(api.getChartAnalysis, { chartId })
@@ -312,7 +310,7 @@ const cacheKey = `${chartId}-${JSON.stringify(weights)}`
 
 const cached = await ctx.db
   .query('calculationCache')
-  .withIndex('by_cache_key', q => q.eq('cacheKey', cacheKey))
+  .withIndex('by_cache_key', (q) => q.eq('cacheKey', cacheKey))
   .first()
 
 if (cached && cached.expiresAt > Date.now()) {
@@ -327,8 +325,8 @@ if (cached && cached.expiresAt > Date.now()) {
 const { data } = useQuery({
   queryKey: ['chart', chartId],
   queryFn: () => fetchChart(chartId),
-  staleTime: 5 * 60 * 1000,      // Consider fresh for 5 min
-  cacheTime: 30 * 60 * 1000,     // Keep in cache for 30 min
+  staleTime: 5 * 60 * 1000, // Consider fresh for 5 min
+  cacheTime: 30 * 60 * 1000, // Keep in cache for 30 min
 })
 ```
 
@@ -370,9 +368,9 @@ export const calculateComplete = action({
 // Track Core Web Vitals
 import { getCLS, getFID, getLCP } from 'web-vitals'
 
-getCLS(metric => sendToAnalytics('CLS', metric.value))
-getFID(metric => sendToAnalytics('FID', metric.value))
-getLCP(metric => sendToAnalytics('LCP', metric.value))
+getCLS((metric) => sendToAnalytics('CLS', metric.value))
+getFID((metric) => sendToAnalytics('FID', metric.value))
+getLCP((metric) => sendToAnalytics('LCP', metric.value))
 ```
 
 ## Bundle Size
@@ -381,12 +379,12 @@ getLCP(metric => sendToAnalytics('LCP', metric.value))
 
 ```typescript
 // Import only what's needed
-import { Button } from '@/components/ui/button'  // Good
-import * as UI from '@/components/ui'            // Bad
+import { Button } from '@/components/ui/button' // Good
+import * as UI from '@/components/ui' // Bad
 
 // For lodash
-import debounce from 'lodash/debounce'  // Good
-import { debounce } from 'lodash'       // Bad
+import debounce from 'lodash/debounce' // Good
+import { debounce } from 'lodash' // Bad
 ```
 
 ### 2. Code Splitting
@@ -415,13 +413,13 @@ bun run analyze
 
 ## Summary
 
-| Optimization | Impact | Effort |
-|--------------|--------|--------|
-| Parallel calculations | High | Low |
-| Lazy loading | High | Low |
-| Virtual lists | High | Medium |
-| Data separation | Medium | Medium |
-| Caching | Medium | Medium |
-| Bundle splitting | Medium | Low |
-| Globe optimization | Medium | High |
-| WASM caching | Low | Low |
+| Optimization          | Impact | Effort |
+| --------------------- | ------ | ------ |
+| Parallel calculations | High   | Low    |
+| Lazy loading          | High   | Low    |
+| Virtual lists         | High   | Medium |
+| Data separation       | Medium | Medium |
+| Caching               | Medium | Medium |
+| Bundle splitting      | Medium | Low    |
+| Globe optimization    | Medium | High   |
+| WASM caching          | Low    | Low    |
