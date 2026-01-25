@@ -13,7 +13,6 @@ import {
   formatLongitude,
 } from '../shared/constants'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
-import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -22,8 +21,6 @@ import type { ResultsState } from '../hooks/useResultsState'
 export interface ScoringTabProps {
   /** Scoring grid data */
   scoringGrid: Array<GridCell>
-  /** Results state for synchronization */
-  resultsState?: ResultsState
   /** Number of rows to display */
   displayLimit?: number
 }
@@ -188,24 +185,25 @@ export const ScoringTab = memo(function ScoringTab({
               </button>
 
               {/* Score Breakdown Bar */}
-              <div className="h-1.5 flex overflow-hidden" role="img" aria-label="Score breakdown">
+              <div
+                className="h-1.5 flex overflow-hidden"
+                role="img"
+                aria-label={`Score breakdown: Zenith ${zenithPercent.toFixed(1)}%, ACG ${acgPercent.toFixed(1)}%, Paran ${paranPercent.toFixed(1)}%`}
+              >
                 <div
                   className="bg-blue-500"
                   style={{ width: `${zenithPercent}%` }}
                   title={`Zenith: ${zenithPercent.toFixed(1)}%`}
-                  aria-label={`Zenith: ${zenithPercent.toFixed(1)}%`}
                 />
                 <div
                   className="bg-purple-500"
                   style={{ width: `${acgPercent}%` }}
                   title={`ACG: ${acgPercent.toFixed(1)}%`}
-                  aria-label={`ACG: ${acgPercent.toFixed(1)}%`}
                 />
                 <div
                   className="bg-amber-500"
                   style={{ width: `${paranPercent}%` }}
                   title={`Paran: ${paranPercent.toFixed(1)}%`}
-                  aria-label={`Paran: ${paranPercent.toFixed(1)}%`}
                 />
               </div>
 

@@ -263,7 +263,7 @@ export function EnhancedGlobeCanvas({
   // Layer Management
   // ==========================================================================
 
-  // Update zenith bands when data or visibility changes
+  // Create/update zenith bands when data changes
   useEffect(() => {
     if (!sceneRef.current || !declinations) return
 
@@ -288,12 +288,11 @@ export function EnhancedGlobeCanvas({
 
     // Create new layer
     const layer = createZenithBandLayer(zenithLines, globeState.planets)
-    layer.group.visible = globeState.layers.zenithBands
     scene.add(layer.group)
     layers.zenithBands = layer
-  }, [declinations, globeState.planets, globeState.layers.zenithBands])
+  }, [declinations, globeState.planets])
 
-  // Update ACG lines when data or visibility changes
+  // Create/update ACG lines when data changes
   useEffect(() => {
     if (!sceneRef.current || !acgLines) return
 
@@ -307,12 +306,11 @@ export function EnhancedGlobeCanvas({
 
     // Create new layer
     const layer = createACGLineLayer(acgLines, globeState.planets, globeState.acgLineTypes)
-    layer.group.visible = globeState.layers.acgLines
     scene.add(layer.group)
     layers.acgLines = layer
-  }, [acgLines, globeState.planets, globeState.acgLineTypes, globeState.layers.acgLines])
+  }, [acgLines, globeState.planets, globeState.acgLineTypes])
 
-  // Update paran points when data or visibility changes
+  // Create/update paran points when data changes
   useEffect(() => {
     if (!sceneRef.current || !parans) return
 
@@ -326,10 +324,9 @@ export function EnhancedGlobeCanvas({
 
     // Create new layer
     const layer = createParanPointLayer(parans, globeState.planets)
-    layer.group.visible = globeState.layers.paranPoints
     scene.add(layer.group)
     layers.paranPoints = layer
-  }, [parans, globeState.planets, globeState.layers.paranPoints])
+  }, [parans, globeState.planets])
 
   // Update heatmap when data or settings change
   useEffect(() => {
@@ -371,31 +368,53 @@ export function EnhancedGlobeCanvas({
     globeState.heatmapSpread,
   ])
 
-  // Update visibility when layer toggles change
+  // ==========================================================================
+  // Layer Visibility (separate effects to avoid race conditions)
+  // ==========================================================================
+
+  // Zenith bands visibility
+  useEffect(() => {
+    if (sceneRef.current?.layers.zenithBands) {
+      sceneRef.current.layers.zenithBands.group.visible = globeState.layers.zenithBands
+    }
+  }, [globeState.layers.zenithBands])
+
+  // ACG lines visibility
+  useEffect(() => {
+    if (sceneRef.current?.layers.acgLines) {
+      sceneRef.current.layers.acgLines.group.visible = globeState.layers.acgLines
+    }
+  }, [globeState.layers.acgLines])
+
+  // Paran points visibility
+  useEffect(() => {
+    if (sceneRef.current?.layers.paranPoints) {
+      sceneRef.current.layers.paranPoints.group.visible = globeState.layers.paranPoints
+    }
+  }, [globeState.layers.paranPoints])
+
+  // Heatmap visibility
+  useEffect(() => {
+    if (sceneRef.current?.layers.heatmap) {
+      sceneRef.current.layers.heatmap.group.visible = globeState.layers.heatmap
+    }
+  }, [globeState.layers.heatmap])
+
+  // Planet/ACG type filters - updates individual mesh visibility within layers
   useEffect(() => {
     if (!sceneRef.current) return
-
     const { layers } = sceneRef.current
 
     if (layers.zenithBands) {
-      layers.zenithBands.group.visible = globeState.layers.zenithBands
       updateZenithBandVisibility(layers.zenithBands.group, globeState.planets)
     }
-
     if (layers.acgLines) {
-      layers.acgLines.group.visible = globeState.layers.acgLines
       updateACGLineVisibility(layers.acgLines.group, globeState.planets, globeState.acgLineTypes)
     }
-
     if (layers.paranPoints) {
-      layers.paranPoints.group.visible = globeState.layers.paranPoints
       updateParanPointVisibility(layers.paranPoints.group, globeState.planets)
     }
-
-    if (layers.heatmap) {
-      layers.heatmap.group.visible = globeState.layers.heatmap
-    }
-  }, [globeState.layers, globeState.planets, globeState.acgLineTypes])
+  }, [globeState.planets, globeState.acgLineTypes])
 
   return <div ref={containerRef} className={`w-full h-full ${className}`} />
 }

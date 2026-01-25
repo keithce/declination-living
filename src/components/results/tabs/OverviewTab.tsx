@@ -33,7 +33,7 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
   // Calculate statistics with empty array handling
   const totalCells = scoringGrid.length
   const scores = scoringGrid.map((c) => c.score)
-  const maxScore = scores.length > 0 ? Math.max(...scores) : 0
+  const maxScore = scores.reduce((max, s) => Math.max(max, s), 0)
   const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / totalCells : 0
 
   // Get top locations
@@ -108,7 +108,8 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
         <h3 className="text-sm font-semibold text-white mb-4">Score Distribution</h3>
         <div className="space-y-3">
           {factorPercentages.map(({ factor, count, percentage }) => {
-            const { label, color } = factorLabels[factor]
+            const entry = factorLabels[factor]
+            const { label, color } = entry
             return (
               <div key={factor}>
                 <div className="flex items-center justify-between mb-1">

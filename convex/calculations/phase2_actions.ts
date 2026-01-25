@@ -21,8 +21,9 @@ import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from './cor
 
 function throwWithContext(error: unknown, context: string): never {
   const message = error instanceof Error ? error.message : String(error)
-  const stack = error instanceof Error ? error.stack : undefined
-  throw new Error(`${context}: ${message}${stack ? `\n${stack}` : ''}`)
+  throw new Error(`${context}: ${message}`, {
+    cause: error instanceof Error ? error : undefined,
+  })
 }
 
 // =============================================================================
@@ -122,6 +123,13 @@ export const calculatePhase2Complete = action({
     ),
   },
   handler: async (ctx, { birthDate, birthTime, timezone, weights, gridOptions }) => {
+    // Validate planet weights are non-negative
+    for (const [planet, weight] of Object.entries(weights)) {
+      if (weight < 0) {
+        throw new Error(`Invalid weight for ${planet}: must be non-negative`)
+      }
+    }
+
     // 1. Calculate Julian Day and positions
     const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
@@ -153,7 +161,7 @@ export const calculatePhase2Complete = action({
       acgZenithData = await ctx.runAction(internal.calculations.acg.actions.calculateACGAndZenith, {
         julianDay: jd,
         positions: equatorialPositions,
-        orb: 1.0,
+        orb: gridOptions?.acgOrb ?? 1.0,
       })
     } catch (error) {
       throwWithContext(error, 'ACG/Zenith calculation failed')

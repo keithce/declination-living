@@ -19,6 +19,9 @@ export { GlobeControls } from './controls'
 export { useGlobeState, getVisiblePlanetCount, getVisibleACGLineTypeCount } from './hooks'
 export type { GlobeState, GlobeStateActions, UseGlobeStateReturn } from './hooks'
 
+// Utils
+export { transformACGLines, transformZenithLines, transformParans, hasPhase2Data } from './utils'
+
 // Layer types
 export type {
   PlanetId,

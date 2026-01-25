@@ -14,7 +14,6 @@ import {
   formatLongitude,
 } from '../shared/constants'
 import type { ACGLine, PlanetId } from '@/../convex/calculations/core/types'
-import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -23,8 +22,6 @@ import type { ResultsState } from '../hooks/useResultsState'
 export interface ACGLinesTabProps {
   /** ACG lines from calculations */
   acgLines: Array<ACGLine>
-  /** Results state for synchronization */
-  resultsState?: ResultsState
 }
 
 type LineTypeFilter = 'all' | 'MC' | 'IC' | 'ASC' | 'DSC'

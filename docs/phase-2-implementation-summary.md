@@ -528,7 +528,7 @@ All animations respect user preferences and disable completely when reduced moti
 
 ## File Structure
 
-```
+```text
 /Users/kelliott/code/declination-living/
 
 convex/calculations/

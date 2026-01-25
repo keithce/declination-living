@@ -219,7 +219,11 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
       </div>
 
       {/* Layer Toggles */}
-      <CollapsibleSection title="Visualization Layers" icon={<Layers className="w-4 h-4" />}>
+      <CollapsibleSection
+        key="visualization-layers"
+        title="Visualization Layers"
+        icon={<Layers className="w-4 h-4" />}
+      >
         <ToggleButton
           enabled={state.layers.zenithBands}
           onClick={() => state.toggleLayer('zenithBands')}
@@ -245,6 +249,7 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
       {/* Heatmap Controls (when enabled) */}
       {state.layers.heatmap && (
         <CollapsibleSection
+          key="heatmap-settings"
           title="Heatmap Settings"
           icon={<Flame className="w-4 h-4" />}
           defaultOpen={true}
@@ -270,6 +275,7 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
 
       {/* Planet Filters */}
       <CollapsibleSection
+        key="planets"
         title="Planets"
         icon={<Circle className="w-4 h-4" />}
         badge={`${visiblePlanetCount}/${PLANET_IDS.length}`}
@@ -304,6 +310,7 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
       {/* ACG Line Type Filters (when ACG layer is enabled) */}
       {state.layers.acgLines && (
         <CollapsibleSection
+          key="acg-line-types"
           title="ACG Line Types"
           icon={<Minus className="w-4 h-4" />}
           badge={`${visibleACGCount}/4`}

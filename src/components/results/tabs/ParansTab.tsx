@@ -13,7 +13,6 @@ import {
   formatLatitude,
 } from '../shared/constants'
 import type { ParanPoint, PlanetId } from '@/../convex/calculations/core/types'
-import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -22,8 +21,6 @@ import type { ResultsState } from '../hooks/useResultsState'
 export interface ParansTabProps {
   /** Paran points from calculations */
   parans: Array<ParanPoint>
-  /** Results state for synchronization */
-  resultsState?: ResultsState
   /** Number of parans to display */
   displayLimit?: number
 }
@@ -106,7 +103,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
         (e2 === 'rise' && (e1 === 'culminate' || e1 === 'anti_culminate'))
       )
         stats.riseCulminate++
-      else if (e1 === 'rise' && e2 === 'set') stats.riseSet++
+      else if ((e1 === 'rise' && e2 === 'set') || (e1 === 'set' && e2 === 'rise')) stats.riseSet++
       else if (
         (e1 === 'culminate' || e1 === 'anti_culminate') &&
         (e2 === 'culminate' || e2 === 'anti_culminate')

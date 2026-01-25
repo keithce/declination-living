@@ -145,7 +145,7 @@ export function useResultsState(): ResultsState {
   // Scroll to element helper
   const scrollToElement = useCallback((element: ElementIdentifier) => {
     // Generate DOM ID from element identifier
-    const domId = `${element.type}-${element.id}`
+    const domId = generateElementId(element)
     const targetElement = document.getElementById(domId)
 
     if (targetElement) {

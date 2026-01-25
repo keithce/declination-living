@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "format:ci": "prettier --check .",
     "lint:ci": "eslint . --max-warnings 0",
-    "check:ci": "bun run format:ci && bun run lint:ci"
+    "check:ci": "bun run format:ci && bun run lint:ci && bun run typecheck"
   },
   "dependencies": {
     "@auth/core": "0.41.1",

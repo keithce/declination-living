@@ -50,6 +50,11 @@ export function announceToScreenReader(message: string): void {
 
 /**
  * Focus management - trap focus within a container
+ *
+ * Note: This function captures focusable elements at call time (static snapshot).
+ * If the DOM changes after calling trapFocus, the focus trap will not update
+ * to include new elements or exclude removed ones. Call the cleanup function
+ * and re-invoke trapFocus if the container's content changes dynamically.
  */
 export function trapFocus(containerElement: HTMLElement): () => void {
   const focusableElements = containerElement.querySelectorAll<HTMLElement>(
@@ -125,9 +130,11 @@ export function handleKeyboardNavigation(
       break
     case 'ArrowLeft':
       handlers.onArrowLeft?.()
+      event.preventDefault()
       break
     case 'ArrowRight':
       handlers.onArrowRight?.()
+      event.preventDefault()
       break
   }
 }
@@ -138,4 +145,11 @@ export function handleKeyboardNavigation(
 let idCounter = 0
 export function generateA11yId(prefix: string): string {
   return `${prefix}-${++idCounter}`
+}
+
+/**
+ * Reset the ID counter (for testing purposes only)
+ */
+export function resetA11yIdCounter(): void {
+  idCounter = 0
 }

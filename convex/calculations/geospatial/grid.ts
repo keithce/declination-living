@@ -5,6 +5,7 @@
  * for visualization on a globe or map.
  */
 
+import { DEFAULT_PARAN_STRENGTH } from '../core/constants'
 import { scoreLatitude, scoreLocationForACG, scoreParanProximity } from './search'
 import type {
   ACGLine,
@@ -81,6 +82,14 @@ export function generateScoringGrid(
     paranOrb = 1.0,
   } = options
 
+  // Validate orb values to prevent division by zero
+  if (paranOrb <= 0) {
+    throw new Error('paranOrb must be positive')
+  }
+  if (acgOrb <= 0) {
+    throw new Error('acgOrb must be positive')
+  }
+
   const grid: Array<GridCell> = []
 
   for (let lat = latMin; lat <= latMax; lat += latStep) {
@@ -127,7 +136,7 @@ export function generateScoringGrid(
         dominantPlanet = acgResult.dominantPlanet
       } else if (dominantFactor === 'paran' && parans.length > 0) {
         // Find paran with highest contribution using same formula as scoreParanProximity
-        let bestParan = parans[0]
+        let bestParan: (typeof parans)[0] | undefined
         let bestContribution = 0
 
         for (const paran of parans) {
@@ -137,7 +146,8 @@ export function generateScoringGrid(
             const w1 = weights[paran.planet1]
             const w2 = weights[paran.planet2]
             const avgWeight = (w1 + w2) / 2
-            const contribution = proximityScore * avgWeight * (paran.strength ?? 1)
+            const contribution =
+              proximityScore * avgWeight * (paran.strength ?? DEFAULT_PARAN_STRENGTH)
 
             if (contribution > bestContribution) {
               bestContribution = contribution
@@ -146,10 +156,12 @@ export function generateScoringGrid(
           }
         }
 
-        // Pick higher-weighted planet from best paran
-        const w1 = weights[bestParan.planet1]
-        const w2 = weights[bestParan.planet2]
-        dominantPlanet = w1 >= w2 ? bestParan.planet1 : bestParan.planet2
+        // Only assign dominant planet if a paran was actually within orb
+        if (bestParan && bestContribution > 0) {
+          const w1 = weights[bestParan.planet1]
+          const w2 = weights[bestParan.planet2]
+          dominantPlanet = w1 >= w2 ? bestParan.planet1 : bestParan.planet2
+        }
       }
 
       grid.push({

@@ -13,6 +13,7 @@ import {
   formatLatitude,
 } from '../shared/constants'
 import type { ZenithLine } from '@/../convex/calculations/core/types'
+import { APPROX_APPROX_OBLIQUITY } from '@/../convex/calculations/core/constants'
 
 // =============================================================================
 // Types
@@ -24,12 +25,6 @@ export interface ZenithTabProps {
   /** Initial orb value */
   initialOrb?: number
 }
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-const OBLIQUITY = 23.44 // Approximate obliquity of the ecliptic
 
 // =============================================================================
 // Main Component
@@ -47,8 +42,8 @@ export const ZenithTab = memo(function ZenithTab({
   )
 
   // Identify OOB planets
-  const oobLines = sortedLines.filter((line) => Math.abs(line.declination) > OBLIQUITY)
-  const normalLines = sortedLines.filter((line) => Math.abs(line.declination) <= OBLIQUITY)
+  const oobLines = sortedLines.filter((line) => Math.abs(line.declination) > APPROX_OBLIQUITY)
+  const normalLines = sortedLines.filter((line) => Math.abs(line.declination) <= APPROX_OBLIQUITY)
 
   return (
     <div className="space-y-4">
@@ -86,11 +81,11 @@ export const ZenithTab = memo(function ZenithTab({
             </span>
           </div>
           <div className="text-xs text-slate-500 mb-3">
-            Declination exceeds ±{OBLIQUITY.toFixed(2)}° (obliquity of the ecliptic)
+            Declination exceeds ±{APPROX_OBLIQUITY.toFixed(2)}° (obliquity of the ecliptic)
           </div>
           <div className="space-y-2">
             {oobLines.map((line, index) => {
-              const oobDegrees = Math.abs(line.declination) - OBLIQUITY
+              const oobDegrees = Math.abs(line.declination) - APPROX_OBLIQUITY
               const orbMin = line.declination - orb
               const orbMax = line.declination + orb
 

@@ -381,6 +381,11 @@ export function scoreLocationForACG(
   }>
   dominantPlanet?: PlanetId
 } {
+  // Guard against division by zero
+  if (orb <= 0) {
+    throw new Error('orb must be positive')
+  }
+
   let totalScore = 0
   const contributions: Array<{
     planet: PlanetId
@@ -444,6 +449,11 @@ export function scoreParanProximity(
   weights: PlanetWeights,
   orb: number = 1.0,
 ): number {
+  // Guard against division by zero
+  if (orb <= 0) {
+    throw new Error('orb must be positive')
+  }
+
   let totalScore = 0
 
   for (const paran of parans) {

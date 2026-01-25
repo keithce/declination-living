@@ -12,10 +12,10 @@ import { ACGLinesTab } from './tabs/ACGLinesTab'
 import { ZenithTab } from './tabs/ZenithTab'
 import { ScoringTab } from './tabs/ScoringTab'
 import { ParansTab } from './tabs/ParansTab'
-import { useResultsState } from './hooks/useResultsState'
 import type { ACGLine, ParanPoint, ZenithLine } from '@/../convex/calculations/core/types'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
 import type { GlobeState } from '../globe/hooks/useGlobeState'
+import { APPROX_OBLIQUITY } from '@/../convex/calculations/core/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // =============================================================================
@@ -56,32 +56,27 @@ export const ResultsTabs = memo(function ResultsTabs({
   scoringGrid,
   globeState: _globeState, // Future: Sync with globe visualization
 }: ResultsTabsProps) {
-  // Initialize results state for synchronization
-  const resultsState = useResultsState()
-
   // Calculate summary statistics
   const acgCount = acgLines.length
   const paranCount = parans.length
   const gridCellCount = scoringGrid.length
 
   // Count OOB zenith lines
-  const oobCount = zenithLines.filter(
-    (z) => Math.abs(z.declination) > 23.44, // Approximate obliquity
-  ).length
+  const oobCount = zenithLines.filter((z) => Math.abs(z.declination) > APPROX_OBLIQUITY).length
 
   return (
     <Tabs defaultValue="overview" className="w-full">
       <TabsList className="w-full grid grid-cols-5 bg-slate-800/50">
-        <TabsTrigger value="overview" className="flex items-center gap-1.5">
+        <TabsTrigger value="overview" className="flex items-center gap-1.5" aria-label="Overview">
           <Target className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Overview</span>
         </TabsTrigger>
-        <TabsTrigger value="acg" className="flex items-center gap-1.5">
+        <TabsTrigger value="acg" className="flex items-center gap-1.5" aria-label="ACG Lines">
           <Globe className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">ACG Lines</span>
           <span className="text-xs text-slate-400 hidden md:inline">({acgCount})</span>
         </TabsTrigger>
-        <TabsTrigger value="zenith" className="flex items-center gap-1.5">
+        <TabsTrigger value="zenith" className="flex items-center gap-1.5" aria-label="Zenith">
           <MapPin className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Zenith</span>
           {oobCount > 0 && (
@@ -90,12 +85,12 @@ export const ResultsTabs = memo(function ResultsTabs({
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="scoring" className="flex items-center gap-1.5">
+        <TabsTrigger value="scoring" className="flex items-center gap-1.5" aria-label="Scoring">
           <BarChart3 className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Scoring</span>
           <span className="text-xs text-slate-400 hidden md:inline">({gridCellCount})</span>
         </TabsTrigger>
-        <TabsTrigger value="parans" className="flex items-center gap-1.5">
+        <TabsTrigger value="parans" className="flex items-center gap-1.5" aria-label="Parans">
           <Sparkles className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Parans</span>
           <span className="text-xs text-slate-400 hidden md:inline">({paranCount})</span>
@@ -108,19 +103,19 @@ export const ResultsTabs = memo(function ResultsTabs({
         </TabsContent>
 
         <TabsContent value="acg" className="m-0">
-          <ACGLinesTab acgLines={acgLines} resultsState={resultsState} />
+          <ACGLinesTab acgLines={acgLines} />
         </TabsContent>
 
         <TabsContent value="zenith" className="m-0">
-          <ZenithTab zenithLines={zenithLines} resultsState={resultsState} initialOrb={1.0} />
+          <ZenithTab zenithLines={zenithLines} initialOrb={1.0} />
         </TabsContent>
 
         <TabsContent value="scoring" className="m-0">
-          <ScoringTab scoringGrid={scoringGrid} resultsState={resultsState} displayLimit={50} />
+          <ScoringTab scoringGrid={scoringGrid} displayLimit={50} />
         </TabsContent>
 
         <TabsContent value="parans" className="m-0">
-          <ParansTab parans={parans} resultsState={resultsState} displayLimit={100} />
+          <ParansTab parans={parans} displayLimit={100} />
         </TabsContent>
       </div>
     </Tabs>

@@ -4,6 +4,9 @@
 
 import { useEffect, useRef } from 'react'
 
+/** Check if running in development mode */
+const isDev = typeof process !== 'undefined' && process.env.NODE_ENV !== 'production'
+
 /** SSR-safe time function */
 const getTime = () => (typeof performance !== 'undefined' ? performance.now() : Date.now())
 
@@ -14,10 +17,14 @@ export async function measureAsync<T>(label: string, fn: () => Promise<T>): Prom
   const start = getTime()
   try {
     const result = await fn()
-    console.log(`⏱️ [${label}] ${(getTime() - start).toFixed(2)}ms`)
+    if (isDev) {
+      console.log(`⏱️ [${label}] ${(getTime() - start).toFixed(2)}ms`)
+    }
     return result
   } catch (error) {
-    console.error(`❌ [${label}] Failed after ${(getTime() - start).toFixed(2)}ms`, error)
+    if (isDev) {
+      console.error(`❌ [${label}] Failed after ${(getTime() - start).toFixed(2)}ms`, error)
+    }
     throw error
   }
 }
@@ -29,10 +36,14 @@ export function measureSync<T>(label: string, fn: () => T): T {
   const start = getTime()
   try {
     const result = fn()
-    console.log(`⏱️ [${label}] ${(getTime() - start).toFixed(2)}ms`)
+    if (isDev) {
+      console.log(`⏱️ [${label}] ${(getTime() - start).toFixed(2)}ms`)
+    }
     return result
   } catch (error) {
-    console.error(`❌ [${label}] Failed after ${(getTime() - start).toFixed(2)}ms`, error)
+    if (isDev) {
+      console.error(`❌ [${label}] Failed after ${(getTime() - start).toFixed(2)}ms`, error)
+    }
     throw error
   }
 }
@@ -41,7 +52,7 @@ export function measureSync<T>(label: string, fn: () => T): T {
  * Create a performance marker for web performance timeline
  */
 export function mark(name: string): void {
-  if (typeof window !== 'undefined') {
+  if (typeof performance !== 'undefined' && typeof performance.mark === 'function') {
     performance.mark(name)
   }
 }
@@ -78,6 +89,7 @@ export function useRenderPerformance(componentName: string): void {
   }
 
   // Capture end time after commit (in effect)
+  // Intentional: empty deps to measure every render
   useEffect(() => {
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
       const renderEnd = performance.now()

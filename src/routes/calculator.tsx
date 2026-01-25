@@ -12,6 +12,7 @@ import { useCalculatorState } from '@/hooks/use-calculator-state'
 import { DeclinationTable } from '@/components/calculator/DeclinationTable'
 import { ResultsPanel } from '@/components/calculator/ResultsPanel'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
+import { EnhancedGlobeSection } from '@/components/results/EnhancedGlobeSection'
 import { GlobeView } from '@/components/globe'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
 
@@ -89,24 +90,29 @@ function CalculatorContent() {
 
     setIsCalculating(true)
     try {
-      // Run both calculations in parallel
-      const [calcResult, phase2Result] = await Promise.all([
-        calculateComplete({
-          birthDate: birthData.birthDate,
-          birthTime: birthData.birthTime,
-          timezone: birthData.birthTimezone,
-          weights,
-        }),
-        calculatePhase2({
-          birthDate: birthData.birthDate,
-          birthTime: birthData.birthTime,
-          timezone: birthData.birthTimezone,
-          weights,
-        }),
-      ])
-
+      // Phase 1: Core calculation (must succeed)
+      const calcResult = await calculateComplete({
+        birthDate: birthData.birthDate,
+        birthTime: birthData.birthTime,
+        timezone: birthData.birthTimezone,
+        weights,
+      })
       setResult(calcResult)
-      setPhase2Data(phase2Result)
+
+      // Phase 2: Enhanced calculation (optional - don't block Phase 1 results)
+      try {
+        const phase2Result = await calculatePhase2({
+          birthDate: birthData.birthDate,
+          birthTime: birthData.birthTime,
+          timezone: birthData.birthTimezone,
+          weights,
+        })
+        setPhase2Data(phase2Result)
+      } catch (phase2Err) {
+        console.error('Phase 2 calculation failed:', phase2Err)
+        // Phase 1 results still displayed, just without enhanced features
+        setPhase2Data(null)
+      }
     } catch (err) {
       console.error('Calculation failed:', err)
       setError('Calculation failed. Please try again.')
@@ -349,19 +355,37 @@ function CalculatorContent() {
                 <h3 className="font-display text-lg font-semibold text-white mb-4">
                   Global Visualization
                 </h3>
-                <GlobeView
-                  optimalLatitudes={result.optimalLatitudes}
-                  latitudeBands={result.latitudeBands}
-                  birthLocation={
-                    birthData
-                      ? {
-                          latitude: birthData.birthLatitude,
-                          longitude: birthData.birthLongitude,
-                          city: birthData.birthCity,
-                        }
-                      : undefined
-                  }
-                />
+                {phase2Data ? (
+                  <EnhancedGlobeSection
+                    birthLocation={
+                      birthData
+                        ? {
+                            latitude: birthData.birthLatitude,
+                            longitude: birthData.birthLongitude,
+                            city: birthData.birthCity,
+                          }
+                        : undefined
+                    }
+                    declinations={phase2Data.declinations}
+                    acgLines={phase2Data.acgLines}
+                    parans={phase2Data.parans}
+                    globeState={globeState}
+                  />
+                ) : (
+                  <GlobeView
+                    optimalLatitudes={result.optimalLatitudes}
+                    latitudeBands={result.latitudeBands}
+                    birthLocation={
+                      birthData
+                        ? {
+                            latitude: birthData.birthLatitude,
+                            longitude: birthData.birthLongitude,
+                            city: birthData.birthCity,
+                          }
+                        : undefined
+                    }
+                  />
+                )}
               </div>
 
               {/* Weights adjuster (collapsed) */}

@@ -10,8 +10,8 @@
 
 - **Schema**: Tables defined in `convex/schema.ts` - `charts`, `cities`, `presets`, `profiles`, `calculationCache`, `anonymousUsers` plus auth tables
 - **Calculations**: Ephemeris calculations using astronomia library and Swiss Ephemeris (sweph-wasm) in `convex/calculations/`
-  - `ephemeris.ts`: Planetary position calculations using VSOP87 data
-  - `swissephService.ts`: Swiss Ephemeris integration for enhanced precision
+  - `ephemeris.ts`: Planetary position calculations using VSOP87 data via the astronomia library. Optimized for performance and used as the default calculation engine.
+  - `swissephService.ts`: Swiss Ephemeris integration for enhanced precision via sweph-wasm. Used when higher accuracy is required (e.g., asteroid positions, precise timing). Falls back to astronomia if unavailable.
   - `optimizer.ts`: Location scoring algorithms
   - `actions.ts`: Convex actions for computation
 
