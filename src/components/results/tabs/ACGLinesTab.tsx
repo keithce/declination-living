@@ -189,7 +189,7 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-white">
-                            {ACG_LINE_TYPE_LABELS[line.lineType]?.label || line.lineType}
+                            {ACG_LINE_TYPE_LABELS[line.lineType].label}
                           </span>
                           <span className="text-xs text-slate-500">
                             {line.points.length} points
@@ -197,7 +197,7 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
                         </div>
                       </div>
                       <div className="text-xs text-slate-400">
-                        {ACG_LINE_TYPE_LABELS[line.lineType]?.description || 'ACG line'}
+                        {ACG_LINE_TYPE_LABELS[line.lineType].description}
                       </div>
 
                       {/* Sample Points */}

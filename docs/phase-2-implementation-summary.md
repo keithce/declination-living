@@ -301,7 +301,7 @@ User clicks "Calculate" →
 
 ### Backend Data Flow
 
-```
+```text
 Birth Data Input
     ↓
 dateToJulianDay
@@ -329,7 +329,7 @@ PlanetDeclinations    calculateACGAndZenith  calculateAllParans  generateScoring
 
 ### Frontend Component Hierarchy
 
-```
+```text
 Calculator
     ├── BirthDataForm (Step 1)
     ├── PlanetWeightsEditor (Step 2)

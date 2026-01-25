@@ -16,6 +16,16 @@ import { generateScoringGrid } from './geospatial/grid'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from './core/types'
 
 // =============================================================================
+// Error Handling
+// =============================================================================
+
+function throwWithContext(error: unknown, context: string): never {
+  const message = error instanceof Error ? error.message : String(error)
+  const stack = error instanceof Error ? error.stack : undefined
+  throw new Error(`${context}: ${message}${stack ? `\n${stack}` : ''}`)
+}
+
+// =============================================================================
 // Coordinate Conversion Utilities
 // =============================================================================
 
@@ -146,9 +156,7 @@ export const calculatePhase2Complete = action({
         orb: 1.0,
       })
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      const stack = error instanceof Error ? error.stack : undefined
-      throw new Error(`ACG/Zenith calculation failed: ${message}${stack ? `\n${stack}` : ''}`)
+      throwWithContext(error, 'ACG/Zenith calculation failed')
     }
 
     // 4. Calculate all parans
@@ -156,9 +164,7 @@ export const calculatePhase2Complete = action({
     try {
       paranResult = calculateAllParans(equatorialPositions)
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      const stack = error instanceof Error ? error.stack : undefined
-      throw new Error(`Paran calculation failed: ${message}${stack ? `\n${stack}` : ''}`)
+      throwWithContext(error, 'Paran calculation failed')
     }
 
     // 5. Generate scoring grid
@@ -172,9 +178,7 @@ export const calculatePhase2Complete = action({
         gridOptions || {},
       )
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      const stack = error instanceof Error ? error.stack : undefined
-      throw new Error(`Scoring grid generation failed: ${message}${stack ? `\n${stack}` : ''}`)
+      throwWithContext(error, 'Scoring grid generation failed')
     }
 
     return {

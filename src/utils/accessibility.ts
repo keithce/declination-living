@@ -29,6 +29,8 @@ export function createAriaLabel(primaryText: string, secondaryText?: string): st
  * Announce message to screen readers
  */
 export function announceToScreenReader(message: string): void {
+  if (typeof window === 'undefined') return
+
   const announcement = document.createElement('div')
   announcement.setAttribute('role', 'status')
   announcement.setAttribute('aria-live', 'polite')
@@ -52,6 +54,10 @@ export function trapFocus(containerElement: HTMLElement): () => void {
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   )
 
+  if (focusableElements.length === 0) {
+    return () => {} // No-op cleanup
+  }
+
   const firstElement = focusableElements[0]
   const lastElement = focusableElements[focusableElements.length - 1]
 
@@ -61,13 +67,13 @@ export function trapFocus(containerElement: HTMLElement): () => void {
     if (e.shiftKey) {
       // Shift + Tab
       if (document.activeElement === firstElement) {
-        lastElement?.focus()
+        lastElement.focus()
         e.preventDefault()
       }
     } else {
       // Tab
       if (document.activeElement === lastElement) {
-        firstElement?.focus()
+        firstElement.focus()
         e.preventDefault()
       }
     }
@@ -101,7 +107,6 @@ export function handleKeyboardNavigation(
       handlers.onEnter?.()
       break
     case ' ':
-    case 'Space':
       handlers.onSpace?.()
       event.preventDefault() // Prevent page scroll
       break

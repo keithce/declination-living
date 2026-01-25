@@ -104,7 +104,7 @@ export const ResultsTabs = memo(function ResultsTabs({
 
       <div className="mt-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
         <TabsContent value="overview" className="m-0">
-          <OverviewTab scoringGrid={scoringGrid} resultsState={resultsState} topN={10} />
+          <OverviewTab scoringGrid={scoringGrid} topN={10} />
         </TabsContent>
 
         <TabsContent value="acg" className="m-0">

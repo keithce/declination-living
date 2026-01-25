@@ -22,7 +22,7 @@
 - [x] Semantic HTML elements used (button, nav, section)
 - [x] ARIA labels added for icon-only buttons
 - [x] ARIA live regions for dynamic content announcements
-- [x] Screen reader only text (.sr-only) for context
+- [x] Screen-reader-only text (.sr-only) for context
 - [x] Meaningful alt text for visual indicators
 
 **ARIA implementations:**

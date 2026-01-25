@@ -13,7 +13,6 @@ import {
   formatLongitude,
 } from '../shared/constants'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
-import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -22,8 +21,6 @@ import type { ResultsState } from '../hooks/useResultsState'
 export interface OverviewTabProps {
   /** Scoring grid data */
   scoringGrid: Array<GridCell>
-  /** Results state for synchronization */
-  resultsState?: ResultsState
   /** Top N locations to display */
   topN?: number
 }
@@ -109,10 +106,7 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
         <h3 className="text-sm font-semibold text-white mb-4">Score Distribution</h3>
         <div className="space-y-3">
           {factorPercentages.map(({ factor, count, percentage }) => {
-            const { label, color } = factorLabels[factor] || {
-              label: factor,
-              color: 'bg-slate-500',
-            }
+            const { label, color } = factorLabels[factor]
             return (
               <div key={factor}>
                 <div className="flex items-center justify-between mb-1">

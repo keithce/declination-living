@@ -5,7 +5,7 @@
  * and results tabs in sync.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PlanetId } from '@/../convex/calculations/core/types'
 
 // =============================================================================
@@ -70,6 +70,16 @@ export function useResultsState(): ResultsState {
   const [visibleLayers, setVisibleLayers] = useState<Set<ElementType>>(
     new Set(['acg-line', 'zenith-line', 'paran', 'grid-cell']),
   )
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Filter management
   const togglePlanetFilter = useCallback((planet: PlanetId) => {
@@ -144,10 +154,16 @@ export function useResultsState(): ResultsState {
         block: 'center',
       })
 
+      // Clear any existing timeout before setting new one
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current)
+      }
+
       // Highlight element briefly
       targetElement.classList.add('highlight-flash')
-      setTimeout(() => {
+      highlightTimeoutRef.current = setTimeout(() => {
         targetElement.classList.remove('highlight-flash')
+        highlightTimeoutRef.current = null
       }, 1000)
     }
   }, [])
@@ -190,5 +206,6 @@ export function generateElementId(element: Partial<ElementIdentifier>): string {
   ) {
     return `${element.latitude.toFixed(1)}-${element.longitude.toFixed(1)}`
   }
-  return 'unknown'
+  // Deterministic fallback with type + random suffix
+  return `${element.type || 'element'}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }

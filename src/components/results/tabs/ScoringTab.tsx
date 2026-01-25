@@ -70,13 +70,13 @@ export const ScoringTab = memo(function ScoringTab({
     }
 
     // Sort
-    filtered = [...filtered].sort((a, b) => {
-      if (sortField === 'score') return b.score - a.score
-      if (sortField === 'zenith') return b.zenithContribution - a.zenithContribution
-      if (sortField === 'acg') return b.acgContribution - a.acgContribution
-      if (sortField === 'paran') return b.paranContribution - a.paranContribution
-      return 0
-    })
+    const sortValues: Record<SortField, (cell: GridCell) => number> = {
+      score: (c) => c.score,
+      zenith: (c) => c.zenithContribution,
+      acg: (c) => c.acgContribution,
+      paran: (c) => c.paranContribution,
+    }
+    filtered = [...filtered].sort((a, b) => sortValues[sortField](b) - sortValues[sortField](a))
 
     return filtered.slice(0, displayLimit)
   }, [scoringGrid, factorFilter, sortField, displayLimit])

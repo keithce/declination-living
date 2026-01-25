@@ -46,9 +46,8 @@ function matchesEventFilter(paran: ParanPoint, filter: EventTypeFilter): boolean
   if (filter === 'rise') return events.has('rise')
   if (filter === 'set') return events.has('set')
   if (filter === 'culminate') return events.has('culminate') || events.has('anti_culminate')
-  if (filter === 'mixed') return events.size > 1 && paran.event1 !== paran.event2
-
-  return true
+  // filter === 'mixed'
+  return events.size > 1 && paran.event1 !== paran.event2
 }
 
 // =============================================================================

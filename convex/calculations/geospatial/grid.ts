@@ -126,21 +126,30 @@ export function generateScoringGrid(
       } else if (dominantFactor === 'acg') {
         dominantPlanet = acgResult.dominantPlanet
       } else if (dominantFactor === 'paran' && parans.length > 0) {
-        // Find closest paran and use higher-weighted planet
-        let closestParan = parans[0]
-        let closestDistance = Math.abs(lat - closestParan.latitude)
+        // Find paran with highest contribution using same formula as scoreParanProximity
+        let bestParan = parans[0]
+        let bestContribution = 0
+
         for (const paran of parans) {
           const distance = Math.abs(lat - paran.latitude)
-          if (distance < closestDistance) {
-            closestDistance = distance
-            closestParan = paran
+          if (distance <= paranOrb) {
+            const proximityScore = 1 - distance / paranOrb
+            const w1 = weights[paran.planet1]
+            const w2 = weights[paran.planet2]
+            const avgWeight = (w1 + w2) / 2
+            const contribution = proximityScore * avgWeight * (paran.strength ?? 1)
+
+            if (contribution > bestContribution) {
+              bestContribution = contribution
+              bestParan = paran
+            }
           }
         }
-        // Use the higher-weighted planet from the paran pair
-        dominantPlanet =
-          weights[closestParan.planet1] >= weights[closestParan.planet2]
-            ? closestParan.planet1
-            : closestParan.planet2
+
+        // Pick higher-weighted planet from best paran
+        const w1 = weights[bestParan.planet1]
+        const w2 = weights[bestParan.planet2]
+        dominantPlanet = w1 >= w2 ? bestParan.planet1 : bestParan.planet2
       }
 
       grid.push({
