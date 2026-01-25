@@ -344,6 +344,114 @@ export function scoreLatitude(
 }
 
 // =============================================================================
+// ACG and Paran Proximity Scoring
+// =============================================================================
+
+/**
+ * Calculate score based on proximity to ACG lines.
+ * Uses great circle distance for accuracy.
+ *
+ * @param latitude - Target latitude
+ * @param longitude - Target longitude
+ * @param acgLines - Array of ACG lines
+ * @param weights - Planet weights
+ * @param orb - Maximum distance to consider (default: 2.0°)
+ * @returns Score and contribution details
+ */
+export function scoreLocationForACG(
+  latitude: number,
+  longitude: number,
+  acgLines: Array<import('../core/types').ACGLine>,
+  weights: PlanetWeights,
+  orb: number = 2.0,
+): {
+  score: number
+  contributions: Array<{
+    planet: PlanetId
+    lineType: string
+    distance: number
+  }>
+  dominantPlanet?: PlanetId
+} {
+  const { greatCircleDistanceKm } = require('../coordinates/transform')
+
+  let totalScore = 0
+  const contributions: Array<{
+    planet: PlanetId
+    lineType: string
+    distance: number
+  }> = []
+
+  let maxContribution = 0
+  let dominantPlanet: PlanetId | undefined
+
+  for (const line of acgLines) {
+    let minDistance = Infinity
+
+    // Find closest point on this line
+    for (const point of line.points) {
+      // Use great circle distance for accuracy
+      const distance =
+        greatCircleDistanceKm(latitude, longitude, point.latitude, point.longitude) / 111 // Convert km to degrees (approximate)
+
+      if (distance < minDistance) {
+        minDistance = distance
+      }
+    }
+
+    // Score if within orb
+    if (minDistance <= orb) {
+      const weight = weights[line.planet]
+      const proximityScore = (1 - minDistance / orb) * weight
+      totalScore += proximityScore
+
+      contributions.push({
+        planet: line.planet,
+        lineType: line.lineType,
+        distance: minDistance,
+      })
+
+      // Track dominant planet
+      if (proximityScore > maxContribution) {
+        maxContribution = proximityScore
+        dominantPlanet = line.planet
+      }
+    }
+  }
+
+  return { score: totalScore, contributions, dominantPlanet }
+}
+
+/**
+ * Calculate score based on proximity to paran points.
+ *
+ * @param latitude - Target latitude
+ * @param parans - Array of paran points
+ * @param weights - Planet weights
+ * @param orb - Maximum distance to consider (default: 1.0°)
+ * @returns Score
+ */
+export function scoreParanProximity(
+  latitude: number,
+  parans: Array<ParanPoint>,
+  weights: PlanetWeights,
+  orb: number = 1.0,
+): number {
+  let totalScore = 0
+
+  for (const paran of parans) {
+    const distance = Math.abs(latitude - paran.latitude)
+    if (distance <= orb) {
+      const proximityScore = 1 - distance / orb
+      const avgWeight = (weights[paran.planet1] + weights[paran.planet2]) / 2
+      totalScore += proximityScore * avgWeight * (paran.strength ?? 1)
+    }
+  }
+
+  return totalScore
+}
+
+// =============================================================================
 // Find Optimal Latitude Range
 // =============================================================================
 

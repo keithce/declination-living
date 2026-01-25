@@ -281,6 +281,8 @@ export interface GeospatialSearchResult {
     maxLat: number
     score: number
     dominantPlanets: Array<PlanetId>
+    zenithPlanets: Array<PlanetId>
+    paranCount: number
   }>
   /** Specific paran latitudes */
   paranLatitudes: Array<{
