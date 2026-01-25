@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as cache_analysisCache from "../cache/analysisCache.js";
 import type * as calculations_acg_index from "../calculations/acg/index.js";
 import type * as calculations_acg_line_solver from "../calculations/acg/line_solver.js";
 import type * as calculations_acg_zenith from "../calculations/acg/zenith.js";
@@ -17,6 +18,8 @@ import type * as calculations_coordinates_geocentric from "../calculations/coord
 import type * as calculations_coordinates_hour_angle from "../calculations/coordinates/hour_angle.js";
 import type * as calculations_coordinates_index from "../calculations/coordinates/index.js";
 import type * as calculations_coordinates_sda from "../calculations/coordinates/sda.js";
+import type * as calculations_coordinates_topocentric from "../calculations/coordinates/topocentric.js";
+import type * as calculations_coordinates_transform from "../calculations/coordinates/transform.js";
 import type * as calculations_core_constants from "../calculations/core/constants.js";
 import type * as calculations_core_index from "../calculations/core/index.js";
 import type * as calculations_core_math from "../calculations/core/math.js";
@@ -29,8 +32,11 @@ import type * as calculations_dignity_terms from "../calculations/dignity/terms.
 import type * as calculations_enhanced_actions from "../calculations/enhanced_actions.js";
 import type * as calculations_ephemeris from "../calculations/ephemeris.js";
 import type * as calculations_ephemeris_index from "../calculations/ephemeris/index.js";
+import type * as calculations_ephemeris_julian from "../calculations/ephemeris/julian.js";
 import type * as calculations_ephemeris_oob from "../calculations/ephemeris/oob.js";
+import type * as calculations_ephemeris_oobCalculator from "../calculations/ephemeris/oobCalculator.js";
 import type * as calculations_ephemeris_speed from "../calculations/ephemeris/speed.js";
+import type * as calculations_ephemeris_swissephService from "../calculations/ephemeris/swissephService.js";
 import type * as calculations_geospatial_index from "../calculations/geospatial/index.js";
 import type * as calculations_geospatial_search from "../calculations/geospatial/search.js";
 import type * as calculations_index from "../calculations/index.js";
@@ -47,6 +53,7 @@ import type * as cities_queries from "../cities/queries.js";
 import type * as http from "../http.js";
 import type * as presets_queries from "../presets/queries.js";
 import type * as presets_seed from "../presets/seed.js";
+import type * as users_anonymous from "../users/anonymous.js";
 
 import type {
   ApiFromModules,
@@ -56,6 +63,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  "cache/analysisCache": typeof cache_analysisCache;
   "calculations/acg/index": typeof calculations_acg_index;
   "calculations/acg/line_solver": typeof calculations_acg_line_solver;
   "calculations/acg/zenith": typeof calculations_acg_zenith;
@@ -64,6 +72,8 @@ declare const fullApi: ApiFromModules<{
   "calculations/coordinates/hour_angle": typeof calculations_coordinates_hour_angle;
   "calculations/coordinates/index": typeof calculations_coordinates_index;
   "calculations/coordinates/sda": typeof calculations_coordinates_sda;
+  "calculations/coordinates/topocentric": typeof calculations_coordinates_topocentric;
+  "calculations/coordinates/transform": typeof calculations_coordinates_transform;
   "calculations/core/constants": typeof calculations_core_constants;
   "calculations/core/index": typeof calculations_core_index;
   "calculations/core/math": typeof calculations_core_math;
@@ -76,8 +86,11 @@ declare const fullApi: ApiFromModules<{
   "calculations/enhanced_actions": typeof calculations_enhanced_actions;
   "calculations/ephemeris": typeof calculations_ephemeris;
   "calculations/ephemeris/index": typeof calculations_ephemeris_index;
+  "calculations/ephemeris/julian": typeof calculations_ephemeris_julian;
   "calculations/ephemeris/oob": typeof calculations_ephemeris_oob;
+  "calculations/ephemeris/oobCalculator": typeof calculations_ephemeris_oobCalculator;
   "calculations/ephemeris/speed": typeof calculations_ephemeris_speed;
+  "calculations/ephemeris/swissephService": typeof calculations_ephemeris_swissephService;
   "calculations/geospatial/index": typeof calculations_geospatial_index;
   "calculations/geospatial/search": typeof calculations_geospatial_search;
   "calculations/index": typeof calculations_index;
@@ -94,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   "presets/queries": typeof presets_queries;
   "presets/seed": typeof presets_seed;
+  "users/anonymous": typeof users_anonymous;
 }>;
 
 /**

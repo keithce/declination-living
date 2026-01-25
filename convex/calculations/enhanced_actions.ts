@@ -15,12 +15,16 @@
 
 import { v } from 'convex/values'
 import { action } from '../_generated/server'
+import { internal } from '../_generated/api'
 
+import { generateCacheKey, hashWeights } from '../cache/analysisCache'
 import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from './ephemeris'
 import { findOptimalLatitudes, getOptimalLatitudeBands } from './optimizer'
 
 // Import new modules
 import { PLANET_IDS } from './core/types'
+
+// Import cache utilities
 import { checkAllOOBStatus, getMeanObliquity } from './ephemeris/oob'
 import { calculateAllZenithLines } from './acg/zenith'
 import { calculateAllACGLines, findACGLinesNearLocation } from './acg/line_solver'
@@ -446,8 +450,27 @@ export const calculateCompleteEnhanced = action({
     timezone: v.string(),
     weights: planetWeightsValidator,
     ascendant: v.optional(v.number()),
+    anonymousUserId: v.optional(v.string()),
+    userId: v.optional(v.string()),
   },
-  handler: async (_ctx, { birthDate, birthTime, weights, ascendant }) => {
+  handler: async (
+    ctx,
+    { birthDate, birthTime, timezone, weights, ascendant, anonymousUserId, userId },
+  ) => {
+    // Generate cache key
+    const weightsHash = hashWeights(weights)
+    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash)
+
+    // Check cache first - use type assertion to break the circular reference
+    type CachedResult = unknown
+    const cachedResult: CachedResult = await ctx.runQuery(
+      internal.cache.analysisCache.getCachedResultInternal,
+      { cacheKey },
+    )
+    if (cachedResult !== null) {
+      return cachedResult
+    }
+
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
@@ -509,7 +532,7 @@ export const calculateCompleteEnhanced = action({
       ]),
     )
 
-    return {
+    const result = {
       // Basic data
       julianDay: jd,
       obliquity,
@@ -554,6 +577,18 @@ export const calculateCompleteEnhanced = action({
       // Metadata
       sect: isDay ? 'day' : 'night',
     }
+
+    // Cache the result
+    await ctx.runMutation(internal.cache.analysisCache.setCachedResultInternal, {
+      cacheKey,
+      inputHash: weightsHash,
+      result,
+      calculationType: 'full',
+      userId: userId as any,
+      anonymousUserId: anonymousUserId as any,
+    })
+
+    return result
   },
 })
 

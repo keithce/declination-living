@@ -175,6 +175,29 @@ export default defineSchema({
     computedAt: v.number(),
   }).index('by_chart', ['chartId']),
 
+  // Anonymous users for fingerprint-based identification
+  anonymousUsers: defineTable({
+    fingerprintId: v.string(),
+    createdAt: v.number(),
+    lastSeen: v.number(),
+    chartCount: v.number(),
+  }).index('by_fingerprint', ['fingerprintId']),
+
+  // Standalone calculation cache (not tied to charts)
+  calculationCache: defineTable({
+    cacheKey: v.string(),
+    userId: v.optional(v.id('users')),
+    anonymousUserId: v.optional(v.id('anonymousUsers')),
+    inputHash: v.string(),
+    result: v.any(),
+    calculationType: v.string(), // 'full' | 'declinations' | 'parans' | 'acg' | 'vibes'
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  })
+    .index('by_cache_key', ['cacheKey'])
+    .index('by_user', ['userId'])
+    .index('by_anonymous_user', ['anonymousUserId']),
+
   // User-defined and preset vibes for search
   vibes: defineTable({
     userId: v.optional(v.id('users')),
