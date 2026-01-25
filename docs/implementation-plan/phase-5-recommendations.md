@@ -32,10 +32,8 @@ The PDF defines these primary vibe categories:
 | Creativity   | Venus, Neptune, Mercury  | Artistic expression    |
 | Spirituality | Neptune, Moon, Jupiter   | Inner development      |
 | Adventure    | Mars, Jupiter, Uranus    | Exploration, risk      |
-| Healing      | Moon, Neptune, Chiron\*  | Health, recovery       |
+| Healing      | Moon, Neptune, Venus     | Health, recovery       |
 | Learning     | Mercury, Jupiter, Uranus | Education, knowledge   |
-
-\*Note: Chiron not included in current 10-planet system
 
 ## Tasks
 

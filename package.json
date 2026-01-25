@@ -7,12 +7,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --check .",
-    "format:fix": "prettier --write .",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
     "check": "prettier --write . && eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format:ci": "prettier --check .",
+    "lint:ci": "eslint . --max-warnings 0",
+    "check:ci": "bun run format:ci && bun run lint:ci && bun run typecheck"
   },
   "dependencies": {
     "@auth/core": "0.41.1",

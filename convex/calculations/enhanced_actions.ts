@@ -108,34 +108,10 @@ interface CompleteEnhancedResult {
 }
 
 // =============================================================================
-// Validators
+// Validators (imported from shared)
 // =============================================================================
 
-const planetWeightsValidator = v.object({
-  sun: v.number(),
-  moon: v.number(),
-  mercury: v.number(),
-  venus: v.number(),
-  mars: v.number(),
-  jupiter: v.number(),
-  saturn: v.number(),
-  uranus: v.number(),
-  neptune: v.number(),
-  pluto: v.number(),
-})
-
-const planetDeclinationsValidator = v.object({
-  sun: v.number(),
-  moon: v.number(),
-  mercury: v.number(),
-  venus: v.number(),
-  mars: v.number(),
-  jupiter: v.number(),
-  saturn: v.number(),
-  uranus: v.number(),
-  neptune: v.number(),
-  pluto: v.number(),
-})
+import { planetDeclinationsValidator, planetWeightsValidator } from './validators'
 
 // =============================================================================
 // Enhanced Position Actions
@@ -531,7 +507,7 @@ export const calculateCompleteEnhanced = action({
   ) => {
     // Generate cache key
     const weightsHash = hashWeights(weights)
-    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash)
+    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash, ascendant)
 
     // Check cache first
     const cachedResult = (await ctx.runQuery(internal.cache.analysisCache.getCachedResultInternal, {

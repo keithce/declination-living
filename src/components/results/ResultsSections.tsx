@@ -14,6 +14,7 @@ import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowDownUp, CircleDot, Crown, MapPin, Sparkles, Zap } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PLANET_COLORS, PLANET_NAMES, PLANET_SYMBOLS } from '@/lib/planet-constants'
 
 // =============================================================================
 // Types
@@ -79,45 +80,6 @@ interface ResultsSectionsProps {
 // =============================================================================
 // Constants
 // =============================================================================
-
-const PLANET_COLORS: Record<string, string> = {
-  sun: '#fbbf24',
-  moon: '#e2e8f0',
-  mercury: '#a78bfa',
-  venus: '#f472b6',
-  mars: '#ef4444',
-  jupiter: '#f97316',
-  saturn: '#78716c',
-  uranus: '#22d3ee',
-  neptune: '#818cf8',
-  pluto: '#a3a3a3',
-}
-
-const PLANET_SYMBOLS: Record<string, string> = {
-  sun: '☉',
-  moon: '☽',
-  mercury: '☿',
-  venus: '♀',
-  mars: '♂',
-  jupiter: '♃',
-  saturn: '♄',
-  uranus: '♅',
-  neptune: '♆',
-  pluto: '♇',
-}
-
-const PLANET_NAMES: Record<string, string> = {
-  sun: 'Sun',
-  moon: 'Moon',
-  mercury: 'Mercury',
-  venus: 'Venus',
-  mars: 'Mars',
-  jupiter: 'Jupiter',
-  saturn: 'Saturn',
-  uranus: 'Uranus',
-  neptune: 'Neptune',
-  pluto: 'Pluto',
-}
 
 const DIGNITY_LABELS: Record<string, { label: string; color: string }> = {
   R: { label: 'Rulership', color: 'text-amber-400' },

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { PLANET_COLORS } from '@/lib/planet-constants'
 
 interface LatitudeBand {
   min: number
@@ -22,19 +23,6 @@ interface GlobeCanvasProps {
     longitude: number
     city: string
   }
-}
-
-const PLANET_COLORS: Record<string, string> = {
-  sun: '#fbbf24',
-  moon: '#e2e8f0',
-  mercury: '#a78bfa',
-  venus: '#f472b6',
-  mars: '#ef4444',
-  jupiter: '#f97316',
-  saturn: '#78716c',
-  uranus: '#22d3ee',
-  neptune: '#818cf8',
-  pluto: '#a3a3a3',
 }
 
 // Convert lat/lon to 3D position on sphere

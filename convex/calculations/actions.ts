@@ -4,21 +4,9 @@ import { v } from 'convex/values'
 import { action } from '../_generated/server'
 import { calculateDeclinations, dateToJulianDay } from './ephemeris'
 import { findOptimalLatitudes, getOptimalLatitudeBands, scoreCities } from './optimizer'
+import { planetWeightsValidator } from './validators'
 import type { PlanetDeclinations } from './ephemeris'
 import type { CityScore, LatitudeScore } from './optimizer'
-
-const planetWeightsValidator = v.object({
-  sun: v.number(),
-  moon: v.number(),
-  mercury: v.number(),
-  venus: v.number(),
-  mars: v.number(),
-  jupiter: v.number(),
-  saturn: v.number(),
-  uranus: v.number(),
-  neptune: v.number(),
-  pluto: v.number(),
-})
 
 /**
  * Calculate planetary declinations for a birth date/time

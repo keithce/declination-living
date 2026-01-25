@@ -220,3 +220,61 @@ code {
 .glow-gold-intense {
   box-shadow: 0 0 60px rgba(251, 191, 36, 0.5);
 }
+
+/* Highlight flash animation for results synchronization */
+@keyframes highlight-flash {
+  0% {
+    background-color: rgba(251, 191, 36, 0);
+    box-shadow: 0 0 0 rgba(251, 191, 36, 0);
+  }
+  50% {
+    background-color: rgba(251, 191, 36, 0.2);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  }
+  100% {
+    background-color: rgba(251, 191, 36, 0);
+    box-shadow: 0 0 0 rgba(251, 191, 36, 0);
+  }
+}
+
+.highlight-flash {
+  animation: highlight-flash 1s ease-in-out;
+}
+
+/* Accessibility - Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-twinkle,
+  .animate-float,
+  .animate-orbit,
+  .animate-pulse-glow {
+    animation: none !important;
+  }
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--celestial-gold);
+  outline-offset: 2px;
+}

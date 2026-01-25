@@ -11,7 +11,10 @@ import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { useCalculatorState } from '@/hooks/use-calculator-state'
 import { DeclinationTable } from '@/components/calculator/DeclinationTable'
 import { ResultsPanel } from '@/components/calculator/ResultsPanel'
+import { ResultsTabs } from '@/components/results/ResultsTabs'
+import { EnhancedGlobeSection } from '@/components/results/EnhancedGlobeSection'
 import { GlobeView } from '@/components/globe'
+import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
 
 export const Route = createFileRoute('/calculator')({
   component: CalculatorPage,
@@ -65,10 +68,13 @@ function CalculatorContent() {
   const [chartName, setChartName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [phase2Data, setPhase2Data] = useState<any | null>(null)
 
   const calculateComplete = useAction(api.calculations.actions.calculateComplete)
+  const calculatePhase2 = useAction(api.calculations.phase2_actions.calculatePhase2Complete)
   const recalculateWithWeights = useAction(api.calculations.actions.recalculateWithWeights)
   const createChart = useMutation(api.charts.mutations.create)
+  const globeState = useGlobeState()
 
   const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
@@ -84,14 +90,29 @@ function CalculatorContent() {
 
     setIsCalculating(true)
     try {
+      // Phase 1: Core calculation (must succeed)
       const calcResult = await calculateComplete({
         birthDate: birthData.birthDate,
         birthTime: birthData.birthTime,
         timezone: birthData.birthTimezone,
         weights,
       })
-
       setResult(calcResult)
+
+      // Phase 2: Enhanced calculation (optional - don't block Phase 1 results)
+      try {
+        const phase2Result = await calculatePhase2({
+          birthDate: birthData.birthDate,
+          birthTime: birthData.birthTime,
+          timezone: birthData.birthTimezone,
+          weights,
+        })
+        setPhase2Data(phase2Result)
+      } catch (phase2Err) {
+        console.error('Phase 2 calculation failed:', phase2Err)
+        // Phase 1 results still displayed, just without enhanced features
+        setPhase2Data(null)
+      }
     } catch (err) {
       console.error('Calculation failed:', err)
       setError('Calculation failed. Please try again.')
@@ -101,13 +122,22 @@ function CalculatorContent() {
   }
 
   const handleRecalculate = async (newWeights: PlanetWeights) => {
-    if (!result) return
+    if (!result || !birthData) return
 
     setIsCalculating(true)
 
     try {
+      // Recalculate Phase 1 results (lightweight)
       const recalcResult = await recalculateWithWeights({
         declinations: result.declinations,
+        weights: newWeights,
+      })
+
+      // Recalculate Phase 2 results with new weights
+      const phase2Result = await calculatePhase2({
+        birthDate: birthData.birthDate,
+        birthTime: birthData.birthTime,
+        timezone: birthData.birthTimezone,
         weights: newWeights,
       })
 
@@ -119,6 +149,7 @@ function CalculatorContent() {
         },
         newWeights,
       )
+      setPhase2Data(phase2Result)
     } catch (err) {
       console.error('Recalculation failed:', err)
     } finally {
@@ -324,19 +355,37 @@ function CalculatorContent() {
                 <h3 className="font-display text-lg font-semibold text-white mb-4">
                   Global Visualization
                 </h3>
-                <GlobeView
-                  optimalLatitudes={result.optimalLatitudes}
-                  latitudeBands={result.latitudeBands}
-                  birthLocation={
-                    birthData
-                      ? {
-                          latitude: birthData.birthLatitude,
-                          longitude: birthData.birthLongitude,
-                          city: birthData.birthCity,
-                        }
-                      : undefined
-                  }
-                />
+                {phase2Data ? (
+                  <EnhancedGlobeSection
+                    birthLocation={
+                      birthData
+                        ? {
+                            latitude: birthData.birthLatitude,
+                            longitude: birthData.birthLongitude,
+                            city: birthData.birthCity,
+                          }
+                        : undefined
+                    }
+                    declinations={phase2Data.declinations}
+                    acgLines={phase2Data.acgLines}
+                    parans={phase2Data.parans}
+                    globeState={globeState}
+                  />
+                ) : (
+                  <GlobeView
+                    optimalLatitudes={result.optimalLatitudes}
+                    latitudeBands={result.latitudeBands}
+                    birthLocation={
+                      birthData
+                        ? {
+                            latitude: birthData.birthLatitude,
+                            longitude: birthData.birthLongitude,
+                            city: birthData.birthCity,
+                          }
+                        : undefined
+                    }
+                  />
+                )}
               </div>
 
               {/* Weights adjuster (collapsed) */}
@@ -350,11 +399,30 @@ function CalculatorContent() {
                 </div>
               </details>
 
-              {/* Results */}
+              {/* Phase 1 Results */}
               <ResultsPanel
                 optimalLatitudes={result.optimalLatitudes}
                 latitudeBands={result.latitudeBands}
               />
+
+              {/* Phase 2 Enhanced Results */}
+              {phase2Data && (
+                <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Sparkles className="w-5 h-5 text-amber-400" />
+                    <h3 className="font-display text-xl font-semibold text-white">
+                      Enhanced Analysis
+                    </h3>
+                  </div>
+                  <ResultsTabs
+                    acgLines={phase2Data.acgLines}
+                    zenithLines={phase2Data.zenithLines}
+                    parans={phase2Data.parans}
+                    scoringGrid={phase2Data.scoringGrid}
+                    globeState={globeState}
+                  />
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex items-center justify-center gap-4">

@@ -206,7 +206,7 @@ export const cleanupExpiredCache = mutation({
     const now = Date.now()
     const expired = await ctx.db
       .query('calculationCache')
-      .filter((q) => q.lt(q.field('expiresAt'), now))
+      .withIndex('by_expires_at', (q) => q.lt('expiresAt', now))
       .collect()
 
     let deleted = 0
@@ -269,14 +269,17 @@ export const clearUserCache = mutation({
  * @param birthTime - Birth time string
  * @param timezone - Timezone string
  * @param weightsHash - Stringified weights
+ * @param ascendant - Optional ascendant degree for sect calculation
  */
 export function generateCacheKey(
   birthDate: string,
   birthTime: string,
   timezone: string,
   weightsHash: string,
+  ascendant?: number,
 ): string {
-  const input = `${birthDate}|${birthTime}|${timezone}|${weightsHash}`
+  const ascendantStr = ascendant !== undefined ? ascendant.toFixed(6) : 'none'
+  const input = `${birthDate}|${birthTime}|${timezone}|${weightsHash}|${ascendantStr}`
 
   // Simple hash function (FNV-1a)
   let hash = 2166136261

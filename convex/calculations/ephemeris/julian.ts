@@ -29,9 +29,17 @@ export function calendarToJulianDay(year: number, month: number, day: number): n
     m += 12
   }
 
-  // Gregorian calendar correction
-  const a = Math.floor(y / 100)
-  const b = 2 - a + Math.floor(a / 4)
+  // Determine if this is a Gregorian or Julian calendar date
+  // Cutover: October 15, 1582 (Gregorian) = October 5, 1582 (Julian)
+  const isGregorian =
+    year > 1582 || (year === 1582 && month > 10) || (year === 1582 && month === 10 && day >= 15)
+
+  // Gregorian calendar correction (only for dates after cutover)
+  let b = 0
+  if (isGregorian) {
+    const a = Math.floor(y / 100)
+    b = 2 - a + Math.floor(a / 4)
+  }
 
   // Julian Day formula
   const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524.5

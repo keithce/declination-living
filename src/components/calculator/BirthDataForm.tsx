@@ -4,6 +4,46 @@ import { Calendar, Clock, Info } from 'lucide-react'
 import { CityAutocomplete } from './CityAutocomplete'
 import type { CityResult } from '@/lib/geoapify'
 
+// Dev mode presets - tree-shaken in production
+const DEV_PRESETS = import.meta.env.DEV
+  ? [
+      {
+        label: 'Keith',
+        birthDate: '1986-02-28',
+        birthTime: '16:20',
+        city: {
+          placeId: 'dev-sarasota',
+          name: 'Sarasota',
+          city: 'Sarasota',
+          state: 'Florida',
+          country: 'United States',
+          countryCode: 'us',
+          latitude: 27.3364,
+          longitude: -82.5307,
+          timezone: 'America/New_York',
+          displayName: 'Sarasota, Florida, United States',
+        } satisfies CityResult,
+      },
+      {
+        label: 'Preset 2',
+        birthDate: '1991-07-14',
+        birthTime: '02:45',
+        city: {
+          placeId: 'dev-edmonds',
+          name: 'Edmonds',
+          city: 'Edmonds',
+          state: 'Washington',
+          country: 'United States',
+          countryCode: 'us',
+          latitude: 47.8107,
+          longitude: -122.3774,
+          timezone: 'America/Los_Angeles',
+          displayName: 'Edmonds, Washington, United States',
+        } satisfies CityResult,
+      },
+    ]
+  : []
+
 export interface BirthData {
   birthDate: string
   birthTime: string
@@ -60,6 +100,13 @@ export function BirthDataForm({ onSubmit, isLoading }: BirthDataFormProps) {
     })
   }
 
+  const fillPreset = (preset: (typeof DEV_PRESETS)[number]) => {
+    setBirthDate(preset.birthDate)
+    setBirthTime(preset.birthTime)
+    setSelectedCity(preset.city)
+    setErrors({})
+  }
+
   return (
     <motion.form
       onSubmit={handleSubmit}
@@ -68,6 +115,29 @@ export function BirthDataForm({ onSubmit, isLoading }: BirthDataFormProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Dev Mode Presets */}
+      {DEV_PRESETS.length > 0 && (
+        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-medium text-amber-400 uppercase tracking-wide">
+              Dev Mode
+            </span>
+          </div>
+          <div className="flex gap-2">
+            {DEV_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => fillPreset(preset)}
+                className="px-3 py-1.5 text-sm bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg transition-colors"
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Birth Date */}
       <div>
         <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">

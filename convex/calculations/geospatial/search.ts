@@ -6,11 +6,17 @@
  */
 
 import { PLANET_IDS } from '../core/types'
-import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../core/constants'
+import {
+  DECLINATION_SIGMA,
+  DEFAULT_DECLINATION_ORB,
+  DEFAULT_PARAN_STRENGTH,
+} from '../core/constants'
 import { gaussian } from '../core/math'
 import { findZenithOverlaps } from '../acg/zenith'
 import { calculateAllParans } from '../parans/solver'
+import { greatCircleDistanceKm } from '../coordinates/transform'
 import type {
+  ACGLine,
   EquatorialCoordinates,
   GeospatialSearchResult,
   ParanPoint,
@@ -162,7 +168,9 @@ export function calculateParanLatitudes(
       planets.add(paran.planet2)
 
       // Add weighted contribution
-      score += (weights[paran.planet1] + weights[paran.planet2]) * (paran.strength ?? 0.5)
+      score +=
+        (weights[paran.planet1] + weights[paran.planet2]) *
+        (paran.strength ?? DEFAULT_PARAN_STRENGTH)
     }
 
     targets.push({
@@ -341,6 +349,123 @@ export function scoreLatitude(
   contributions.sort((a, b) => b.contribution - a.contribution)
 
   return { score: totalScore, contributions }
+}
+
+// =============================================================================
+// ACG and Paran Proximity Scoring
+// =============================================================================
+
+/**
+ * Calculate score based on proximity to ACG lines.
+ * Uses great circle distance for accuracy.
+ *
+ * @param latitude - Target latitude
+ * @param longitude - Target longitude
+ * @param acgLines - Array of ACG lines
+ * @param weights - Planet weights
+ * @param orb - Maximum distance to consider (default: 2.0°)
+ * @returns Score and contribution details
+ */
+export function scoreLocationForACG(
+  latitude: number,
+  longitude: number,
+  acgLines: Array<ACGLine>,
+  weights: PlanetWeights,
+  orb: number = 2.0,
+): {
+  score: number
+  contributions: Array<{
+    planet: PlanetId
+    lineType: string
+    distance: number
+  }>
+  dominantPlanet?: PlanetId
+} {
+  // Guard against division by zero
+  if (orb <= 0) {
+    throw new Error('orb must be positive')
+  }
+
+  let totalScore = 0
+  const contributions: Array<{
+    planet: PlanetId
+    lineType: string
+    distance: number
+  }> = []
+
+  let maxContribution = 0
+  let dominantPlanet: PlanetId | undefined
+
+  for (const line of acgLines) {
+    let minDistance = Infinity
+
+    // Find closest point on this line
+    for (const point of line.points) {
+      // Use great circle distance converted to angular degrees
+      // Formula: angularDeg = (km / earthRadiusKm) * (180 / π)
+      const distanceKm = greatCircleDistanceKm(latitude, longitude, point.latitude, point.longitude)
+      const distance = (distanceKm / 6371) * (180 / Math.PI)
+
+      if (distance < minDistance) {
+        minDistance = distance
+      }
+    }
+
+    // Score if within orb
+    if (minDistance <= orb) {
+      const weight = weights[line.planet]
+      const proximityScore = (1 - minDistance / orb) * weight
+      totalScore += proximityScore
+
+      contributions.push({
+        planet: line.planet,
+        lineType: line.lineType,
+        distance: minDistance,
+      })
+
+      // Track dominant planet
+      if (proximityScore > maxContribution) {
+        maxContribution = proximityScore
+        dominantPlanet = line.planet
+      }
+    }
+  }
+
+  return { score: totalScore, contributions, dominantPlanet }
+}
+
+/**
+ * Calculate score based on proximity to paran points.
+ *
+ * @param latitude - Target latitude
+ * @param parans - Array of paran points
+ * @param weights - Planet weights
+ * @param orb - Maximum distance to consider (default: 1.0°)
+ * @returns Score
+ */
+export function scoreParanProximity(
+  latitude: number,
+  parans: Array<ParanPoint>,
+  weights: PlanetWeights,
+  orb: number = 1.0,
+): number {
+  // Guard against division by zero
+  if (orb <= 0) {
+    throw new Error('orb must be positive')
+  }
+
+  let totalScore = 0
+
+  for (const paran of parans) {
+    const distance = Math.abs(latitude - paran.latitude)
+    if (distance <= orb) {
+      const proximityScore = 1 - distance / orb
+      const avgWeight = (weights[paran.planet1] + weights[paran.planet2]) / 2
+      totalScore += proximityScore * avgWeight * (paran.strength ?? DEFAULT_PARAN_STRENGTH)
+    }
+  }
+
+  return totalScore
 }
 
 // =============================================================================

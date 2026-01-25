@@ -126,7 +126,7 @@ bun --bun run check      # Lint + format
 
 ## File Structure (After Implementation)
 
-```
+```text
 src/
 ├── routes/
 │   ├── calculator.tsx          # Enhanced calculator

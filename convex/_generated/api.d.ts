@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as cache_analysisCache from "../cache/analysisCache.js";
+import type * as calculations_acg_actions from "../calculations/acg/actions.js";
 import type * as calculations_acg_index from "../calculations/acg/index.js";
 import type * as calculations_acg_line_solver from "../calculations/acg/line_solver.js";
 import type * as calculations_acg_zenith from "../calculations/acg/zenith.js";
@@ -37,14 +38,17 @@ import type * as calculations_ephemeris_oob from "../calculations/ephemeris/oob.
 import type * as calculations_ephemeris_oobCalculator from "../calculations/ephemeris/oobCalculator.js";
 import type * as calculations_ephemeris_speed from "../calculations/ephemeris/speed.js";
 import type * as calculations_ephemeris_swissephService from "../calculations/ephemeris/swissephService.js";
+import type * as calculations_geospatial_grid from "../calculations/geospatial/grid.js";
 import type * as calculations_geospatial_index from "../calculations/geospatial/index.js";
 import type * as calculations_geospatial_search from "../calculations/geospatial/search.js";
 import type * as calculations_index from "../calculations/index.js";
 import type * as calculations_optimizer from "../calculations/optimizer.js";
 import type * as calculations_parans_index from "../calculations/parans/index.js";
 import type * as calculations_parans_solver from "../calculations/parans/solver.js";
+import type * as calculations_phase2_actions from "../calculations/phase2_actions.js";
 import type * as calculations_safety_filter from "../calculations/safety/filter.js";
 import type * as calculations_safety_index from "../calculations/safety/index.js";
+import type * as calculations_validators from "../calculations/validators.js";
 import type * as calculations_vibes_index from "../calculations/vibes/index.js";
 import type * as calculations_vibes_translator from "../calculations/vibes/translator.js";
 import type * as charts_mutations from "../charts/mutations.js";
@@ -64,6 +68,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "cache/analysisCache": typeof cache_analysisCache;
+  "calculations/acg/actions": typeof calculations_acg_actions;
   "calculations/acg/index": typeof calculations_acg_index;
   "calculations/acg/line_solver": typeof calculations_acg_line_solver;
   "calculations/acg/zenith": typeof calculations_acg_zenith;
@@ -91,14 +96,17 @@ declare const fullApi: ApiFromModules<{
   "calculations/ephemeris/oobCalculator": typeof calculations_ephemeris_oobCalculator;
   "calculations/ephemeris/speed": typeof calculations_ephemeris_speed;
   "calculations/ephemeris/swissephService": typeof calculations_ephemeris_swissephService;
+  "calculations/geospatial/grid": typeof calculations_geospatial_grid;
   "calculations/geospatial/index": typeof calculations_geospatial_index;
   "calculations/geospatial/search": typeof calculations_geospatial_search;
   "calculations/index": typeof calculations_index;
   "calculations/optimizer": typeof calculations_optimizer;
   "calculations/parans/index": typeof calculations_parans_index;
   "calculations/parans/solver": typeof calculations_parans_solver;
+  "calculations/phase2_actions": typeof calculations_phase2_actions;
   "calculations/safety/filter": typeof calculations_safety_filter;
   "calculations/safety/index": typeof calculations_safety_index;
+  "calculations/validators": typeof calculations_validators;
   "calculations/vibes/index": typeof calculations_vibes_index;
   "calculations/vibes/translator": typeof calculations_vibes_translator;
   "charts/mutations": typeof charts_mutations;
