@@ -13,7 +13,6 @@ import {
   formatLatitude,
 } from '../shared/constants'
 import type { ZenithLine } from '@/../convex/calculations/core/types'
-import type { ResultsState } from '../hooks/useResultsState'
 
 // =============================================================================
 // Types
@@ -22,8 +21,6 @@ import type { ResultsState } from '../hooks/useResultsState'
 export interface ZenithTabProps {
   /** Zenith lines from calculations */
   zenithLines: Array<ZenithLine>
-  /** Results state for synchronization */
-  resultsState?: ResultsState
   /** Initial orb value */
   initialOrb?: number
 }

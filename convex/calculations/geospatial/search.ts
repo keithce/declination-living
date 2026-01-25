@@ -6,7 +6,11 @@
  */
 
 import { PLANET_IDS } from '../core/types'
-import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../core/constants'
+import {
+  DECLINATION_SIGMA,
+  DEFAULT_DECLINATION_ORB,
+  DEFAULT_PARAN_STRENGTH,
+} from '../core/constants'
 import { gaussian } from '../core/math'
 import { findZenithOverlaps } from '../acg/zenith'
 import { calculateAllParans } from '../parans/solver'
@@ -164,7 +168,9 @@ export function calculateParanLatitudes(
       planets.add(paran.planet2)
 
       // Add weighted contribution
-      score += (weights[paran.planet1] + weights[paran.planet2]) * (paran.strength ?? 0.5)
+      score +=
+        (weights[paran.planet1] + weights[paran.planet2]) *
+        (paran.strength ?? DEFAULT_PARAN_STRENGTH)
     }
 
     targets.push({
@@ -445,7 +451,7 @@ export function scoreParanProximity(
     if (distance <= orb) {
       const proximityScore = 1 - distance / orb
       const avgWeight = (weights[paran.planet1] + weights[paran.planet2]) / 2
-      totalScore += proximityScore * avgWeight * (paran.strength ?? 1)
+      totalScore += proximityScore * avgWeight * (paran.strength ?? DEFAULT_PARAN_STRENGTH)
     }
   }
 

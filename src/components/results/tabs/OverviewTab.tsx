@@ -48,11 +48,11 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
     { zenith: 0, acg: 0, paran: 0, mixed: 0 } as Record<string, number>,
   )
 
-  // Calculate percentages
+  // Calculate percentages (guard against division by zero)
   const factorPercentages = Object.entries(factorCounts).map(([factor, count]) => ({
     factor,
     count,
-    percentage: (count / totalCells) * 100,
+    percentage: totalCells > 0 ? (count / totalCells) * 100 : 0,
   }))
 
   const factorLabels: Record<string, { label: string; color: string }> = {
@@ -96,7 +96,9 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
             <span className="text-xs text-slate-500">Top Location</span>
           </div>
           <div className="text-sm font-mono text-amber-400">
-            {topLocations[0] ? formatLatitude(topLocations[0].lat) : 'N/A'}
+            {topLocations[0]
+              ? `${formatLatitude(topLocations[0].lat)}, ${formatLongitude(topLocations[0].lon)}`
+              : 'N/A'}
           </div>
         </div>
       </div>

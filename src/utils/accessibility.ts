@@ -40,9 +40,11 @@ export function announceToScreenReader(message: string): void {
 
   document.body.appendChild(announcement)
 
-  // Remove after announcement
+  // Remove after announcement (defensive check in case element was already removed)
   setTimeout(() => {
-    document.body.removeChild(announcement)
+    if (announcement.parentNode) {
+      announcement.parentNode.removeChild(announcement)
+    }
   }, 1000)
 }
 

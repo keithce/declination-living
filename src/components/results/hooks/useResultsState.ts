@@ -162,7 +162,11 @@ export function useResultsState(): ResultsState {
       // Highlight element briefly
       targetElement.classList.add('highlight-flash')
       highlightTimeoutRef.current = setTimeout(() => {
-        targetElement.classList.remove('highlight-flash')
+        // Re-query element in case it was detached during the timeout
+        const currentElement = document.getElementById(domId)
+        if (currentElement) {
+          currentElement.classList.remove('highlight-flash')
+        }
         highlightTimeoutRef.current = null
       }, 1000)
     }
@@ -206,6 +210,11 @@ export function generateElementId(element: Partial<ElementIdentifier>): string {
   ) {
     return `${element.latitude.toFixed(1)}-${element.longitude.toFixed(1)}`
   }
-  // Deterministic fallback with type + random suffix
-  return `${element.type || 'element'}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  // Deterministic fallback: serialize available properties into a stable ID
+  const parts: Array<string> = [element.type || 'element']
+  if (element.id) parts.push(element.id)
+  if (element.planet) parts.push(element.planet)
+  if (element.latitude !== undefined) parts.push(element.latitude.toFixed(2))
+  if (element.longitude !== undefined) parts.push(element.longitude.toFixed(2))
+  return parts.join('-')
 }

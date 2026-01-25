@@ -93,6 +93,9 @@ export const PARAN_MAX_ITERATIONS = 50
 /** Latitude step for initial paran search (degrees) */
 export const PARAN_LATITUDE_STEP = 0.25
 
+/** Default paran strength when not provided */
+export const DEFAULT_PARAN_STRENGTH = 0.5
+
 // =============================================================================
 // Declination/Zenith Constants
 // =============================================================================

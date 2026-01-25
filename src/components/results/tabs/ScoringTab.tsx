@@ -188,21 +188,24 @@ export const ScoringTab = memo(function ScoringTab({
               </button>
 
               {/* Score Breakdown Bar */}
-              <div className="h-1.5 flex overflow-hidden">
+              <div className="h-1.5 flex overflow-hidden" role="img" aria-label="Score breakdown">
                 <div
                   className="bg-blue-500"
                   style={{ width: `${zenithPercent}%` }}
                   title={`Zenith: ${zenithPercent.toFixed(1)}%`}
+                  aria-label={`Zenith: ${zenithPercent.toFixed(1)}%`}
                 />
                 <div
                   className="bg-purple-500"
                   style={{ width: `${acgPercent}%` }}
                   title={`ACG: ${acgPercent.toFixed(1)}%`}
+                  aria-label={`ACG: ${acgPercent.toFixed(1)}%`}
                 />
                 <div
                   className="bg-amber-500"
                   style={{ width: `${paranPercent}%` }}
                   title={`Paran: ${paranPercent.toFixed(1)}%`}
+                  aria-label={`Paran: ${paranPercent.toFixed(1)}%`}
                 />
               </div>
 

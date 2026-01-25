@@ -300,8 +300,8 @@ describe('Zenith Line Calculator', () => {
       const optimal = findOptimalZenithLatitudes(TEST_DECLINATIONS, VARIED_WEIGHTS, 5, 0.5)
 
       // Top latitude should be near a high-weight planet's declination
-      const topLatitude = optimal[0].latitude
-      const topPlanet = optimal[0].contributions[0].planet
+      expect(optimal[0].latitude).toBeDefined()
+      expect(optimal[0].contributions[0].planet).toBeDefined()
 
       // Distance to dominant planet should be small
       expect(optimal[0].contributions[0].distance).toBeLessThan(2)

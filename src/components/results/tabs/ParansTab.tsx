@@ -128,7 +128,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
         </div>
         <div className="p-3 rounded-lg bg-slate-800/50">
           <div className="text-xl font-bold text-amber-400">
-            {summary.riseRise + summary.setSet}
+            {(summary.riseRise || 0) + (summary.setSet || 0) + (summary.riseSet || 0)}
           </div>
           <div className="text-xs text-slate-500">Horizon Parans</div>
         </div>
