@@ -69,8 +69,16 @@ export function measureBetween(
   if (typeof window !== 'undefined') {
     try {
       performance.measure(measureName, startMark, endMark)
-      const measure = performance.getEntriesByName(measureName)[0]
-      return measure.duration
+      const measures = performance.getEntriesByName(measureName)
+      const measure = measures[measures.length - 1]
+      const duration = measure.duration
+
+      // Clear accumulated entries to prevent memory leak
+      performance.clearMeasures(measureName)
+      performance.clearMarks(startMark)
+      performance.clearMarks(endMark)
+
+      return duration
     } catch {
       return null
     }

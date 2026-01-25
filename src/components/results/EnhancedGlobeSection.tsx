@@ -10,31 +10,19 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Layers, X } from 'lucide-react'
 import type { PlanetId } from '@/components/globe/layers/types'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
+import type {BackendACGLine, BackendParanPoint} from '@/components/globe/utils';
 import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { GlobeControls } from '@/components/globe/controls'
-import { transformACGLines, transformParans } from '@/components/globe/utils'
+import {
+  
+  
+  transformACGLines,
+  transformParans
+} from '@/components/globe/utils'
 
 // =============================================================================
 // Types
 // =============================================================================
-
-/** Backend ACGLine format */
-interface BackendACGLine {
-  planet: PlanetId
-  lineType: 'ASC' | 'DSC' | 'MC' | 'IC'
-  points: Array<{ latitude: number; longitude: number }>
-  isCircumpolar?: boolean
-}
-
-/** Backend ParanPoint format */
-interface BackendParanPoint {
-  planet1: PlanetId
-  event1: string
-  planet2: PlanetId
-  event2: string
-  latitude: number
-  strength?: number
-}
 
 interface EnhancedGlobeSectionProps {
   /** Birth location for marker */
@@ -80,9 +68,6 @@ export function EnhancedGlobeSection({
         parans={transformedParans}
         globeState={globeState}
         className="w-full h-full"
-        // Required by ExtendedGlobeCanvasProps but not used for enhanced mode
-        optimalLatitudes={[]}
-        latitudeBands={[]}
       />
 
       {/* Controls Toggle Button */}

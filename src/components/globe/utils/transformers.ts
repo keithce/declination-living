@@ -15,13 +15,13 @@ import type { ACGLineData, ParanPointData, PlanetId, ZenithLineData } from '../l
 // =============================================================================
 
 /** Backend GeoLocation format */
-interface BackendGeoLocation {
+export interface BackendGeoLocation {
   latitude: number
   longitude: number
 }
 
 /** Backend ACGLine format */
-interface BackendACGLine {
+export interface BackendACGLine {
   planet: PlanetId
   lineType: 'ASC' | 'DSC' | 'MC' | 'IC'
   points: Array<BackendGeoLocation>
@@ -29,7 +29,7 @@ interface BackendACGLine {
 }
 
 /** Backend ZenithLine format */
-interface BackendZenithLine {
+export interface BackendZenithLine {
   planet: PlanetId
   declination: number
   orbMin: number
@@ -37,7 +37,7 @@ interface BackendZenithLine {
 }
 
 /** Backend ParanPoint format */
-interface BackendParanPoint {
+export interface BackendParanPoint {
   planet1: PlanetId
   event1: string
   planet2: PlanetId

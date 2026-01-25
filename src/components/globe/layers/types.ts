@@ -142,13 +142,13 @@ export interface LayerGroup {
 
 /** Extended props for GlobeCanvas with all visualization data */
 export interface ExtendedGlobeCanvasProps {
-  // Original props
-  optimalLatitudes: Array<{
+  // Original props (optional for enhanced mode)
+  optimalLatitudes?: Array<{
     latitude: number
     score: number
     dominantPlanet: string
   }>
-  latitudeBands: Array<{
+  latitudeBands?: Array<{
     min: number
     max: number
     dominantPlanet: string

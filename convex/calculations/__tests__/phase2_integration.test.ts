@@ -11,12 +11,14 @@ import { calculateAllZenithLines } from '../acg/zenith'
 import { generateScoringGrid, getGridStatistics, getTopLocations } from '../geospatial/grid'
 import { scoreLocationForACG, scoreParanProximity } from '../geospatial/search'
 import { calculateAllParans } from '../parans/solver'
-import type {
-  EquatorialCoordinates,
-  PlanetDeclinations,
-  PlanetId,
-  PlanetWeights,
+import {
+  
+  PLANET_IDS
+  
+  
+  
 } from '../core/types'
+import type {EquatorialCoordinates, PlanetDeclinations, PlanetId, PlanetWeights} from '../core/types';
 
 // =============================================================================
 // Test Data
@@ -69,7 +71,10 @@ function extractDeclinations(
   positions: Record<PlanetId, EquatorialCoordinates>,
 ): PlanetDeclinations {
   const declinations: Partial<PlanetDeclinations> = {}
-  for (const planet of Object.keys(positions) as Array<PlanetId>) {
+  for (const planet of PLANET_IDS) {
+    if (!(planet in positions)) {
+      throw new Error(`Missing planet in positions: ${planet}`)
+    }
     declinations[planet] = positions[planet].dec
   }
   return declinations as PlanetDeclinations

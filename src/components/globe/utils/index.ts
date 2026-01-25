@@ -8,3 +8,10 @@ export {
   transformParans,
   hasPhase2Data,
 } from './transformers'
+
+export type {
+  BackendGeoLocation,
+  BackendACGLine,
+  BackendZenithLine,
+  BackendParanPoint,
+} from './transformers'

@@ -138,14 +138,14 @@ Phase 2 enhanced visualization and analysis features have been successfully impl
 
 #### Tab Content Components
 
-2. **OverviewTab** (`results/tabs/OverviewTab.tsx` - 145 lines)
+1. **OverviewTab** (`results/tabs/OverviewTab.tsx` - 145 lines)
    - Summary statistics (total cells, max score, avg score)
    - Top N locations display (default: 10)
    - Dominant factor breakdown (zenith/ACG/paran/mixed)
    - Score distribution visualization
    - Animated card reveals
 
-3. **ACGLinesTab** (`results/tabs/ACGLinesTab.tsx` - 230 lines)
+2. **ACGLinesTab** (`results/tabs/ACGLinesTab.tsx` - 230 lines)
    - 40 ACG lines grouped by planet
    - Line type filtering (all/MC/IC/ASC/DSC)
    - Expandable planet sections
@@ -153,14 +153,14 @@ Phase 2 enhanced visualization and analysis features have been successfully impl
    - Sample point previews (first 3 points)
    - Animated expansion
 
-4. **ZenithTab** (`results/tabs/ZenithTab.tsx` - 164 lines)
+3. **ZenithTab** (`results/tabs/ZenithTab.tsx` - 164 lines)
    - 10 zenith bands sorted by declination
    - Interactive orb slider (0.5° - 5.0°)
    - OOB planet highlighting (|dec| > 23.44°)
    - Dynamic band range display
    - Color-coded planet symbols
 
-5. **ScoringTab** (`results/tabs/ScoringTab.tsx` - 280 lines)
+4. **ScoringTab** (`results/tabs/ScoringTab.tsx` - 280 lines)
    - Grid cells with score breakdowns
    - Dominant factor filtering (all/zenith/ACG/paran/mixed)
    - Multi-field sorting (score/zenith/ACG/paran)
@@ -168,7 +168,7 @@ Phase 2 enhanced visualization and analysis features have been successfully impl
    - Display limit (default: 50)
    - Contribution bars
 
-6. **ParansTab** (`results/tabs/ParansTab.tsx` - 261 lines)
+5. **ParansTab** (`results/tabs/ParansTab.tsx` - 261 lines)
    - Paran aspect list with filtering
    - Event type filter (all/rise/set/culminate/mixed)
    - Planet filter (all + 10 individual planets)
@@ -178,7 +178,7 @@ Phase 2 enhanced visualization and analysis features have been successfully impl
 
 #### Shared Components
 
-7. **Constants** (`results/shared/constants.ts` - 95 lines)
+1. **Constants** (`results/shared/constants.ts` - 95 lines)
    - Planet colors (10 colors)
    - Planet symbols (Unicode astronomical symbols)
    - Planet names (full names)

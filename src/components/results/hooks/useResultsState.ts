@@ -203,26 +203,33 @@ export function useResultsState(): ResultsState {
 
 /**
  * Helper to generate unique ID for an element
+ *
+ * Generates consistent IDs using a parts array for all element types.
  */
 export function generateElementId(element: Partial<ElementIdentifier>): string {
-  if (element.type === 'acg-line' && element.planet) {
-    return `${element.planet}-${element.id || 'unknown'}`
+  const parts: Array<string> = []
+
+  if (element.type === 'acg-line') {
+    parts.push('acg-line')
+    if (element.planet) parts.push(element.planet)
+    if (element.id) parts.push(element.id)
+    return parts.length > 1 ? parts.join('-') : 'acg-line-unknown'
   }
   if (element.type === 'zenith-line' && element.planet) {
-    return `${element.planet}`
+    return `zenith-${element.planet}`
   }
   if (element.type === 'paran' && element.id) {
-    return element.id
+    return `paran-${element.id}`
   }
   if (
     element.type === 'grid-cell' &&
     element.latitude !== undefined &&
     element.longitude !== undefined
   ) {
-    return `${element.latitude.toFixed(1)}-${element.longitude.toFixed(1)}`
+    return `grid-${element.latitude.toFixed(1)}-${element.longitude.toFixed(1)}`
   }
   // Deterministic fallback: serialize available properties into a stable ID
-  const parts: Array<string> = [element.type || 'element']
+  parts.push(element.type || 'element')
   if (element.id) parts.push(element.id)
   if (element.planet) parts.push(element.planet)
   if (element.latitude !== undefined) parts.push(element.latitude.toFixed(2))

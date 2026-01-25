@@ -2,8 +2,6 @@
  * Accessibility utilities and helpers
  */
 
-import type { KeyboardEvent } from 'react'
-
 /**
  * Check if user prefers reduced motion
  */
@@ -70,7 +68,7 @@ export function trapFocus(containerElement: HTMLElement): () => void {
   const firstElement = focusableElements[0]
   const lastElement = focusableElements[focusableElements.length - 1]
 
-  function handleTabKey(e: KeyboardEvent): void {
+  function handleTabKey(e: globalThis.KeyboardEvent): void {
     if (e.key !== 'Tab') return
 
     if (e.shiftKey) {
@@ -100,7 +98,7 @@ export function trapFocus(containerElement: HTMLElement): () => void {
  * Keyboard navigation handler
  */
 export function handleKeyboardNavigation(
-  event: KeyboardEvent,
+  event: globalThis.KeyboardEvent,
   handlers: {
     onEnter?: () => void
     onSpace?: () => void
