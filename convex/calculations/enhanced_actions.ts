@@ -15,12 +15,16 @@
 
 import { v } from 'convex/values'
 import { action } from '../_generated/server'
+import { internal } from '../_generated/api'
 
+import { generateCacheKey, hashWeights } from '../cache/analysisCache'
 import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from './ephemeris'
 import { findOptimalLatitudes, getOptimalLatitudeBands } from './optimizer'
 
 // Import new modules
 import { PLANET_IDS } from './core/types'
+
+// Import cache utilities
 import { checkAllOOBStatus, getMeanObliquity } from './ephemeris/oob'
 import { calculateAllZenithLines } from './acg/zenith'
 import { calculateAllACGLines, findACGLinesNearLocation } from './acg/line_solver'
@@ -30,6 +34,78 @@ import { DEFAULT_WEIGHTS, getVibeById, matchVibeFromQuery } from './vibes/transl
 import { generateSearchBands } from './geospatial/search'
 import { quickSafetyCheck } from './safety/filter'
 import type { EquatorialCoordinates, PlanetId } from './core/types'
+
+// =============================================================================
+// Result Types
+// =============================================================================
+
+/** Enhanced declination with OOB status */
+interface EnhancedDeclination {
+  value: number
+  isOOB: boolean
+  oobDegrees: number | null
+}
+
+/** Dignity score for a planet */
+interface DignityScore {
+  total: number
+  indicator: 'R' | 'E' | 'd' | 'f' | '-'
+}
+
+/** Zenith line result */
+interface ZenithLineResult {
+  planet: string
+  latitude: number
+  orbMin: number
+  orbMax: number
+}
+
+/** Paran point result */
+interface ParanResult {
+  planet1: string
+  event1: string
+  planet2: string
+  event2: string
+  latitude: number
+}
+
+/** Paran summary counts */
+interface ParanSummary {
+  riseRise: number
+  riseCulminate: number
+  riseSet: number
+  culminateCulminate: number
+  setSet: number
+  total: number
+}
+
+/** Latitude optimization result */
+interface LatitudeResult {
+  latitude: number
+  score: number
+  dominantPlanet: string
+}
+
+/** Latitude band result */
+interface LatitudeBand {
+  min: number
+  max: number
+  dominantPlanet: string
+}
+
+/** Complete enhanced analysis result */
+interface CompleteEnhancedResult {
+  julianDay: number
+  obliquity: number
+  declinations: Record<string, EnhancedDeclination>
+  optimalLatitudes: Array<LatitudeResult>
+  latitudeBands: Array<LatitudeBand>
+  zenithLines: Array<ZenithLineResult>
+  parans: Array<ParanResult>
+  paranSummary: ParanSummary
+  dignities: Record<string, DignityScore>
+  sect: 'day' | 'night'
+}
 
 // =============================================================================
 // Validators
@@ -446,8 +522,25 @@ export const calculateCompleteEnhanced = action({
     timezone: v.string(),
     weights: planetWeightsValidator,
     ascendant: v.optional(v.number()),
+    anonymousUserId: v.optional(v.id('anonymousUsers')),
+    userId: v.optional(v.id('users')),
   },
-  handler: async (_ctx, { birthDate, birthTime, weights, ascendant }) => {
+  handler: async (
+    ctx,
+    { birthDate, birthTime, timezone, weights, ascendant, anonymousUserId, userId },
+  ) => {
+    // Generate cache key
+    const weightsHash = hashWeights(weights)
+    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash)
+
+    // Check cache first
+    const cachedResult = (await ctx.runQuery(internal.cache.analysisCache.getCachedResultInternal, {
+      cacheKey,
+    })) as CompleteEnhancedResult | null
+    if (cachedResult !== null) {
+      return cachedResult
+    }
+
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
@@ -509,7 +602,7 @@ export const calculateCompleteEnhanced = action({
       ]),
     )
 
-    return {
+    const result = {
       // Basic data
       julianDay: jd,
       obliquity,
@@ -554,6 +647,18 @@ export const calculateCompleteEnhanced = action({
       // Metadata
       sect: isDay ? 'day' : 'night',
     }
+
+    // Cache the result
+    await ctx.runMutation(internal.cache.analysisCache.setCachedResultInternal, {
+      cacheKey,
+      inputHash: weightsHash,
+      result,
+      calculationType: 'full' as const,
+      ...(userId ? { userId } : {}),
+      ...(anonymousUserId ? { anonymousUserId } : {}),
+    })
+
+    return result
   },
 })
 

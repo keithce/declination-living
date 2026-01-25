@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { ChevronLeft, ChevronRight, Loader2, Save, Sparkles, X } from 'lucide-react'

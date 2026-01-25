@@ -318,3 +318,150 @@ export interface SafetyScore {
   /** Warnings for the user */
   warnings: Array<string>
 }
+
+// =============================================================================
+// Swiss Ephemeris Types
+// =============================================================================
+
+/**
+ * Core interface for a calculated planetary body.
+ * PDF Reference: Part II, Section 2.3
+ * Normalized to J2000 epoch where applicable.
+ */
+export interface CelestialBody {
+  /** Swiss Ephemeris body ID (e.g., 0 = Sun) */
+  id: number
+  /** Display name */
+  name: string
+  /** Internal planet identifier */
+  planetId: PlanetId
+  /** Ecliptic coordinates */
+  ecliptic: {
+    /** 0-360 degrees */
+    longitude: number
+    /** +/- 90 degrees */
+    latitude: number
+    /** Distance in AU */
+    distance: number
+    /** Degrees per day */
+    speed: number
+  }
+  /** Equatorial coordinates */
+  equatorial: {
+    /** 0-360 degrees (converted from hours) */
+    rightAscension: number
+    /** +/- 90 degrees */
+    declination: number
+    /** Degrees per day (critical for station detection) */
+    speedDec: number
+    /** RA speed in degrees per day */
+    speedRA: number
+  }
+  /** Is the planet retrograde? */
+  isRetrograde: boolean
+  /** Is the planet out of bounds? */
+  isOutOfBounds: boolean
+  /** How far beyond obliquity (only if OOB) */
+  oobDegrees?: number
+  /** House position (only if location provided) */
+  house?: number
+}
+
+/**
+ * Configuration for the calculation request.
+ * PDF Reference: Part II, Section 2.3
+ */
+export interface EphemerisConfig {
+  /** Date/time in UTC */
+  date: Date
+  /** Observer location (optional) */
+  location?: {
+    latitude: number
+    longitude: number
+    /** Meters above sea level, defaults to 0 */
+    altitude?: number
+  }
+  /** Bitwise flags for swisseph options */
+  flags: number
+  /** Array of body IDs to calculate */
+  bodies: Array<number>
+}
+
+/**
+ * Complete calculation result returned to the UI
+ */
+export interface CompleteCalculationResult {
+  /** All celestial body positions */
+  celestialBodies: Array<CelestialBody>
+  /** Simplified declinations map */
+  declinations: PlanetDeclinations
+  /** Out of bounds planets */
+  outOfBounds: Array<CelestialBody>
+  /** Essential dignities for all planets */
+  dignities: Record<PlanetId, DignityScore>
+  /** Zenith lines for all planets */
+  zenithLines: Array<ZenithLine>
+  /** ACG lines (4 per planet) */
+  acgLines: Array<ACGLine>
+  /** Paran analysis */
+  parans: ParanResult
+  /** Vibe search results */
+  vibeSearch: GeospatialSearchResult
+  /** Calculation metadata */
+  metadata: {
+    calculatedAt: number
+    julianDay: number
+    greenwichSiderealTime: number
+    obliquity: number
+    /** Day or night chart for sect-based calculations */
+    sect: 'day' | 'night'
+  }
+}
+
+/**
+ * Map planet ID to Swiss Ephemeris body ID
+ */
+export const PLANET_TO_SE_ID: Record<PlanetId, number> = {
+  sun: 0,
+  moon: 1,
+  mercury: 2,
+  venus: 3,
+  mars: 4,
+  jupiter: 5,
+  saturn: 6,
+  uranus: 7,
+  neptune: 8,
+  pluto: 9,
+}
+
+/**
+ * Map Swiss Ephemeris body ID to planet ID
+ */
+export const SE_ID_TO_PLANET: Record<number, PlanetId> = {
+  0: 'sun',
+  1: 'moon',
+  2: 'mercury',
+  3: 'venus',
+  4: 'mars',
+  5: 'jupiter',
+  6: 'saturn',
+  7: 'uranus',
+  8: 'neptune',
+  9: 'pluto',
+}
+
+/**
+ * Planet display names
+ */
+export const PLANET_NAMES: Record<PlanetId, string> = {
+  sun: 'Sun',
+  moon: 'Moon',
+  mercury: 'Mercury',
+  venus: 'Venus',
+  mars: 'Mars',
+  jupiter: 'Jupiter',
+  saturn: 'Saturn',
+  uranus: 'Uranus',
+  neptune: 'Neptune',
+  pluto: 'Pluto',
+}
