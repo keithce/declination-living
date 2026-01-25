@@ -114,6 +114,7 @@ export function hasPhase2Data(phase2Data: unknown): phase2Data is {
     Array.isArray(data.zenithLines) &&
     Array.isArray(data.parans) &&
     typeof data.declinations === 'object' &&
-    data.declinations !== null
+    data.declinations !== null &&
+    !Array.isArray(data.declinations)
   )
 }

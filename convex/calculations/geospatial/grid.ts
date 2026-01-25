@@ -89,19 +89,24 @@ export function generateScoringGrid(
   if (acgOrb <= 0) {
     throw new Error('acgOrb must be positive')
   }
+  // Validate grid step values
+  if (latStep <= 0 || !Number.isFinite(latStep)) {
+    throw new Error('latStep must be positive')
+  }
+  if (lonStep <= 0 || !Number.isFinite(lonStep)) {
+    throw new Error('lonStep must be positive')
+  }
 
   const grid: Array<GridCell> = []
 
   for (let lat = latMin; lat <= latMax; lat += latStep) {
+    // Hoist latitude-only computations outside inner lon loop
+    const zenithResult = scoreLatitude(lat, declinations, weights)
+    const paranScore = scoreParanProximity(lat, parans, weights, paranOrb)
+
     for (let lon = lonMin; lon <= lonMax; lon += lonStep) {
-      // Zenith scoring (latitude only)
-      const zenithResult = scoreLatitude(lat, declinations, weights)
-
-      // ACG proximity scoring
+      // ACG proximity scoring (depends on both lat and lon)
       const acgResult = scoreLocationForACG(lat, lon, acgLines, weights, acgOrb)
-
-      // Paran scoring (latitude only)
-      const paranScore = scoreParanProximity(lat, parans, weights, paranOrb)
 
       // Determine dominant factor
       const scores = {

@@ -13,7 +13,7 @@ import {
   formatLatitude,
 } from '../shared/constants'
 import type { ZenithLine } from '@/../convex/calculations/core/types'
-import { APPROX_APPROX_OBLIQUITY } from '@/../convex/calculations/core/constants'
+import { APPROX_OBLIQUITY } from '@/../convex/calculations/core/constants'
 
 // =============================================================================
 // Types

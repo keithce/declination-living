@@ -52,6 +52,7 @@ export function measureSync<T>(label: string, fn: () => T): T {
  * Create a performance marker for web performance timeline
  */
 export function mark(name: string): void {
+  if (!isDev) return
   if (typeof performance !== 'undefined' && typeof performance.mark === 'function') {
     performance.mark(name)
   }
@@ -84,14 +85,14 @@ export function useRenderPerformance(componentName: string): void {
   const renderStartRef = useRef<number>(0)
 
   // Capture start time during render (synchronous)
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  if (typeof window !== 'undefined' && isDev) {
     renderStartRef.current = performance.now()
   }
 
   // Capture end time after commit (in effect)
   // Intentional: empty deps to measure every render
   useEffect(() => {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    if (typeof window !== 'undefined' && isDev) {
       const renderEnd = performance.now()
       const duration = renderEnd - renderStartRef.current
       console.log(`🎨 [${componentName}] Render: ${duration.toFixed(2)}ms`)

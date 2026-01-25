@@ -385,7 +385,7 @@ describe('Phase 2 Integration', () => {
       for (const line of acgLines) {
         for (const point of line.points) {
           expect(point.longitude).toBeGreaterThanOrEqual(-180)
-          expect(point.longitude).toBeLessThanOrEqual(360)
+          expect(point.longitude).toBeLessThanOrEqual(180)
         }
       }
     })

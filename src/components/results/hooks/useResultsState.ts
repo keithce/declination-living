@@ -71,6 +71,7 @@ export function useResultsState(): ResultsState {
     new Set(['acg-line', 'zenith-line', 'paran', 'grid-cell']),
   )
   const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevHighlightedRef = useRef<string | null>(null)
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -159,14 +160,24 @@ export function useResultsState(): ResultsState {
         clearTimeout(highlightTimeoutRef.current)
       }
 
+      // Remove highlight from previously highlighted element
+      if (prevHighlightedRef.current && prevHighlightedRef.current !== domId) {
+        const prevElement = document.getElementById(prevHighlightedRef.current)
+        if (prevElement) {
+          prevElement.classList.remove('highlight-flash')
+        }
+      }
+
       // Highlight element briefly
       targetElement.classList.add('highlight-flash')
+      prevHighlightedRef.current = domId
       highlightTimeoutRef.current = setTimeout(() => {
         // Re-query element in case it was detached during the timeout
         const currentElement = document.getElementById(domId)
         if (currentElement) {
           currentElement.classList.remove('highlight-flash')
         }
+        prevHighlightedRef.current = null
         highlightTimeoutRef.current = null
       }, 1000)
     }

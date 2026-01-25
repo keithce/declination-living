@@ -5,7 +5,7 @@
  * Transforms Phase 2 backend data to globe layer format.
  */
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Layers, X } from 'lucide-react'
 import type { PlanetId } from '@/components/globe/layers/types'
@@ -66,9 +66,9 @@ export function EnhancedGlobeSection({
 }: EnhancedGlobeSectionProps) {
   const [showControls, setShowControls] = useState(false)
 
-  // Transform data to globe layer format
-  const transformedACGLines = transformACGLines(acgLines)
-  const transformedParans = transformParans(parans)
+  // Transform data to globe layer format (memoized to avoid recalculation on re-renders)
+  const transformedACGLines = useMemo(() => transformACGLines(acgLines), [acgLines])
+  const transformedParans = useMemo(() => transformParans(parans), [parans])
 
   return (
     <div className="relative w-full h-[500px] rounded-xl overflow-hidden bg-slate-900">
@@ -87,6 +87,7 @@ export function EnhancedGlobeSection({
 
       {/* Controls Toggle Button */}
       <button
+        type="button"
         onClick={() => setShowControls(!showControls)}
         className={`
           absolute top-4 right-4 z-10
@@ -112,6 +113,7 @@ export function EnhancedGlobeSection({
             <div className="relative">
               {/* Close button */}
               <button
+                type="button"
                 onClick={() => setShowControls(false)}
                 className="absolute -top-2 -right-2 z-20 w-6 h-6 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-full text-slate-300 transition-colors"
                 aria-label="Close controls"

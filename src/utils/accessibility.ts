@@ -2,6 +2,8 @@
  * Accessibility utilities and helpers
  */
 
+import type { KeyboardEvent } from 'react'
+
 /**
  * Check if user prefers reduced motion
  */
@@ -98,7 +100,7 @@ export function trapFocus(containerElement: HTMLElement): () => void {
  * Keyboard navigation handler
  */
 export function handleKeyboardNavigation(
-  event: React.KeyboardEvent,
+  event: KeyboardEvent,
   handlers: {
     onEnter?: () => void
     onSpace?: () => void

@@ -91,26 +91,26 @@ Phase 2 enhanced visualization and analysis features have been successfully impl
 
 #### Backend Integration
 
-5. **ACG/Zenith Action** (`acg/actions.ts` - 95 lines)
+1. **ACG/Zenith Action** (`acg/actions.ts` - 95 lines)
    - Internal action wrapper
    - 24-hour TTL caching
    - Hash-based cache keys
    - Type-safe validators
 
-6. **Scoring Grid Generator** (`geospatial/grid.ts` - 280 lines)
+2. **Scoring Grid Generator** (`geospatial/grid.ts` - 280 lines)
    - Configurable grid resolution (default: 5° lat × 10° lon)
    - Multi-factor scoring (zenith + ACG + paran)
    - Dominant factor detection
    - Dominant planet identification
    - 629 cells at default resolution
 
-7. **ACG Proximity Scoring** (`geospatial/search.ts` +80 lines)
+3. **ACG Proximity Scoring** (`geospatial/search.ts` +80 lines)
    - Great circle distance calculations
    - Orb-based proximity weighting
    - Contribution tracking
    - Paran latitude band scoring
 
-8. **Phase 2 Complete Action** (`phase2_actions.ts` - 118 lines)
+4. **Phase 2 Complete Action** (`phase2_actions.ts` - 118 lines)
    - Integrates all Phase 2 calculations
    - Parallel execution of ACG/zenith/parans
    - Returns complete dataset for visualization
@@ -688,6 +688,7 @@ No migration needed! Phase 2 is additive:
    ```
 
 3. **Render ResultsTabs:**
+
    ```typescript
    <ResultsTabs
      acgLines={phase2Data.acgLines}
