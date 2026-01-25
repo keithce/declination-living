@@ -390,7 +390,7 @@ const LocationsSection = memo(function LocationsSection({
       <div className="space-y-2">
         {optimalLatitudes.slice(0, 15).map((loc, index) => (
           <motion.div
-            key={`${loc.latitude}-${loc.score}-${idx}`}
+            key={`${loc.latitude}-${loc.score}-${index}`}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.03 }}

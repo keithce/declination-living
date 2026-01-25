@@ -36,6 +36,78 @@ import { quickSafetyCheck } from './safety/filter'
 import type { EquatorialCoordinates, PlanetId } from './core/types'
 
 // =============================================================================
+// Result Types
+// =============================================================================
+
+/** Enhanced declination with OOB status */
+interface EnhancedDeclination {
+  value: number
+  isOOB: boolean
+  oobDegrees: number | null
+}
+
+/** Dignity score for a planet */
+interface DignityScore {
+  total: number
+  indicator: 'R' | 'E' | 'd' | 'f' | '-'
+}
+
+/** Zenith line result */
+interface ZenithLineResult {
+  planet: string
+  latitude: number
+  orbMin: number
+  orbMax: number
+}
+
+/** Paran point result */
+interface ParanResult {
+  planet1: string
+  event1: string
+  planet2: string
+  event2: string
+  latitude: number
+}
+
+/** Paran summary counts */
+interface ParanSummary {
+  riseRise: number
+  riseCulminate: number
+  riseSet: number
+  culminateCulminate: number
+  setSet: number
+  total: number
+}
+
+/** Latitude optimization result */
+interface LatitudeResult {
+  latitude: number
+  score: number
+  dominantPlanet: string
+}
+
+/** Latitude band result */
+interface LatitudeBand {
+  min: number
+  max: number
+  dominantPlanet: string
+}
+
+/** Complete enhanced analysis result */
+interface CompleteEnhancedResult {
+  julianDay: number
+  obliquity: number
+  declinations: Record<string, EnhancedDeclination>
+  optimalLatitudes: Array<LatitudeResult>
+  latitudeBands: Array<LatitudeBand>
+  zenithLines: Array<ZenithLineResult>
+  parans: Array<ParanResult>
+  paranSummary: ParanSummary
+  dignities: Record<string, DignityScore>
+  sect: 'day' | 'night'
+}
+
+// =============================================================================
 // Validators
 // =============================================================================
 
@@ -450,8 +522,8 @@ export const calculateCompleteEnhanced = action({
     timezone: v.string(),
     weights: planetWeightsValidator,
     ascendant: v.optional(v.number()),
-    anonymousUserId: v.optional(v.string()),
-    userId: v.optional(v.string()),
+    anonymousUserId: v.optional(v.id('anonymousUsers')),
+    userId: v.optional(v.id('users')),
   },
   handler: async (
     ctx,
@@ -461,12 +533,10 @@ export const calculateCompleteEnhanced = action({
     const weightsHash = hashWeights(weights)
     const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash)
 
-    // Check cache first - use type assertion to break the circular reference
-    type CachedResult = unknown
-    const cachedResult: CachedResult = await ctx.runQuery(
-      internal.cache.analysisCache.getCachedResultInternal,
-      { cacheKey },
-    )
+    // Check cache first
+    const cachedResult = (await ctx.runQuery(internal.cache.analysisCache.getCachedResultInternal, {
+      cacheKey,
+    })) as CompleteEnhancedResult | null
     if (cachedResult !== null) {
       return cachedResult
     }
@@ -584,8 +654,8 @@ export const calculateCompleteEnhanced = action({
       inputHash: weightsHash,
       result,
       calculationType: 'full' as const,
-      ...(userId ? { userId: userId as any } : {}),
-      ...(anonymousUserId ? { anonymousUserId: anonymousUserId as any } : {}),
+      ...(userId ? { userId } : {}),
+      ...(anonymousUserId ? { anonymousUserId } : {}),
     })
 
     return result

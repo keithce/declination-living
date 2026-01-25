@@ -95,7 +95,9 @@ export function dateToJulianDay(
 
   // Create an ISO datetime string representing the local time
   // fromZonedTime will interpret this as a time in the specified timezone
-  const isoString = `${dateStr}T${timeStr}:00`
+  // Only append :00 if seconds not already present
+  const hasSeconds = timeStr.split(':').length === 3
+  const isoString = `${dateStr}T${timeStr}${hasSeconds ? '' : ':00'}`
 
   // Convert from the specified timezone to UTC
   // fromZonedTime takes a datetime and timezone, returns UTC Date

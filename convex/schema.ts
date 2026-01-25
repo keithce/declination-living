@@ -202,7 +202,8 @@ export default defineSchema({
   })
     .index('by_cache_key', ['cacheKey'])
     .index('by_user', ['userId'])
-    .index('by_anonymous_user', ['anonymousUserId']),
+    .index('by_anonymous_user', ['anonymousUserId'])
+    .index('by_expires_at', ['expiresAt']),
 
   // User-defined and preset vibes for search
   vibes: defineTable({

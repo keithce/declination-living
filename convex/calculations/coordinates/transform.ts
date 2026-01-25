@@ -142,11 +142,9 @@ export function calculateHourAngle(lst: number, ra: number): number {
   if (!Number.isFinite(lst) || !Number.isFinite(ra)) {
     throw new Error(`calculateHourAngle: invalid inputs lst=${lst}, ra=${ra}`)
   }
-  let ha = lst - ra
-  // Normalize to -180 to +180
-  while (ha > 180) ha -= 360
-  while (ha < -180) ha += 360
-  return ha
+  const ha = lst - ra
+  // Normalize to -180 to +180 using modulo (avoids while loops)
+  return (((ha % 360) + 540) % 360) - 180
 }
 
 /**

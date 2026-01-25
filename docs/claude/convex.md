@@ -53,13 +53,13 @@ export default defineSchema({
   sessions: defineTable({
     userId: v.id('users'),
     sessionId: v.string(),
-  }).index('sessionId', ['sessionId']),
+  }).index('by_session_id', ['sessionId']),
 
   threads: defineTable({
     uuid: v.string(),
     summary: v.optional(v.string()),
     summarizer: v.optional(v.id('_scheduled_functions')),
-  }).index('uuid', ['uuid']),
+  }).index('by_uuid', ['uuid']),
 
   messages: defineTable({
     message: v.string(),
@@ -78,6 +78,8 @@ export default defineSchema({
         userId: v.id('users'),
       }),
     ),
-  }).index('threadId', ['threadId']),
+  }).index('by_thread_id', ['threadId']),
 })
 ```
+
+> **Convention:** Use `by_*` prefix for index names (e.g., `by_user`, `by_cache_key`) for consistency.

@@ -161,7 +161,9 @@ export function useCalculatorState() {
 
   const resetState = useCallback(() => {
     setState(DEFAULT_STATE)
-    localStorage.removeItem(STORAGE_KEY)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY)
+    }
   }, [])
 
   return {

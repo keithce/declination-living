@@ -143,6 +143,11 @@ class SwissEphService {
     const flags = SEFLG_SPEED | SEFLG_SWIEPH | SEFLG_EQUATORIAL
     const result = swe.swe_calc_ut(jd, bodyId, flags)
 
+    // Validate result contains valid numbers
+    if (!Number.isFinite(result[0]) || !Number.isFinite(result[1])) {
+      throw new Error(`Swiss Ephemeris returned invalid equatorial data for body ${bodyId}`)
+    }
+
     return {
       rightAscension: result[0],
       declination: result[1],
@@ -190,6 +195,11 @@ class SwissEphService {
 
     const flags = SEFLG_SPEED | SEFLG_SWIEPH | SEFLG_EQUATORIAL | SEFLG_TOPOCTR
     const result = swe.swe_calc_ut(jd, bodyId, flags)
+
+    // Validate result contains valid numbers
+    if (!Number.isFinite(result[0]) || !Number.isFinite(result[1])) {
+      throw new Error(`Swiss Ephemeris returned invalid topocentric data for body ${bodyId}`)
+    }
 
     return {
       rightAscension: result[0],

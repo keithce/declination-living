@@ -120,11 +120,11 @@ describe('Integration Tests - Astronomical Calculations', () => {
       expect(status.oobDegrees).toBeCloseTo(3.56, 1)
     })
 
-    it('should not flag Jupiter as OOB (low inclination)', () => {
-      // Jupiter rarely exceeds obliquity (inclination ~1.3°)
-      const jupiterMaxDec = 23.5 // Typical max
+    it('should detect Jupiter barely OOB at extreme declination', () => {
+      // Jupiter can just barely exceed obliquity (inclination ~1.3°)
+      const jupiterMaxDec = 23.5 // Typical max at extreme
       const status = getOOBStatus(jupiterMaxDec, obliquity)
-      expect(status.isOOB).toBe(true) // Just barely, 0.06°
+      expect(status.isOOB).toBe(true) // Just barely, ~0.06°
       expect(status.oobDegrees).toBeLessThan(0.2)
     })
   })

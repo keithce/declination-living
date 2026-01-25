@@ -95,9 +95,14 @@ export async function calculateParallaxCorrection(
     // Get topocentric position
     const topocentric = await getTopocentricPosition(jd, bodyId, observer)
 
+    // Calculate RA correction with proper wrap-around handling
+    let raCorrection = topocentric.rightAscension - geocentric.rightAscension
+    // Normalize to [-180, 180] to handle 0°/360° boundary crossing
+    raCorrection = (((raCorrection % 360) + 540) % 360) - 180
+
     return {
       decCorrection: topocentric.declination - geocentric.declination,
-      raCorrection: topocentric.rightAscension - geocentric.rightAscension,
+      raCorrection,
     }
   } catch (error) {
     throw new Error(

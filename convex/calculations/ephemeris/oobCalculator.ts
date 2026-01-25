@@ -35,6 +35,11 @@ export interface EnhancedOOBResult extends OOBResult {
  * @returns OOB status with full details
  */
 export async function checkOutOfBounds(jd: number, declination: number): Promise<OOBResult> {
+  // Validate input to ensure consistent behavior with checkAllOutOfBounds
+  if (!Number.isFinite(declination)) {
+    throw new Error(`Invalid declination: ${declination}`)
+  }
+
   const swe = SwissEphService.getInstance()
   await swe.initialize()
 
