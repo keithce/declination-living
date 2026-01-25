@@ -531,7 +531,7 @@ export const calculateCompleteEnhanced = action({
   ) => {
     // Generate cache key
     const weightsHash = hashWeights(weights)
-    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash)
+    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash, ascendant)
 
     // Check cache first
     const cachedResult = (await ctx.runQuery(internal.cache.analysisCache.getCachedResultInternal, {

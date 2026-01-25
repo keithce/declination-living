@@ -19,7 +19,7 @@ ACG lines show where planets are angular (on ASC, DSC, MC, or IC) around the glo
 
 **MC/IC Line** (meridian crossing):
 
-```
+```text
 At any longitude λ, the planet is on MC/IC when:
   Local Sidereal Time = Right Ascension (for MC)
   Local Sidereal Time = Right Ascension ± 180° (for IC)
@@ -29,7 +29,7 @@ Solving for latitude where this occurs at each longitude.
 
 **ASC/DSC Line** (horizon crossing):
 
-```
+```text
 For a planet to be rising/setting at latitude φ:
   cos(H) = -tan(δ) × tan(φ)
 
@@ -43,7 +43,7 @@ Solving: given RA, dec, and LST, find latitude where altitude = 0
 
 **Zenith Line**:
 
-```
+```text
 A planet is directly overhead (zenith) when:
   Observer latitude = Planet declination
 

@@ -366,10 +366,10 @@ export const calculateComplete = action({
 
 ```typescript
 // Track Core Web Vitals
-import { getCLS, getFID, getLCP } from 'web-vitals'
+import { getCLS, getINP, getLCP } from 'web-vitals'
 
 getCLS((metric) => sendToAnalytics('CLS', metric.value))
-getFID((metric) => sendToAnalytics('FID', metric.value))
+getINP((metric) => sendToAnalytics('INP', metric.value))
 getLCP((metric) => sendToAnalytics('LCP', metric.value))
 ```
 

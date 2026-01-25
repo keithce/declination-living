@@ -31,7 +31,7 @@ At a specific latitude, two different planets experience angular events simultan
 
 **Hour Angle at Rising/Setting**:
 
-```
+```text
 cos(H) = -tan(δ) × tan(φ)
 
 where:
