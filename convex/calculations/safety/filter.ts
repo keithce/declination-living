@@ -63,6 +63,14 @@ export const SAFETY_WEIGHTS = {
   beneficAngular: 5,
 }
 
+/** Safety level score thresholds */
+export const SAFETY_LEVEL_THRESHOLDS = {
+  excellent: 85,
+  good: 70,
+  moderate: 55,
+  challenging: 40,
+} as const
+
 // =============================================================================
 // Aspect Detection
 // =============================================================================
@@ -210,10 +218,10 @@ export function calculateSafetyScore(
 export function getSafetyLevel(
   score: number,
 ): 'excellent' | 'good' | 'moderate' | 'challenging' | 'difficult' {
-  if (score >= 85) return 'excellent'
-  if (score >= 70) return 'good'
-  if (score >= 55) return 'moderate'
-  if (score >= 40) return 'challenging'
+  if (score >= SAFETY_LEVEL_THRESHOLDS.excellent) return 'excellent'
+  if (score >= SAFETY_LEVEL_THRESHOLDS.good) return 'good'
+  if (score >= SAFETY_LEVEL_THRESHOLDS.moderate) return 'moderate'
+  if (score >= SAFETY_LEVEL_THRESHOLDS.challenging) return 'challenging'
   return 'difficult'
 }
 
@@ -350,4 +358,22 @@ export function quickSafetyCheck(
     riskPlanets,
     benefits,
   }
+}
+
+// =============================================================================
+// Safety Threshold Check
+// =============================================================================
+
+/**
+ * Check if a safety score meets a minimum threshold level.
+ *
+ * @param score - Safety score (0-100)
+ * @param minLevel - Minimum safety level required
+ * @returns True if score meets or exceeds the threshold
+ */
+export function meetsMinimumSafety(
+  score: number,
+  minLevel: 'excellent' | 'good' | 'moderate' | 'challenging' = 'moderate',
+): boolean {
+  return score >= SAFETY_LEVEL_THRESHOLDS[minLevel]
 }
