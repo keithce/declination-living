@@ -127,11 +127,7 @@ export const ResultsTabs = memo(function ResultsTabs({
           <div className="flex items-center gap-2">
             {activeOption?.icon}
             <SelectValue placeholder="Select view" />
-            {activeOption?.badge && (
-              <span className="ml-auto px-1.5 py-0.5 text-xs bg-slate-700/50 rounded">
-                {activeOption.badge}
-              </span>
-            )}
+            {/* Badge removed - displayed by SelectValue */}
           </div>
         </SelectTrigger>
         <SelectContent className="bg-slate-800 border-slate-700">
@@ -157,7 +153,11 @@ export const ResultsTabs = memo(function ResultsTabs({
 
       {/* Content Area */}
       <div
-        className={compact ? 'p-2' : 'p-4 rounded-xl bg-slate-800/30 border border-slate-700/50'}
+        className={
+          compact
+            ? 'p-2 rounded-md bg-slate-800/20 border border-slate-700/30'
+            : 'p-4 rounded-xl bg-slate-800/30 border border-slate-700/50'
+        }
       >
         {activeTab === 'overview' && (
           <OverviewTab scoringGrid={scoringGrid} topN={10} compact={compact} />

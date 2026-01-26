@@ -71,6 +71,7 @@ export function calculateAllParans(
 
   for (const planetId of PLANET_IDS) {
     const pos = positions[planetId]
+    // Type guarantees pos exists; validate ra/dec are proper numbers
     if (typeof pos.ra !== 'number' || typeof pos.dec !== 'number') {
       throw new Error(`Invalid position data for planet ${planetId}: ra and dec must be numbers`)
     }

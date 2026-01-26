@@ -17,31 +17,26 @@ const BirthDataSchema = z.object({
   birthTimezone: z.string(),
 })
 
-const PlanetWeightsSchema = z.object({
-  sun: z.number(),
-  moon: z.number(),
-  mercury: z.number(),
-  venus: z.number(),
-  mars: z.number(),
-  jupiter: z.number(),
-  saturn: z.number(),
-  uranus: z.number(),
-  neptune: z.number(),
-  pluto: z.number(),
-})
+// Shared planet keys for consistent schema definitions
+const PLANET_KEYS = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+  'uranus',
+  'neptune',
+  'pluto',
+] as const
 
-const DeclinationsSchema = z.object({
-  sun: z.number(),
-  moon: z.number(),
-  mercury: z.number(),
-  venus: z.number(),
-  mars: z.number(),
-  jupiter: z.number(),
-  saturn: z.number(),
-  uranus: z.number(),
-  neptune: z.number(),
-  pluto: z.number(),
-})
+const planetNumberSchema = Object.fromEntries(
+  PLANET_KEYS.map((key) => [key, z.number()]),
+) as Record<(typeof PLANET_KEYS)[number], z.ZodNumber>
+
+const PlanetWeightsSchema = z.object(planetNumberSchema)
+const DeclinationsSchema = z.object(planetNumberSchema)
 
 const CalculatorStateSchema = z.object({
   step: z.enum(['birth-data', 'weights', 'results']),

@@ -136,7 +136,11 @@ export const paranStatisticsValidator = v.object({
 // =============================================================================
 
 /**
- * Validator for equatorial position input (for paran calculations).
+ * Convex schema validator for equatorial position (structural check only).
+ * Validates: planetId is valid, ra/dec exist and are numbers.
+ *
+ * NOTE: Does NOT enforce numeric ranges. Callers performing calculations
+ * should also call validateEquatorialPosition(ra, dec) for range validation.
  */
 export const equatorialPositionValidator = v.object({
   planetId: planetIdValidator,

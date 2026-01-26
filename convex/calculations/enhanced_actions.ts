@@ -122,15 +122,13 @@ function buildEquatorialPositions(
   positions: ReturnType<typeof calculateAllPositions>,
   obliquity: number,
 ): Record<PlanetId, EquatorialCoordinates> {
-  const equatorial = {} as Record<PlanetId, EquatorialCoordinates>
-  for (const planet of PLANET_IDS) {
-    const pos = positions[planet]
-    const eq = eclipticToEquatorial(pos.longitude, pos.latitude, obliquity)
-    equatorial[planet] = {
-      ra: eq.rightAscension,
-      dec: eq.declination,
-    }
-  }
+  const equatorial = Object.fromEntries(
+    PLANET_IDS.map((planet) => {
+      const pos = positions[planet]
+      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, obliquity)
+      return [planet, { ra: eq.rightAscension, dec: eq.declination }]
+    }),
+  ) as Record<PlanetId, EquatorialCoordinates>
   return equatorial
 }
 

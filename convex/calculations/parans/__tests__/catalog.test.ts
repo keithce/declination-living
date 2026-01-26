@@ -298,9 +298,8 @@ describe('Paran Catalog', () => {
       const result = findAllParans(testPositions)
       const stats = getParanStatistics(result)
 
-      expect(stats.byHemisphere.northern + stats.byHemisphere.southern).toBeLessThanOrEqual(
-        result.points.length,
-      )
+      // All points should be counted (lat >= 0 is northern)
+      expect(stats.byHemisphere.northern + stats.byHemisphere.southern).toBe(result.points.length)
     })
 
     it('handles empty result', () => {

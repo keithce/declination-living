@@ -183,6 +183,13 @@ export function FloatingDataPanel({
   // Debounce recalculate to prevent excessive API calls during slider dragging
   const debouncedRecalculate = useMemo(() => debounce(onRecalculate, 400), [onRecalculate])
 
+  // Cleanup pending debounce on unmount or when onRecalculate changes
+  useEffect(() => {
+    return () => {
+      debouncedRecalculate.cancel()
+    }
+  }, [debouncedRecalculate])
+
   // Load saved width from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)

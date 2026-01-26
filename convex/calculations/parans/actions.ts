@@ -11,6 +11,7 @@ import {
   paranPointValidator,
   paranResultValidator,
   paranStatisticsValidator,
+  paranSummaryValidator,
 } from '../validators'
 import { findAllParans, getParanStatistics, getParansAtLatitude, getTopParans } from './catalog'
 import type { PlanetPosition } from './catalog'
@@ -120,15 +121,7 @@ export const getParanSummary = internalAction({
     strengthThreshold: v.optional(v.number()),
   },
   returns: v.object({
-    summary: v.object({
-      riseRise: v.number(),
-      riseCulminate: v.number(),
-      riseSet: v.number(),
-      culminateCulminate: v.number(),
-      culminateSet: v.number(),
-      setSet: v.number(),
-      total: v.number(),
-    }),
+    summary: paranSummaryValidator,
     statistics: paranStatisticsValidator,
     sampleParans: v.array(paranPointValidator),
   }),

@@ -244,7 +244,11 @@ function CalculatorContent() {
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                onAnimationComplete={() => chartNameInputRef.current?.focus()}
+                onAnimationComplete={() => {
+                  if (showSaveModal) {
+                    chartNameInputRef.current?.focus()
+                  }
+                }}
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 p-6 shadow-2xl"
               >

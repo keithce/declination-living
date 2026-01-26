@@ -244,9 +244,8 @@ export function calculateEventTime(
 
 /**
  * Calculate the signed difference between two LST values.
- *
  * Returns value in range [-180, 180) representing the shortest arc
- * from lst1 to lst2.
+ * from lst2 to lst1 (positive if lst1 is "ahead" of lst2).
  *
  * @param lst1 - First LST in degrees (0-360)
  * @param lst2 - Second LST in degrees (0-360)
