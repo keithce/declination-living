@@ -230,6 +230,11 @@ export function calculateEventTime(
       return calculateCulminateTime(planetId, ra)
     case 'anti_culminate':
       return calculateAntiCulminateTime(planetId, ra)
+    default: {
+      const _exhaustive: never = event
+      void _exhaustive
+      throw new Error(`Unknown angular event: ${event}`)
+    }
   }
 }
 

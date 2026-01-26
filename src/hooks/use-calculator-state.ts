@@ -30,13 +30,26 @@ const PlanetWeightsSchema = z.object({
   pluto: z.number(),
 })
 
+const DeclinationsSchema = z.object({
+  sun: z.number(),
+  moon: z.number(),
+  mercury: z.number(),
+  venus: z.number(),
+  mars: z.number(),
+  jupiter: z.number(),
+  saturn: z.number(),
+  uranus: z.number(),
+  neptune: z.number(),
+  pluto: z.number(),
+})
+
 const CalculatorStateSchema = z.object({
   step: z.enum(['birth-data', 'weights', 'results']),
   birthData: BirthDataSchema.nullable(),
   weights: PlanetWeightsSchema,
   result: z
     .object({
-      declinations: z.record(z.number()),
+      declinations: DeclinationsSchema,
       optimalLatitudes: z.array(
         z.object({ latitude: z.number(), score: z.number(), dominantPlanet: z.string() }),
       ),

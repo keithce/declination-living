@@ -10,8 +10,8 @@ import {
   scoreLatitudeForZenith,
   scoreLatitudesForZenith,
 } from '../zenith'
-import { APPROX_OBLIQUITY, DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../../core/constants'
-import type { PlanetDeclinations, PlanetId, PlanetWeights } from '../../core/types'
+import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../../core/constants'
+import type { PlanetDeclinations, PlanetWeights } from '../../core/types'
 
 describe('Zenith Line Calculator', () => {
   // Test data

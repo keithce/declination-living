@@ -17,11 +17,8 @@ import type { PlanetData } from './bisection'
 // Types
 // =============================================================================
 
-export interface PlanetPosition {
-  planetId: PlanetId
-  ra: number
-  dec: number
-}
+/** Planet position for paran calculations. Alias of PlanetData from bisection. */
+export type PlanetPosition = PlanetData
 
 // =============================================================================
 // Main Catalog Generation
@@ -310,8 +307,10 @@ export function groupParansByEventType(result: ParanResult): Map<string, Array<P
   const events = new Map<string, Array<ParanPoint>>()
 
   for (const paran of result.points) {
-    // Sort events to normalize the key (rise-set same as set-rise)
-    const sortedEvents = [paran.event1, paran.event2].sort()
+    // Sort events by precedence order (rise-set same as set-rise)
+    const sortedEvents = [paran.event1, paran.event2].sort(
+      (a, b) => EVENT_ORDER[a] - EVENT_ORDER[b],
+    )
     const key = `${sortedEvents[0]}-${sortedEvents[1]}`
 
     if (!events.has(key)) {
@@ -373,7 +372,7 @@ export function getParanStatistics(result: ParanResult): {
     },
     strongestParan: result.points[0], // Already sorted by strength
     byHemisphere: {
-      northern: result.points.filter((p) => p.latitude > 0).length,
+      northern: result.points.filter((p) => p.latitude >= 0).length,
       southern: result.points.filter((p) => p.latitude < 0).length,
     },
   }

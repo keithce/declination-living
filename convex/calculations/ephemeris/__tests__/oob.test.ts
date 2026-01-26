@@ -12,7 +12,7 @@ import {
 } from '../oob'
 import { J2000 } from '../../core/constants'
 import { PLANET_IDS } from '../../core/types'
-import type { PlanetDeclinations, PlanetId } from '../../core/types'
+import type { PlanetDeclinations } from '../../core/types'
 
 describe('OOB Detection', () => {
   describe('getMeanObliquity', () => {

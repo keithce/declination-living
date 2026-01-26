@@ -79,6 +79,12 @@ export const getParansForLocation = internalAction({
     latitude: v.number(),
     orb: v.optional(v.number()),
   },
+  returns: v.object({
+    latitude: v.number(),
+    orb: v.number(),
+    parans: v.array(paranPointValidator),
+    count: v.number(),
+  }),
   handler: async (_ctx, args) => {
     const orb = args.orb ?? 2.0
 
@@ -113,6 +119,19 @@ export const getParanSummary = internalAction({
     positions: v.array(equatorialPositionValidator),
     strengthThreshold: v.optional(v.number()),
   },
+  returns: v.object({
+    summary: v.object({
+      riseRise: v.number(),
+      riseCulminate: v.number(),
+      riseSet: v.number(),
+      culminateCulminate: v.number(),
+      culminateSet: v.number(),
+      setSet: v.number(),
+      total: v.number(),
+    }),
+    statistics: paranStatisticsValidator,
+    sampleParans: v.array(paranPointValidator),
+  }),
   handler: async (_ctx, args) => {
     const threshold = args.strengthThreshold ?? 0.5
 

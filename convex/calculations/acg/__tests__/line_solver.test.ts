@@ -15,7 +15,6 @@ import {
 } from '../line_solver'
 import { getGMST } from '../../coordinates/hour_angle'
 import { normalizeDegreesSymmetric } from '../../core/math'
-import { J2000 } from '../../core/constants'
 import type { EquatorialCoordinates, PlanetId } from '../../core/types'
 
 describe('ACG Line Solver', () => {

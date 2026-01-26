@@ -143,3 +143,22 @@ export const equatorialPositionValidator = v.object({
   ra: v.number(),
   dec: v.number(),
 })
+
+// =============================================================================
+// Validation Helpers
+// =============================================================================
+
+/**
+ * Validate equatorial position values are within valid ranges.
+ * RA: 0-360 degrees, Dec: -90 to +90 degrees
+ *
+ * @throws Error if values are out of range
+ */
+export function validateEquatorialPosition(ra: number, dec: number): void {
+  if (ra < 0 || ra > 360) {
+    throw new Error(`Right Ascension must be 0-360 degrees, got ${ra}`)
+  }
+  if (dec < -90 || dec > 90) {
+    throw new Error(`Declination must be -90 to +90 degrees, got ${dec}`)
+  }
+}

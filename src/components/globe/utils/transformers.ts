@@ -8,7 +8,7 @@
  * These utilities handle the transformation.
  */
 
-import type { AngularEvent } from '@/../convex/calculations/core/types'
+import type { AngularEvent } from '@convex/calculations/core/types'
 import type { ACGLineData, ParanPointData, PlanetId, ZenithLineData } from '../layers/types'
 
 // =============================================================================

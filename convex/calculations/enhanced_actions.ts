@@ -34,6 +34,7 @@ import { DEFAULT_WEIGHTS, getVibeById, matchVibeFromQuery } from './vibes/transl
 import { generateSearchBands } from './geospatial/search'
 import { quickSafetyCheck } from './safety/filter'
 import { planetDeclinationsValidator, planetWeightsValidator } from './validators'
+import { eclipticToEquatorial } from './coordinates/transform'
 import type { EquatorialCoordinates, PlanetId } from './core/types'
 
 // =============================================================================
@@ -110,6 +111,30 @@ interface CompleteEnhancedResult {
 }
 
 // =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Convert ecliptic positions to equatorial coordinates for all planets.
+ * This is the proper conversion - ecliptic longitude is NOT the same as Right Ascension.
+ */
+function buildEquatorialPositions(
+  positions: ReturnType<typeof calculateAllPositions>,
+  obliquity: number,
+): Record<PlanetId, EquatorialCoordinates> {
+  const equatorial = {} as Record<PlanetId, EquatorialCoordinates>
+  for (const planet of PLANET_IDS) {
+    const pos = positions[planet]
+    const eq = eclipticToEquatorial(pos.longitude, pos.latitude, obliquity)
+    equatorial[planet] = {
+      ra: eq.rightAscension,
+      dec: eq.declination,
+    }
+  }
+  return equatorial
+}
+
+// =============================================================================
 // Enhanced Position Actions
 // =============================================================================
 
@@ -146,12 +171,13 @@ export const calculateEnhancedPositions = action({
 
     for (const planet of PLANET_IDS) {
       const pos = positions[planet]
+      // Convert ecliptic to equatorial coordinates properly
+      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, obliquity)
       enhanced[planet] = {
         longitude: pos.longitude,
         latitude: pos.latitude,
         declination: pos.declination,
-        // Calculate RA from longitude (simplified - assumes small latitude)
-        ra: pos.longitude, // This is approximate; proper conversion is in geocentric module
+        ra: eq.rightAscension,
         isOOB: oobStatus[planet].isOOB,
         oobDegrees: oobStatus[planet].oobDegrees,
       }
@@ -181,20 +207,10 @@ export const calculateACGLinesAction = action({
   handler: async (_ctx, { birthDate, birthTime }) => {
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
+    const obliquity = getMeanObliquity(jd)
 
-    // Build equatorial positions for ACG calculation
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      equatorialPositions[planet] = {
-        ra: pos.longitude, // Simplified - proper RA conversion needed
-        dec: pos.declination,
-      }
-    }
+    // Build equatorial positions with proper ecliptic to equatorial conversion
+    const equatorialPositions = buildEquatorialPositions(positions, obliquity)
 
     const lines = calculateAllACGLines(jd, equatorialPositions)
 
@@ -235,19 +251,10 @@ export const findACGLinesNearLocationAction = action({
   handler: async (_ctx, { birthDate, birthTime, latitude, longitude, orb }) => {
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
+    const obliquity = getMeanObliquity(jd)
 
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      equatorialPositions[planet] = {
-        ra: pos.longitude,
-        dec: pos.declination,
-      }
-    }
+    // Build equatorial positions with proper ecliptic to equatorial conversion
+    const equatorialPositions = buildEquatorialPositions(positions, obliquity)
 
     const allLines = calculateAllACGLines(jd, equatorialPositions)
     const nearbyLines = findACGLinesNearLocation({ latitude, longitude }, allLines, orb ?? 2)
@@ -301,19 +308,10 @@ export const calculateParansAction = action({
   handler: async (_ctx, { birthDate, birthTime, topN }) => {
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
+    const obliquity = getMeanObliquity(jd)
 
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      equatorialPositions[planet] = {
-        ra: pos.longitude,
-        dec: pos.declination,
-      }
-    }
+    // Build equatorial positions with proper ecliptic to equatorial conversion
+    const equatorialPositions = buildEquatorialPositions(positions, obliquity)
 
     const result = calculateAllParans(equatorialPositions)
 
@@ -530,20 +528,13 @@ export const calculateCompleteEnhanced = action({
     // Zenith lines
     const zenithLines = calculateAllZenithLines(declinations, 1)
 
-    // Build equatorial positions for parans
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-    const longitudes: Record<PlanetId, number> = {} as Record<PlanetId, number>
+    // Build equatorial positions with proper ecliptic to equatorial conversion
+    const equatorialPositions = buildEquatorialPositions(positions, obliquity)
 
+    // Build longitudes map for dignity calculation
+    const longitudes: Record<PlanetId, number> = {} as Record<PlanetId, number>
     for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      equatorialPositions[planet] = {
-        ra: pos.longitude,
-        dec: pos.declination,
-      }
-      longitudes[planet] = pos.longitude
+      longitudes[planet] = positions[planet].longitude
     }
 
     // Top parans
@@ -652,19 +643,10 @@ export const generateSearchBandsAction = action({
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
+    const obliquity = getMeanObliquity(jd)
 
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      equatorialPositions[planet] = {
-        ra: pos.longitude,
-        dec: pos.declination,
-      }
-    }
+    // Build equatorial positions with proper ecliptic to equatorial conversion
+    const equatorialPositions = buildEquatorialPositions(positions, obliquity)
 
     const result = generateSearchBands(declinations, equatorialPositions, weights)
 

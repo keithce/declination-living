@@ -3,6 +3,7 @@
  */
 
 import type * as THREE from 'three'
+import type { AngularEvent } from '@convex/calculations/core/types'
 import { PLANET_COLORS } from '@/lib/planet-constants'
 
 // Re-export for convenience
@@ -77,9 +78,9 @@ export interface ACGLineData {
 /** Paran point data from backend */
 export interface ParanPointData {
   planet1: PlanetId
-  event1: string
+  event1: AngularEvent
   planet2: PlanetId
-  event2: string
+  event2: AngularEvent
   latitude: number
   strength?: number
 }

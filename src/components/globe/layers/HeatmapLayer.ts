@@ -246,6 +246,9 @@ export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void
     }
   }
 
+  // Track actual count before padding
+  const actualHotCount = hotLatitudes.length
+
   while (hotLatitudes.length < MAX_HOT_LATITUDES) {
     hotLatitudes.push(0)
     hotColors.push(0, 0, 0)
@@ -256,6 +259,7 @@ export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void
   material.uniforms.uHotLatitudes.value = hotLatitudes
   material.uniforms.uHotColors.value = hotColors.slice(0, MAX_HOT_LATITUDES * 3)
   material.uniforms.uHotWeights.value = hotWeights
+  material.uniforms.uHotCount.value = actualHotCount
   material.uniforms.uIntensity.value = intensity
   material.uniforms.uSigma.value = sigma
   material.needsUpdate = true

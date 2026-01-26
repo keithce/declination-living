@@ -5,7 +5,7 @@
  * Glass-morphism styling with collapse/expand and resize functionality.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ChevronLeft,
@@ -24,6 +24,8 @@ import type { Declinations } from '@/components/calculator/DeclinationTable'
 import type { Phase2Data } from '@/components/results/FullPageGlobeLayout'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
+import { debounce } from '@/lib/utils'
+import { formatDeclination } from '@/components/results/shared/constants'
 
 // =============================================================================
 // Types
@@ -129,12 +131,6 @@ function CompactDeclinations({ declinations }: { declinations: Declinations }) {
     { key: 'pluto', symbol: '♇', color: '#a3a3a3' },
   ] as const
 
-  const formatDeclination = (value: number): string => {
-    const direction = value >= 0 ? 'N' : 'S'
-    const degrees = Math.abs(value)
-    return `${degrees.toFixed(1)}° ${direction}`
-  }
-
   return (
     <div className="p-4 border-b border-slate-700/50">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
@@ -183,6 +179,9 @@ export function FloatingDataPanel({
   const isResizing = useRef(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
+
+  // Debounce recalculate to prevent excessive API calls during slider dragging
+  const debouncedRecalculate = useMemo(() => debounce(onRecalculate, 400), [onRecalculate])
 
   // Load saved width from localStorage
   useEffect(() => {
@@ -425,7 +424,7 @@ export function FloatingDataPanel({
                   className="overflow-hidden"
                 >
                   <div className="pt-4">
-                    <PlanetWeightsEditor weights={weights} onChange={onRecalculate} />
+                    <PlanetWeightsEditor weights={weights} onChange={debouncedRecalculate} />
                   </div>
                 </motion.div>
               )}

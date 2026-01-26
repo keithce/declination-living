@@ -194,6 +194,20 @@ function CalculatorContent() {
     setShowSaveModal(true)
   }
 
+  // Handle Escape key to close save modal
+  useEffect(() => {
+    if (!showSaveModal) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowSaveModal(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showSaveModal])
+
   // Show loading state while reading from localStorage
   if (isStateLoading) {
     return <CalculatorLoading />
@@ -245,63 +259,69 @@ function CalculatorContent() {
                   </button>
                 </div>
 
-                <div className="mb-6">
-                  <label
-                    htmlFor="chart-name"
-                    className="block text-sm font-medium text-slate-300 mb-2"
-                  >
-                    Chart Name
-                  </label>
-                  <input
-                    id="chart-name"
-                    type="text"
-                    value={chartName}
-                    onChange={(e) => setChartName(e.target.value)}
-                    placeholder="Enter a name for this chart"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                    ref={chartNameInputRef}
-                  />
-                </div>
-
-                {birthData && (
-                  <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-700">
-                    <div className="text-sm text-slate-400">
-                      <span className="text-white font-medium">
-                        {birthData.birthCity}, {birthData.birthCountry}
-                      </span>
-                      <br />
-                      {birthData.birthDate} at {birthData.birthTime}
-                    </div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    handleSaveChart()
+                  }}
+                >
+                  <div className="mb-6">
+                    <label
+                      htmlFor="chart-name"
+                      className="block text-sm font-medium text-slate-300 mb-2"
+                    >
+                      Chart Name
+                    </label>
+                    <input
+                      id="chart-name"
+                      type="text"
+                      value={chartName}
+                      onChange={(e) => setChartName(e.target.value)}
+                      placeholder="Enter a name for this chart"
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                      ref={chartNameInputRef}
+                    />
                   </div>
-                )}
 
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowSaveModal(false)}
-                    className="flex-1 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 rounded-xl transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveChart}
-                    disabled={!chartName.trim() || isSaving}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Save
-                      </>
-                    )}
-                  </button>
-                </div>
+                  {birthData && (
+                    <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-700">
+                      <div className="text-sm text-slate-400">
+                        <span className="text-white font-medium">
+                          {birthData.birthCity}, {birthData.birthCountry}
+                        </span>
+                        <br />
+                        {birthData.birthDate} at {birthData.birthTime}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowSaveModal(false)}
+                      className="flex-1 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 rounded-xl transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!chartName.trim() || isSaving}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Save
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               </motion.div>
             </motion.div>
           )}

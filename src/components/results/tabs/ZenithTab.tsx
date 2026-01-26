@@ -5,6 +5,7 @@
 import { memo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Zap } from 'lucide-react'
+import { APPROX_OBLIQUITY } from '@convex/calculations/core/constants'
 import {
   PLANET_COLORS,
   PLANET_NAMES,
@@ -12,8 +13,7 @@ import {
   formatDeclination,
   formatLatitude,
 } from '../shared/constants'
-import type { ZenithLine } from '@/../convex/calculations/core/types'
-import { APPROX_OBLIQUITY } from '@/../convex/calculations/core/constants'
+import type { ZenithLine } from '@convex/calculations/core/types'
 
 // =============================================================================
 // Types

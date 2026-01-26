@@ -12,7 +12,7 @@ import {
   formatLatitude,
   formatLongitude,
 } from '../shared/constants'
-import type { GridCell } from '@/../convex/calculations/geospatial/grid'
+import type { GridCell } from '@convex/calculations/geospatial/grid'
 
 // =============================================================================
 // Types

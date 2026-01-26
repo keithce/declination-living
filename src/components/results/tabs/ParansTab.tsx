@@ -12,7 +12,7 @@ import {
   PLANET_SYMBOLS,
   formatLatitude,
 } from '../shared/constants'
-import type { ParanPoint, PlanetId } from '@/../convex/calculations/core/types'
+import type { ParanPoint, PlanetId } from '@convex/calculations/core/types'
 
 // =============================================================================
 // Types

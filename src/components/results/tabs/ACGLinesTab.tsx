@@ -13,7 +13,7 @@ import {
   formatLatitude,
   formatLongitude,
 } from '../shared/constants'
-import type { ACGLine, PlanetId } from '@/../convex/calculations/core/types'
+import type { ACGLine, PlanetId } from '@convex/calculations/core/types'
 
 // =============================================================================
 // Types
@@ -133,14 +133,14 @@ export const ACGLinesTab = memo(function ACGLinesTab({
             onClick={expandAll}
             className="px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >
-            Expand
+            {compact ? 'Expand' : 'Expand All'}
           </button>
           <button
             type="button"
             onClick={collapseAll}
             className="px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >
-            Collapse
+            {compact ? 'Collapse' : 'Collapse All'}
           </button>
         </div>
       </div>

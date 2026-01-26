@@ -131,12 +131,13 @@ function bisectToConvergence(
         const highResult = getDiff(quarterHigh)
 
         // Use current boundary diffs, not stale initial values
+        // Set boundaries to the valid sample points, not mid (which returned null)
         if (lowResult !== null && lowResult.diff * aResult.diff <= 0) {
-          currentB = mid
-          // bDiff stays the same since we're narrowing from the high side
+          currentB = quarterLow
+          bDiff = lowResult.diff
         } else if (highResult !== null && highResult.diff * bDiff <= 0) {
-          currentA = mid
-          // aResult stays the same since we're narrowing from the low side
+          currentA = quarterHigh
+          aResult = { lat: quarterHigh, ...highResult }
         } else {
           break
         }
@@ -181,6 +182,9 @@ function bisectToConvergence(
  * 2. Use bisection to converge on exact latitude
  * 3. Handle circumpolar cases (events becoming impossible)
  * 4. Converge to 10⁻⁶ degree precision
+ *
+ * Note: Returns the first (southernmost) paran found. For multiple parans
+ * in the same range, use findAllParansInRange() instead.
  *
  * @param planet1 - First planet data (id, ra, dec)
  * @param event1 - Angular event for planet 1

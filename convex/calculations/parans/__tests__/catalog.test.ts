@@ -69,6 +69,7 @@ describe('Paran Catalog', () => {
       expect(result.summary.riseCulminate).toBeGreaterThanOrEqual(0)
       expect(result.summary.riseSet).toBeGreaterThanOrEqual(0)
       expect(result.summary.culminateCulminate).toBeGreaterThanOrEqual(0)
+      expect(result.summary.culminateSet).toBeGreaterThanOrEqual(0)
       expect(result.summary.setSet).toBeGreaterThanOrEqual(0)
     })
 
@@ -257,12 +258,14 @@ describe('Paran Catalog', () => {
       const eventGroups = groupParansByEventType(result)
 
       // Each group should have consistent event types
+      // Events are sorted by precedence order: rise, culminate, anti_culminate, set
       for (const [key, parans] of eventGroups) {
         const [e1, e2] = key.split('-')
         for (const paran of parans) {
-          const events = [paran.event1, paran.event2].sort()
-          expect(events[0]).toBe(e1)
-          expect(events[1]).toBe(e2)
+          // Verify the paran's events match the key (in either order)
+          const paranEvents = new Set([paran.event1, paran.event2])
+          const keyEvents = new Set([e1, e2])
+          expect(paranEvents).toEqual(keyEvents)
         }
       }
     })

@@ -67,7 +67,7 @@ describe('Paran Bisection Solver', () => {
       }
     })
 
-    it('returns null when no paran exists', () => {
+    it('handles extreme circumpolar cases gracefully', () => {
       // Create a scenario where the events can never coincide
       const circumpolarPlanet = {
         planetId: 'saturn' as PlanetId,

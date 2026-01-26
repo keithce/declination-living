@@ -7,15 +7,15 @@
 
 import { memo, useState } from 'react'
 import { BarChart3, Globe, MapPin, Sparkles, Target } from 'lucide-react'
+import { APPROX_OBLIQUITY } from '@convex/calculations/core/constants'
 import { OverviewTab } from './tabs/OverviewTab'
 import { ACGLinesTab } from './tabs/ACGLinesTab'
 import { ZenithTab } from './tabs/ZenithTab'
 import { ScoringTab } from './tabs/ScoringTab'
 import { ParansTab } from './tabs/ParansTab'
-import type { ACGLine, ParanPoint, ZenithLine } from '@/../convex/calculations/core/types'
-import type { GridCell } from '@/../convex/calculations/geospatial/grid'
+import type { ACGLine, ParanPoint, ZenithLine } from '@convex/calculations/core/types'
+import type { GridCell } from '@convex/calculations/geospatial/grid'
 import type { GlobeState } from '../globe/hooks/useGlobeState'
-import { APPROX_OBLIQUITY } from '@/../convex/calculations/core/constants'
 import {
   Select,
   SelectContent,
@@ -44,6 +44,12 @@ export interface ResultsTabsProps {
 }
 
 type TabValue = 'overview' | 'acg' | 'zenith' | 'scoring' | 'parans'
+
+const VALID_TAB_VALUES: ReadonlyArray<TabValue> = ['overview', 'acg', 'zenith', 'scoring', 'parans']
+
+function isValidTabValue(v: string): v is TabValue {
+  return (VALID_TAB_VALUES as ReadonlyArray<string>).includes(v)
+}
 
 // =============================================================================
 // Main Component
@@ -111,7 +117,12 @@ export const ResultsTabs = memo(function ResultsTabs({
   return (
     <div className="w-full space-y-3">
       {/* Dropdown Selector */}
-      <Select value={activeTab} onValueChange={(v: string) => setActiveTab(v as TabValue)}>
+      <Select
+        value={activeTab}
+        onValueChange={(v: string) => {
+          if (isValidTabValue(v)) setActiveTab(v)
+        }}
+      >
         <SelectTrigger className="w-full bg-slate-800/50 border-slate-700/50 text-white">
           <div className="flex items-center gap-2">
             {activeOption?.icon}
