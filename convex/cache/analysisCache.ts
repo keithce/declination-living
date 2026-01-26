@@ -312,3 +312,33 @@ export function hashWeights(weights: Record<string, number>): string {
 
   return hash.toString(36)
 }
+
+// =============================================================================
+// Analysis Cache (Chart-linked)
+// =============================================================================
+
+/**
+ * Get analysis cache entry for a saved chart.
+ * Used by the results page to display pre-computed analysis data.
+ */
+export const getByChart = query({
+  args: { chartId: v.id('charts') },
+  handler: async (ctx, { chartId }) => {
+    const userId = await auth.getUserId(ctx)
+
+    // First verify the user has access to this chart
+    const chart = await ctx.db.get('charts', chartId)
+    if (!chart) return null
+
+    // Check access: must be public or owned by user
+    if (!chart.isPublic && chart.userId !== userId) {
+      return null
+    }
+
+    // Get the analysis cache entry
+    return await ctx.db
+      .query('analysisCache')
+      .withIndex('by_chart', (q) => q.eq('chartId', chartId))
+      .first()
+  },
+})

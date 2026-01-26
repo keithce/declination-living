@@ -20,7 +20,8 @@ import {
 import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
-import type { Declinations } from '@/components/calculator/DeclinationTable'
+import type { Declinations, EnhancedDeclination } from '@/components/calculator/DeclinationTable'
+import type { PlanetId } from '@/lib/planet-constants'
 import type { Phase2Data } from '@/components/results/FullPageGlobeLayout'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
@@ -48,6 +49,8 @@ interface CalculationResult {
   declinations: Declinations
   optimalLatitudes: Array<LatitudeScore>
   latitudeBands: Array<LatitudeBand>
+  /** Enhanced declinations with OOB status */
+  enhancedDeclinations?: Record<PlanetId, EnhancedDeclination>
 }
 
 interface FloatingDataPanelProps {
@@ -118,7 +121,13 @@ function BirthSummary({ birthData, onEdit }: { birthData: BirthData; onEdit: () 
   )
 }
 
-function CompactDeclinations({ declinations }: { declinations: Declinations }) {
+function CompactDeclinations({
+  declinations,
+  enhancedDeclinations,
+}: {
+  declinations: Declinations
+  enhancedDeclinations?: Record<PlanetId, EnhancedDeclination>
+}) {
   return (
     <div className="p-4 border-b border-slate-700/50">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
@@ -127,15 +136,25 @@ function CompactDeclinations({ declinations }: { declinations: Declinations }) {
       <div className="grid grid-cols-5 gap-2">
         {PLANETS.map((planet) => {
           const value = declinations[planet.key as keyof Declinations]
+          const enhanced = enhancedDeclinations?.[planet.key]
+          const isOOB = enhanced?.isOOB ?? false
+
           return (
             <div
               key={planet.key}
-              className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg"
-              title={planet.name}
+              className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg relative"
+              title={
+                isOOB
+                  ? `${planet.name} - Out of Bounds by ${enhanced?.oobDegrees?.toFixed(2) ?? '?'}°`
+                  : planet.name
+              }
             >
               <span className="text-lg" style={{ color: planet.color }}>
                 {planet.symbol}
               </span>
+              {isOOB && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />
+              )}
               <span className="text-xs text-slate-400 mt-1">{formatDeclination(value)}</span>
             </div>
           )
@@ -331,7 +350,10 @@ export function FloatingDataPanel({
           {birthData && <BirthSummary birthData={birthData} onEdit={onEditBirthData} />}
 
           {/* Compact Declinations */}
-          <CompactDeclinations declinations={result.declinations} />
+          <CompactDeclinations
+            declinations={result.declinations}
+            enhancedDeclinations={result.enhancedDeclinations}
+          />
 
           {/* Top Latitudes (compact version) */}
           <div className="p-4 border-b border-slate-700/50">

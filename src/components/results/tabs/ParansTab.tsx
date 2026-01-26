@@ -88,7 +88,7 @@ export const ParansTab = memo(function ParansTab({
     return filtered.slice(0, displayLimit)
   }, [parans, eventFilter, selectedPlanet, displayLimit])
 
-  // Calculate summary statistics
+  // Calculate summary statistics including average strength
   const summary = useMemo(() => {
     const stats = {
       riseRise: 0,
@@ -97,7 +97,11 @@ export const ParansTab = memo(function ParansTab({
       culminateCulminate: 0,
       setSet: 0,
       total: filteredParans.length,
+      avgStrength: 0,
     }
+
+    let totalStrength = 0
+    let strengthCount = 0
 
     for (const paran of filteredParans) {
       const e1 = paran.event1
@@ -116,7 +120,15 @@ export const ParansTab = memo(function ParansTab({
       )
         stats.culminateCulminate++
       else if (e1 === 'set' && e2 === 'set') stats.setSet++
+
+      // Track strength for average
+      if (paran.strength !== undefined) {
+        totalStrength += paran.strength
+        strengthCount++
+      }
     }
+
+    stats.avgStrength = strengthCount > 0 ? totalStrength / strengthCount : 0
 
     return stats
   }, [filteredParans])
@@ -124,7 +136,7 @@ export const ParansTab = memo(function ParansTab({
   return (
     <div className={compact ? 'space-y-3' : 'space-y-4'}>
       {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-2 text-center">
+      <div className="grid grid-cols-4 gap-2 text-center">
         <div className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50`}>
           <div className={`${compact ? 'text-base' : 'text-xl'} font-bold text-white`}>
             {summary.total}
@@ -142,6 +154,12 @@ export const ParansTab = memo(function ParansTab({
             {summary.culminateCulminate}
           </div>
           <div className="text-xs text-slate-500">Meridian</div>
+        </div>
+        <div className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50`}>
+          <div className={`${compact ? 'text-base' : 'text-xl'} font-bold text-purple-400`}>
+            {(summary.avgStrength * 100).toFixed(0)}%
+          </div>
+          <div className="text-xs text-slate-500">Avg Strength</div>
         </div>
       </div>
 
@@ -246,13 +264,16 @@ export const ParansTab = memo(function ParansTab({
               {(ANGULAR_EVENT_LABELS[paran.event2] ?? paran.event2).toLowerCase()}
             </div>
             {paran.strength !== undefined && (
-              <div className="mt-2">
-                <div className="h-1 bg-slate-700/50 rounded-full overflow-hidden">
+              <div className="mt-2 flex items-center gap-2">
+                <div className="flex-1 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all"
                     style={{ width: `${paran.strength * 100}%` }}
                   />
                 </div>
+                <span className="text-xs font-mono text-purple-400 min-w-[3rem] text-right">
+                  {(paran.strength * 100).toFixed(0)}%
+                </span>
               </div>
             )}
           </motion.div>
