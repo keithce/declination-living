@@ -25,7 +25,7 @@ import { findOptimalBands, getQueryLatitudeRanges } from '../geospatial/optimize
 import { rankCities } from '../geospatial/ranking'
 import type { CityData } from '../geospatial/ranking'
 import type { OptimizationInput } from '../geospatial/optimizer'
-import type { EquatorialCoordinates, PlanetId, PlanetWeights } from '../core/types'
+import type { EquatorialCoordinates, PlanetId, PlanetWeights, VibeCategory } from '../core/types'
 
 // Re-export translator functions
 export {
@@ -221,6 +221,23 @@ export const calculateRecommendations = action({
     // 5. Get latitude ranges for city queries
     const latitudeRanges = getQueryLatitudeRanges(optimizationResult.bands, 5)
 
+    // Handle empty latitude ranges (no optimal bands found)
+    if (latitudeRanges.length === 0) {
+      return {
+        vibeId: matchedVibeId,
+        vibeName: matchedVibeName,
+        weights,
+        optimalLatitudes: [],
+        bands: [],
+        recommendations: [],
+        metadata: {
+          totalCitiesScored: 0,
+          julianDay: jd,
+          obliquity: Math.round(obliquity * 1000) / 1000,
+        },
+      }
+    }
+
     // 6. Query cities in optimal latitude bands
     const cities: Array<CityData> = await ctx.runQuery(
       internal.calculations.vibes.queries.getCitiesInRangesInternal,
@@ -351,7 +368,7 @@ export const blendVibesAction = action({
       await import('./translator')
 
     // Resolve vibe IDs to categories
-    const resolvedVibes: Array<{ vibe: { weights: PlanetWeights }; ratio: number }> = []
+    const resolvedVibes: Array<{ vibe: VibeCategory; ratio: number }> = []
 
     for (const { vibeId, ratio } of vibes) {
       const vibe = getVibeById(vibeId)
@@ -369,12 +386,7 @@ export const blendVibesAction = action({
     }
 
     // Blend the vibes
-    const blendedWeights = blendVibes(
-      resolvedVibes.map((item) => ({
-        vibe: item.vibe as any, // Type coercion for VibeCategory
-        ratio: item.ratio,
-      })),
-    )
+    const blendedWeights = blendVibes(resolvedVibes)
 
     return {
       blended: true,

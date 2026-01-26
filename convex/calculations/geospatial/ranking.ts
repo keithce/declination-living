@@ -22,6 +22,9 @@ import type { OptimizationInput } from './optimizer'
 // Types
 // =============================================================================
 
+/** City population tier classification */
+export type CityTier = 'major' | 'medium' | 'minor' | 'small'
+
 /** City data from the database */
 export interface CityData {
   _id: Id<'cities'>
@@ -29,7 +32,7 @@ export interface CityData {
   country: string
   latitude: number
   longitude: number
-  tier: 'major' | 'medium' | 'minor' | 'small'
+  tier: CityTier
   population: number
 }
 
@@ -46,7 +49,7 @@ export interface RankedCity {
   /** City longitude */
   longitude: number
   /** City tier (major, medium, minor, small) */
-  tier: 'major' | 'medium' | 'minor' | 'small'
+  tier: CityTier
   /** Combined score */
   score: number
   /** Human-readable highlight strings */
@@ -60,7 +63,7 @@ export interface RankedCity {
 /** Options for city ranking */
 export interface RankingOptions {
   /** Filter to specific city tiers */
-  tiers?: Array<'major' | 'medium' | 'minor' | 'small'>
+  tiers?: Array<CityTier>
   /** Minimum safety level required */
   minSafetyLevel?: 'excellent' | 'good' | 'moderate' | 'challenging'
   /** Maximum number of cities to return */
@@ -267,10 +270,7 @@ export function rankCities(
  * @param tiers - Tiers to include
  * @returns Filtered array
  */
-export function filterByTier(
-  cities: Array<RankedCity>,
-  tiers: Array<'major' | 'medium' | 'minor' | 'small'>,
-): Array<RankedCity> {
+export function filterByTier(cities: Array<RankedCity>, tiers: Array<CityTier>): Array<RankedCity> {
   return cities.filter((city) => tiers.includes(city.tier))
 }
 
@@ -281,10 +281,7 @@ export function filterByTier(
  * @param tiers - Tiers to include
  * @returns Filtered array
  */
-function filterByTierData(
-  cities: Array<CityData>,
-  tiers: Array<'major' | 'medium' | 'minor' | 'small'>,
-): Array<CityData> {
+function filterByTierData(cities: Array<CityData>, tiers: Array<CityTier>): Array<CityData> {
   return cities.filter((city) => tiers.includes(city.tier))
 }
 

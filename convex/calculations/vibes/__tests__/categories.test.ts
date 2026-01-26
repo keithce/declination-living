@@ -10,7 +10,7 @@ import {
   zeroWeights,
 } from '../translator'
 import { PLANET_IDS } from '../../core/types'
-import type { PlanetId, VibeCategory } from '../../core/types'
+import type { PlanetId } from '../../core/types'
 
 describe('Vibe Categories', () => {
   describe('Preset Vibes', () => {
@@ -213,9 +213,9 @@ describe('Vibe Categories', () => {
         { vibe: career, ratio: 0.2 },
       ])
 
-      // Jupiter is weighted heavily in wealth (10) vs career (5)
-      // With 80/20 blend: 0.8*10 + 0.2*5 = 9
-      expect(blended.jupiter).toBeCloseTo(9, 5)
+      // Compute expected value from source weights
+      const expected = 0.8 * wealth.weights.jupiter + 0.2 * career.weights.jupiter
+      expect(blended.jupiter).toBeCloseTo(expected, 5)
     })
 
     it('should return default weights for empty input', () => {

@@ -44,8 +44,6 @@ export const getCitiesInRangesInternal = internalQuery({
     const seenIds = new Set<string>()
 
     for (const range of ranges) {
-      const query = ctx.db.query('cities')
-
       // If tiers specified, query each tier separately
       if (tiers && tiers.length > 0) {
         for (const tier of tiers) {
@@ -73,7 +71,8 @@ export const getCitiesInRangesInternal = internalQuery({
         }
       } else {
         // Query all tiers
-        const cities = await query
+        const cities = await ctx.db
+          .query('cities')
           .withIndex('by_latitude', (q) => q.gte('latitude', range.min).lte('latitude', range.max))
           .take(limitPerRange)
 
