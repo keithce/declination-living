@@ -41,6 +41,8 @@ import type * as calculations_ephemeris_speed from "../calculations/ephemeris/sp
 import type * as calculations_ephemeris_swissephService from "../calculations/ephemeris/swissephService.js";
 import type * as calculations_geospatial_grid from "../calculations/geospatial/grid.js";
 import type * as calculations_geospatial_index from "../calculations/geospatial/index.js";
+import type * as calculations_geospatial_optimizer from "../calculations/geospatial/optimizer.js";
+import type * as calculations_geospatial_ranking from "../calculations/geospatial/ranking.js";
 import type * as calculations_geospatial_search from "../calculations/geospatial/search.js";
 import type * as calculations_index from "../calculations/index.js";
 import type * as calculations_optimizer from "../calculations/optimizer.js";
@@ -55,6 +57,7 @@ import type * as calculations_safety_filter from "../calculations/safety/filter.
 import type * as calculations_safety_index from "../calculations/safety/index.js";
 import type * as calculations_validators from "../calculations/validators.js";
 import type * as calculations_vibes_index from "../calculations/vibes/index.js";
+import type * as calculations_vibes_queries from "../calculations/vibes/queries.js";
 import type * as calculations_vibes_translator from "../calculations/vibes/translator.js";
 import type * as charts_mutations from "../charts/mutations.js";
 import type * as charts_queries from "../charts/queries.js";
@@ -104,6 +107,8 @@ declare const fullApi: ApiFromModules<{
   "calculations/ephemeris/swissephService": typeof calculations_ephemeris_swissephService;
   "calculations/geospatial/grid": typeof calculations_geospatial_grid;
   "calculations/geospatial/index": typeof calculations_geospatial_index;
+  "calculations/geospatial/optimizer": typeof calculations_geospatial_optimizer;
+  "calculations/geospatial/ranking": typeof calculations_geospatial_ranking;
   "calculations/geospatial/search": typeof calculations_geospatial_search;
   "calculations/index": typeof calculations_index;
   "calculations/optimizer": typeof calculations_optimizer;
@@ -118,6 +123,7 @@ declare const fullApi: ApiFromModules<{
   "calculations/safety/index": typeof calculations_safety_index;
   "calculations/validators": typeof calculations_validators;
   "calculations/vibes/index": typeof calculations_vibes_index;
+  "calculations/vibes/queries": typeof calculations_vibes_queries;
   "calculations/vibes/translator": typeof calculations_vibes_translator;
   "charts/mutations": typeof charts_mutations;
   "charts/queries": typeof charts_queries;
