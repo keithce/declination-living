@@ -70,8 +70,20 @@ export function calculateRiseTime(
     }
   }
 
+  // After circumpolar checks, riseHA should always be defined.
+  // Guard against unexpected undefined to satisfy TypeScript.
+  if (sda.riseHA === undefined) {
+    return {
+      planet,
+      event: 'rise',
+      lst: 0,
+      isPossible: false,
+      circumpolarState: 'always_below',
+    }
+  }
+
   // Rising occurs at HA = -SDA
-  const ha = sda.riseHA!
+  const ha = sda.riseHA
   const lst = normalizeDegrees(ra + ha)
 
   return {
@@ -121,8 +133,20 @@ export function calculateSetTime(
     }
   }
 
+  // After circumpolar checks, setHA should always be defined.
+  // Guard against unexpected undefined to satisfy TypeScript.
+  if (sda.setHA === undefined) {
+    return {
+      planet,
+      event: 'set',
+      lst: 0,
+      isPossible: false,
+      circumpolarState: 'always_above',
+    }
+  }
+
   // Setting occurs at HA = +SDA
-  const ha = sda.setHA!
+  const ha = sda.setHA
   const lst = normalizeDegrees(ra + ha)
 
   return {

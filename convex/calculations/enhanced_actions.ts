@@ -530,10 +530,13 @@ export const calculateCompleteEnhanced = action({
     const equatorialPositions = buildEquatorialPositions(positions, obliquity)
 
     // Build longitudes map for dignity calculation
-    const longitudes: Record<PlanetId, number> = {} as Record<PlanetId, number>
-    for (const planet of PLANET_IDS) {
-      longitudes[planet] = positions[planet].longitude
-    }
+    const longitudes = PLANET_IDS.reduce<Record<PlanetId, number>>(
+      (acc, planet) => {
+        acc[planet] = positions[planet].longitude
+        return acc
+      },
+      {} as Record<PlanetId, number>,
+    )
 
     // Top parans
     const paranResult = calculateAllParans(equatorialPositions)

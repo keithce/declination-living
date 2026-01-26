@@ -159,6 +159,10 @@ export function getStrongestParans(
  * @param parans - Array of paran points
  * @param bandSize - Size of each band in degrees
  * @returns Map of band center to parans in that band
+ *
+ * @note The summary fields in the synthetic ParanResult are intentionally
+ * stubbed with zeros. groupParansByLatitude only uses result.points,
+ * so these values are never accessed. Do not rely on them.
  */
 export function groupParansByLatitudeBand(
   parans: Array<ParanPoint>,

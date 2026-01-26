@@ -192,12 +192,16 @@ export function FloatingDataPanel({
 
   // Load saved width from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      const width = Number.parseInt(saved, 10)
-      if (width >= MIN_PANEL_WIDTH && width <= MAX_PANEL_WIDTH) {
-        setPanelWidth(width)
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        const width = Number.parseInt(saved, 10)
+        if (width >= MIN_PANEL_WIDTH && width <= MAX_PANEL_WIDTH) {
+          setPanelWidth(width)
+        }
       }
+    } catch {
+      // localStorage unavailable (privacy mode, quota exceeded, etc.)
     }
     isInitialized.current = true
   }, [])
@@ -205,7 +209,11 @@ export function FloatingDataPanel({
   // Save width to localStorage when it changes (only after initialization)
   useEffect(() => {
     if (isInitialized.current) {
-      localStorage.setItem(STORAGE_KEY, panelWidth.toString())
+      try {
+        localStorage.setItem(STORAGE_KEY, panelWidth.toString())
+      } catch {
+        // Silently ignore - localStorage unavailable
+      }
     }
   }, [panelWidth])
 

@@ -155,7 +155,7 @@ function CalculatorContent() {
   }
 
   const handleSaveChart = async () => {
-    if (!birthData || !result || !chartName.trim()) return
+    if (isSaving || !birthData || !result || !chartName.trim()) return
 
     setIsSaving(true)
     try {
