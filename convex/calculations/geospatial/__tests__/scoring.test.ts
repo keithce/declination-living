@@ -7,7 +7,7 @@ import {
   generateSearchBands,
   scoreLatitude,
 } from '../search'
-import { DECLINATION_SIGMA, DEFAULT_DECLINATION_ORB } from '../../core/constants'
+import { DECLINATION_SIGMA } from '../../core/constants'
 import type {
   EquatorialCoordinates,
   PlanetDeclinations,
@@ -359,11 +359,15 @@ describe('Geospatial Scoring Engine', () => {
 
     it('should respect threshold parameter', () => {
       const lowThreshold = findHighScoringBands(TEST_DECLINATIONS, EQUAL_WEIGHTS, 0.3, 1.0)
-      const highThreshold = findHighScoringBands(TEST_DECLINATIONS, EQUAL_WEIGHTS, 0.7, 1.0)
+      const highThreshold = findHighScoringBands(TEST_DECLINATIONS, EQUAL_WEIGHTS, 0.8, 1.0)
 
-      // Lower threshold should generally find at least as many bands as high threshold
-      // (or both might find zero if score distribution doesn't match thresholds)
       expect(lowThreshold.length).toBeGreaterThan(0)
+
+      // Lower threshold should produce greater or equal total coverage (sum of band widths)
+      // Even if it results in fewer bands due to merging nearby regions
+      const lowCoverage = lowThreshold.reduce((sum, b) => sum + (b.maxLat - b.minLat), 0)
+      const highCoverage = highThreshold.reduce((sum, b) => sum + (b.maxLat - b.minLat), 0)
+      expect(lowCoverage).toBeGreaterThanOrEqual(highCoverage)
     })
 
     it('should calculate average scores correctly', () => {

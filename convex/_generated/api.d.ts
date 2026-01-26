@@ -43,6 +43,10 @@ import type * as calculations_geospatial_index from "../calculations/geospatial/
 import type * as calculations_geospatial_search from "../calculations/geospatial/search.js";
 import type * as calculations_index from "../calculations/index.js";
 import type * as calculations_optimizer from "../calculations/optimizer.js";
+import type * as calculations_parans_actions from "../calculations/parans/actions.js";
+import type * as calculations_parans_bisection from "../calculations/parans/bisection.js";
+import type * as calculations_parans_catalog from "../calculations/parans/catalog.js";
+import type * as calculations_parans_events from "../calculations/parans/events.js";
 import type * as calculations_parans_index from "../calculations/parans/index.js";
 import type * as calculations_parans_solver from "../calculations/parans/solver.js";
 import type * as calculations_phase2_actions from "../calculations/phase2_actions.js";
@@ -101,6 +105,10 @@ declare const fullApi: ApiFromModules<{
   "calculations/geospatial/search": typeof calculations_geospatial_search;
   "calculations/index": typeof calculations_index;
   "calculations/optimizer": typeof calculations_optimizer;
+  "calculations/parans/actions": typeof calculations_parans_actions;
+  "calculations/parans/bisection": typeof calculations_parans_bisection;
+  "calculations/parans/catalog": typeof calculations_parans_catalog;
+  "calculations/parans/events": typeof calculations_parans_events;
   "calculations/parans/index": typeof calculations_parans_index;
   "calculations/parans/solver": typeof calculations_parans_solver;
   "calculations/phase2_actions": typeof calculations_phase2_actions;

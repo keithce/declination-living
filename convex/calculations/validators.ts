@@ -7,6 +7,26 @@
 import { v } from 'convex/values'
 
 // =============================================================================
+// Planet ID Validator
+// =============================================================================
+
+/**
+ * Validator for planet identifiers.
+ */
+export const planetIdValidator = v.union(
+  v.literal('sun'),
+  v.literal('moon'),
+  v.literal('mercury'),
+  v.literal('venus'),
+  v.literal('mars'),
+  v.literal('jupiter'),
+  v.literal('saturn'),
+  v.literal('uranus'),
+  v.literal('neptune'),
+  v.literal('pluto'),
+)
+
+// =============================================================================
 // Planet Weights Validator
 // =============================================================================
 
@@ -47,3 +67,102 @@ export const planetDeclinationsValidator = v.object({
   neptune: v.number(),
   pluto: v.number(),
 })
+
+// =============================================================================
+// Angular Event Validator
+// =============================================================================
+
+/**
+ * Validator for angular event types (rise, set, culminate, anti-culminate).
+ */
+export const angularEventValidator = v.union(
+  v.literal('rise'),
+  v.literal('set'),
+  v.literal('culminate'),
+  v.literal('anti_culminate'),
+)
+
+// =============================================================================
+// Paran Validators
+// =============================================================================
+
+/**
+ * Validator for a single paran point.
+ */
+export const paranPointValidator = v.object({
+  planet1: planetIdValidator,
+  event1: angularEventValidator,
+  planet2: planetIdValidator,
+  event2: angularEventValidator,
+  latitude: v.number(),
+  strength: v.optional(v.number()),
+})
+
+/**
+ * Validator for paran summary statistics.
+ */
+export const paranSummaryValidator = v.object({
+  riseRise: v.number(),
+  riseCulminate: v.number(),
+  riseSet: v.number(),
+  culminateCulminate: v.number(),
+  culminateSet: v.number(),
+  setSet: v.number(),
+  total: v.number(),
+})
+
+/**
+ * Validator for complete paran result.
+ */
+export const paranResultValidator = v.object({
+  points: v.array(paranPointValidator),
+  summary: paranSummaryValidator,
+})
+
+/**
+ * Validator for paran statistics.
+ */
+export const paranStatisticsValidator = v.object({
+  total: v.number(),
+  averageStrength: v.number(),
+  medianStrength: v.number(),
+  latitudeRange: v.object({ min: v.number(), max: v.number() }),
+  strongestParan: v.union(paranPointValidator, v.null()),
+  byHemisphere: v.object({ northern: v.number(), southern: v.number() }),
+})
+
+// =============================================================================
+// Equatorial Position Validator
+// =============================================================================
+
+/**
+ * Convex schema validator for equatorial position (structural check only).
+ * Validates: planetId is valid, ra/dec exist and are numbers.
+ *
+ * NOTE: Does NOT enforce numeric ranges. Callers performing calculations
+ * should also call validateEquatorialPosition(ra, dec) for range validation.
+ */
+export const equatorialPositionValidator = v.object({
+  planetId: planetIdValidator,
+  ra: v.number(),
+  dec: v.number(),
+})
+
+// =============================================================================
+// Validation Helpers
+// =============================================================================
+
+/**
+ * Validate equatorial position values are within valid ranges.
+ * RA: 0-360 degrees, Dec: -90 to +90 degrees
+ *
+ * @throws Error if values are out of range
+ */
+export function validateEquatorialPosition(ra: number, dec: number): void {
+  if (ra < 0 || ra > 360) {
+    throw new Error(`Right Ascension must be 0-360 degrees, got ${ra}`)
+  }
+  if (dec < -90 || dec > 90) {
+    throw new Error(`Declination must be -90 to +90 degrees, got ${dec}`)
+  }
+}

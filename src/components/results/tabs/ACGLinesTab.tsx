@@ -13,7 +13,7 @@ import {
   formatLatitude,
   formatLongitude,
 } from '../shared/constants'
-import type { ACGLine, PlanetId } from '@/../convex/calculations/core/types'
+import type { ACGLine, PlanetId } from '@convex/calculations/core/types'
 
 // =============================================================================
 // Types
@@ -22,6 +22,8 @@ import type { ACGLine, PlanetId } from '@/../convex/calculations/core/types'
 export interface ACGLinesTabProps {
   /** ACG lines from calculations */
   acgLines: Array<ACGLine>
+  /** Compact mode for narrow panels */
+  compact?: boolean
 }
 
 type LineTypeFilter = 'all' | 'MC' | 'IC' | 'ASC' | 'DSC'
@@ -47,7 +49,10 @@ function groupLinesByPlanet(lines: Array<ACGLine>): Partial<Record<PlanetId, Arr
 // Main Component
 // =============================================================================
 
-export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabProps) {
+export const ACGLinesTab = memo(function ACGLinesTab({
+  acgLines,
+  compact = false,
+}: ACGLinesTabProps) {
   const [expandedPlanets, setExpandedPlanets] = useState<Set<PlanetId>>(new Set())
   const [lineTypeFilter, setLineTypeFilter] = useState<LineTypeFilter>('all')
 
@@ -97,19 +102,21 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
   const planets = Object.keys(filteredGroupedLines) as Array<PlanetId>
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? 'space-y-3' : 'space-y-4'}>
       {/* Filter Controls */}
-      <div className="flex items-center justify-between gap-4 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <div className="flex items-center gap-2">
+      <div
+        className={`${compact ? 'p-2 space-y-2' : 'flex items-center justify-between gap-4 p-3'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+      >
+        <div className={`flex ${compact ? 'flex-wrap' : ''} items-center gap-2`}>
           <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-sm text-slate-400">Line Type:</span>
-          <div className="flex gap-1">
+          <span className="text-xs text-slate-400">Type:</span>
+          <div className="flex flex-wrap gap-1">
             {(['all', 'MC', 'IC', 'ASC', 'DSC'] as Array<LineTypeFilter>).map((type) => (
               <button
                 key={type}
                 type="button"
                 onClick={() => setLineTypeFilter(type)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
                   lineTypeFilter === type
                     ? 'bg-blue-500 text-white'
                     : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'
@@ -120,20 +127,20 @@ export const ACGLinesTab = memo(function ACGLinesTab({ acgLines }: ACGLinesTabPr
             ))}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className={`flex gap-2 ${compact ? 'justify-end' : ''}`}>
           <button
             type="button"
             onClick={expandAll}
-            className="px-3 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >
-            Expand All
+            {compact ? 'Expand' : 'Expand All'}
           </button>
           <button
             type="button"
             onClick={collapseAll}
-            className="px-3 py-1 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+            className="px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
           >
-            Collapse All
+            {compact ? 'Collapse' : 'Collapse All'}
           </button>
         </div>
       </div>

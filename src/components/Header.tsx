@@ -14,7 +14,12 @@ import {
   X,
 } from 'lucide-react'
 
-export default function Header() {
+interface HeaderProps {
+  /** Minimal mode for immersive views (transparent, centered title only) */
+  minimal?: boolean
+}
+
+export default function Header({ minimal = false }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { isAuthenticated, isLoading } = useConvexAuth()
   const { signOut } = useAuthActions()
@@ -24,6 +29,21 @@ export default function Header() {
     setIsOpen(false)
   }
 
+  // Minimal header for results view - just centered logo/title
+  if (minimal) {
+    return (
+      <header className="p-4 flex items-center justify-center sticky top-0 z-40 bg-slate-900/60 backdrop-blur-sm">
+        <Link to="/" className="flex items-center gap-2 group">
+          <Globe className="w-6 h-6 text-amber-400 group-hover:text-amber-300 transition-colors" />
+          <span className="text-lg font-bold text-white group-hover:text-white/90 transition-colors">
+            Declination Living
+          </span>
+        </Link>
+      </header>
+    )
+  }
+
+  // Full header with navigation
   return (
     <>
       <header className="p-4 flex items-center justify-between bg-slate-900/80 backdrop-blur-sm text-white shadow-lg border-b border-slate-700/50 sticky top-0 z-40">

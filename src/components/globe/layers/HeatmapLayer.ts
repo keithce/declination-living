@@ -123,7 +123,7 @@ const fragmentShader = `
 
 export interface HeatmapOptions {
   /** Planet declinations (latitudes) to highlight */
-  declinations: Record<PlanetId, number>
+  declinations: Partial<Record<PlanetId, number>>
   /** Planet weights for intensity */
   weights: Record<PlanetId, number>
   /** Overall intensity multiplier (0-2) */
@@ -150,8 +150,9 @@ export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
   const hotWeights: Array<number> = []
 
   for (const planet of PLANET_IDS) {
-    if (weights[planet] > 0) {
-      hotLatitudes.push(declinations[planet])
+    const lat = declinations[planet]
+    if (weights[planet] > 0 && lat !== undefined) {
+      hotLatitudes.push(lat)
 
       // Convert hex color to RGB (0-1 range)
       const hexColor = PLANET_COLORS_HEX[planet]
@@ -231,8 +232,9 @@ export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void
   const hotWeights: Array<number> = []
 
   for (const planet of PLANET_IDS) {
-    if (weights[planet] > 0) {
-      hotLatitudes.push(declinations[planet])
+    const lat = declinations[planet]
+    if (weights[planet] > 0 && lat !== undefined) {
+      hotLatitudes.push(lat)
 
       const hexColor = PLANET_COLORS_HEX[planet]
       const r = ((hexColor >> 16) & 0xff) / 255
@@ -244,6 +246,9 @@ export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void
     }
   }
 
+  // Track actual count before padding
+  const actualHotCount = hotLatitudes.length
+
   while (hotLatitudes.length < MAX_HOT_LATITUDES) {
     hotLatitudes.push(0)
     hotColors.push(0, 0, 0)
@@ -254,6 +259,7 @@ export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void
   material.uniforms.uHotLatitudes.value = hotLatitudes
   material.uniforms.uHotColors.value = hotColors.slice(0, MAX_HOT_LATITUDES * 3)
   material.uniforms.uHotWeights.value = hotWeights
+  material.uniforms.uHotCount.value = actualHotCount
   material.uniforms.uIntensity.value = intensity
   material.uniforms.uSigma.value = sigma
   material.needsUpdate = true

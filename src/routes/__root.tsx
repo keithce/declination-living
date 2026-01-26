@@ -12,6 +12,7 @@ import { Compass, Home } from 'lucide-react'
 import Header from '../components/Header'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import ConvexProvider from '../integrations/convex/provider'
+import { HeaderProvider, useHeaderVisibility } from '../contexts/HeaderContext'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import appCss from '../styles.css?url'
@@ -131,6 +132,12 @@ function RootComponent() {
   )
 }
 
+function HeaderWrapper() {
+  const { hideHeader } = useHeaderVisibility()
+  if (hideHeader) return null
+  return <Header />
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -139,10 +146,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-slate-900">
         <ConvexProvider>
-          <Header />
-          <main>
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </main>
+          <HeaderProvider>
+            <HeaderWrapper />
+            <main>
+              <ErrorBoundary>{children}</ErrorBoundary>
+            </main>
+          </HeaderProvider>
           <TanStackDevtools
             config={{
               position: 'bottom-right',

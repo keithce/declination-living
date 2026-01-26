@@ -84,14 +84,24 @@ export const ACG_MAX_LATITUDE = 89.5
 // Paran Calculation Constants
 // =============================================================================
 
-/** Bisection tolerance for paran latitude finding (degrees) */
-export const PARAN_BISECTION_TOL = 0.01
+/**
+ * Bisection tolerance for paran latitude finding (degrees).
+ * Converges within 10⁻⁶ degrees; intentional for precision,
+ * adjust based on profiling if performance is an issue.
+ */
+export const PARAN_BISECTION_TOL = 1e-6
 
-/** Maximum iterations for bisection solver */
-export const PARAN_MAX_ITERATIONS = 50
+/** Maximum bisection iterations for high precision */
+export const PARAN_MAX_ITERATIONS = 100
 
 /** Latitude step for initial paran search (degrees) */
 export const PARAN_LATITUDE_STEP = 0.25
+
+/** Maximum orb for paran strength calculation (degrees of LST difference) */
+export const PARAN_MAX_ORB = 1.0
+
+/** Default strength threshold for filtering weak parans */
+export const PARAN_STRENGTH_THRESHOLD = 0.5
 
 /** Default paran strength when not provided */
 export const DEFAULT_PARAN_STRENGTH = 0.5

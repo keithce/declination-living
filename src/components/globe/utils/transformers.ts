@@ -8,6 +8,7 @@
  * These utilities handle the transformation.
  */
 
+import type { AngularEvent } from '@convex/calculations/core/types'
 import type { ACGLineData, ParanPointData, PlanetId, ZenithLineData } from '../layers/types'
 
 // =============================================================================
@@ -39,9 +40,9 @@ export interface BackendZenithLine {
 /** Backend ParanPoint format */
 export interface BackendParanPoint {
   planet1: PlanetId
-  event1: string
+  event1: AngularEvent
   planet2: PlanetId
-  event2: string
+  event2: AngularEvent
   latitude: number
   strength?: number
 }

@@ -12,7 +12,7 @@ import {
   formatLatitude,
   formatLongitude,
 } from '../shared/constants'
-import type { GridCell } from '@/../convex/calculations/geospatial/grid'
+import type { GridCell } from '@convex/calculations/geospatial/grid'
 
 // =============================================================================
 // Types
@@ -23,13 +23,19 @@ export interface OverviewTabProps {
   scoringGrid: Array<GridCell>
   /** Top N locations to display */
   topN?: number
+  /** Compact mode for narrow panels */
+  compact?: boolean
 }
 
 // =============================================================================
 // Main Component
 // =============================================================================
 
-export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }: OverviewTabProps) {
+export const OverviewTab = memo(function OverviewTab({
+  scoringGrid,
+  topN = 10,
+  compact = false,
+}: OverviewTabProps) {
   // Calculate statistics with empty array handling
   const totalCells = scoringGrid.length
   const scores = scoringGrid.map((c) => c.score)
@@ -63,39 +69,53 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
   }
 
   return (
-    <div className="space-y-6">
+    <div className={compact ? 'space-y-4' : 'space-y-6'}>
       {/* Summary Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <div className="flex items-center gap-2 mb-2">
-            <Globe className="w-4 h-4 text-slate-400" />
+      <div className={`grid ${compact ? 'grid-cols-2 gap-2' : 'grid-cols-2 md:grid-cols-4 gap-4'}`}>
+        <div
+          className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <Globe className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-slate-400`} />
             <span className="text-xs text-slate-500">Grid Cells</span>
           </div>
-          <div className="text-2xl font-bold text-white">{totalCells}</div>
+          <div className={`${compact ? 'text-lg' : 'text-2xl'} font-bold text-white`}>
+            {totalCells}
+          </div>
         </div>
 
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-green-400" />
+        <div
+          className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-green-400`} />
             <span className="text-xs text-slate-500">Max Score</span>
           </div>
-          <div className="text-2xl font-bold text-green-400">{maxScore.toFixed(1)}</div>
+          <div className={`${compact ? 'text-lg' : 'text-2xl'} font-bold text-green-400`}>
+            {maxScore.toFixed(1)}
+          </div>
         </div>
 
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <div className="flex items-center gap-2 mb-2">
-            <MapPin className="w-4 h-4 text-blue-400" />
+        <div
+          className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <MapPin className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-blue-400`} />
             <span className="text-xs text-slate-500">Avg Score</span>
           </div>
-          <div className="text-2xl font-bold text-blue-400">{avgScore.toFixed(1)}</div>
+          <div className={`${compact ? 'text-lg' : 'text-2xl'} font-bold text-blue-400`}>
+            {avgScore.toFixed(1)}
+          </div>
         </div>
 
-        <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
+        <div
+          className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-amber-400`} />
             <span className="text-xs text-slate-500">Top Location</span>
           </div>
-          <div className="text-sm font-mono text-amber-400">
+          <div className={`${compact ? 'text-xs' : 'text-sm'} font-mono text-amber-400`}>
             {topLocations[0]
               ? `${formatLatitude(topLocations[0].lat)}, ${formatLongitude(topLocations[0].lon)}`
               : 'N/A'}
@@ -104,9 +124,13 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
       </div>
 
       {/* Score Distribution */}
-      <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <h3 className="text-sm font-semibold text-white mb-4">Score Distribution</h3>
-        <div className="space-y-3">
+      <div
+        className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+      >
+        <h3 className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-white mb-3`}>
+          Score Distribution
+        </h3>
+        <div className={compact ? 'space-y-2' : 'space-y-3'}>
           {factorPercentages.map(({ factor, count, percentage }) => {
             const entry = factorLabels[factor]
             const { label, color } = entry
@@ -133,8 +157,12 @@ export const OverviewTab = memo(function OverviewTab({ scoringGrid, topN = 10 }:
       </div>
 
       {/* Top Locations */}
-      <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <h3 className="text-sm font-semibold text-white mb-4">Top {topN} Locations</h3>
+      <div
+        className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+      >
+        <h3 className={`${compact ? 'text-xs' : 'text-sm'} font-semibold text-white mb-3`}>
+          Top {topN} Locations
+        </h3>
         <div className="space-y-2">
           {topLocations.map((location, index) => (
             <motion.div

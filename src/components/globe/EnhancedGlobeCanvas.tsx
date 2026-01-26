@@ -275,16 +275,18 @@ export function EnhancedGlobeCanvas({
       layers.zenithBands.dispose()
     }
 
-    // Create zenith line data from declinations
-    const zenithLines = PLANET_IDS.map((planet) => {
-      const lat = declinations[planet]
-      return {
-        planet,
-        latitude: lat,
-        orbMin: lat - 1,
-        orbMax: lat + 1,
-      }
-    })
+    // Create zenith line data from declinations (filter out undefined values)
+    const zenithLines = PLANET_IDS.filter((planet) => declinations[planet] !== undefined).map(
+      (planet) => {
+        const lat = declinations[planet]!
+        return {
+          planet,
+          latitude: lat,
+          orbMin: lat - 1,
+          orbMax: lat + 1,
+        }
+      },
+    )
 
     // Create new layer
     const layer = createZenithBandLayer(zenithLines, globeState.planets)

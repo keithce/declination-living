@@ -11,12 +11,12 @@ import { calculateAllZenithLines } from '../acg/zenith'
 import { generateScoringGrid, getGridStatistics, getTopLocations } from '../geospatial/grid'
 import { scoreLocationForACG, scoreParanProximity } from '../geospatial/search'
 import { calculateAllParans } from '../parans/solver'
-import {
-  PLANET_IDS,
-  type EquatorialCoordinates,
-  type PlanetDeclinations,
-  type PlanetId,
-  type PlanetWeights,
+import { PLANET_IDS } from '../core/types'
+import type {
+  EquatorialCoordinates,
+  PlanetDeclinations,
+  PlanetId,
+  PlanetWeights,
 } from '../core/types'
 
 // =============================================================================

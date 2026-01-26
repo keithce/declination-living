@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { PlanetId } from '@/../convex/calculations/core/types'
+import type { PlanetId } from '@convex/calculations/core/types'
 
 // =============================================================================
 // Types
