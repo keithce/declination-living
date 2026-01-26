@@ -235,6 +235,7 @@ function CalculatorContent() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-display text-xl font-semibold text-white">Save Chart</h3>
                   <button
+                    type="button"
                     onClick={() => setShowSaveModal(false)}
                     className="text-slate-400 hover:text-white transition-colors"
                   >
@@ -256,7 +257,10 @@ function CalculatorContent() {
                     onChange={(e) => setChartName(e.target.value)}
                     placeholder="Enter a name for this chart"
                     className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                    autoFocus
+                    ref={(el) => {
+                      // Focus after animation completes
+                      if (el) setTimeout(() => el.focus(), 100)
+                    }}
                   />
                 </div>
 
@@ -274,12 +278,14 @@ function CalculatorContent() {
 
                 <div className="flex gap-3">
                   <button
+                    type="button"
                     onClick={() => setShowSaveModal(false)}
                     className="flex-1 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 rounded-xl transition-colors"
                   >
                     Cancel
                   </button>
                   <button
+                    type="button"
                     onClick={handleSaveChart}
                     disabled={!chartName.trim() || isSaving}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"

@@ -167,6 +167,7 @@ export interface ParanResult {
     riseCulminate: number
     riseSet: number
     culminateCulminate: number
+    culminateSet: number
     setSet: number
     total: number
   }

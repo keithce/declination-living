@@ -23,6 +23,8 @@ export interface ParansTabProps {
   parans: Array<ParanPoint>
   /** Number of parans to display */
   displayLimit?: number
+  /** Compact mode for narrow panels */
+  compact?: boolean
 }
 
 type EventTypeFilter = 'all' | 'rise' | 'set' | 'culminate' | 'mixed'
@@ -51,7 +53,11 @@ function matchesEventFilter(paran: ParanPoint, filter: EventTypeFilter): boolean
 // Main Component
 // =============================================================================
 
-export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }: ParansTabProps) {
+export const ParansTab = memo(function ParansTab({
+  parans,
+  displayLimit = 100,
+  compact = false,
+}: ParansTabProps) {
   const [eventFilter, setEventFilter] = useState<EventTypeFilter>('all')
   const [selectedPlanet, setSelectedPlanet] = useState<PlanetId | 'all'>('all')
 
@@ -116,39 +122,45 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
   }, [filteredParans])
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? 'space-y-3' : 'space-y-4'}>
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="p-3 rounded-lg bg-slate-800/50">
-          <div className="text-xl font-bold text-white">{summary.total}</div>
-          <div className="text-xs text-slate-500">Total Parans</div>
+        <div className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50`}>
+          <div className={`${compact ? 'text-base' : 'text-xl'} font-bold text-white`}>
+            {summary.total}
+          </div>
+          <div className="text-xs text-slate-500">Total</div>
         </div>
-        <div className="p-3 rounded-lg bg-slate-800/50">
-          <div className="text-xl font-bold text-amber-400">
+        <div className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50`}>
+          <div className={`${compact ? 'text-base' : 'text-xl'} font-bold text-amber-400`}>
             {(summary.riseRise || 0) + (summary.setSet || 0) + (summary.riseSet || 0)}
           </div>
-          <div className="text-xs text-slate-500">Horizon Parans</div>
+          <div className="text-xs text-slate-500">Horizon</div>
         </div>
-        <div className="p-3 rounded-lg bg-slate-800/50">
-          <div className="text-xl font-bold text-blue-400">{summary.culminateCulminate}</div>
-          <div className="text-xs text-slate-500">Meridian Parans</div>
+        <div className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50`}>
+          <div className={`${compact ? 'text-base' : 'text-xl'} font-bold text-blue-400`}>
+            {summary.culminateCulminate}
+          </div>
+          <div className="text-xs text-slate-500">Meridian</div>
         </div>
       </div>
 
       {/* Filter Controls */}
-      <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 space-y-3">
+      <div
+        className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50 border border-slate-700/50 space-y-2`}
+      >
         {/* Event Type Filter */}
-        <div className="flex items-center gap-3">
+        <div className={`flex ${compact ? 'flex-wrap' : ''} items-center gap-2`}>
           <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-sm text-slate-400">Event Type:</span>
-          <div className="flex gap-1">
+          <span className="text-xs text-slate-400">Event:</span>
+          <div className="flex flex-wrap gap-1">
             {(['all', 'rise', 'set', 'culminate', 'mixed'] as Array<EventTypeFilter>).map(
               (type) => (
                 <button
                   key={type}
                   type="button"
                   onClick={() => setEventFilter(type)}
-                  className={`px-3 py-1 text-xs font-medium rounded transition-colors capitalize ${
+                  className={`px-2 py-0.5 text-xs font-medium rounded transition-colors capitalize ${
                     eventFilter === type
                       ? 'bg-blue-500 text-white'
                       : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'
@@ -162,13 +174,13 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
         </div>
 
         {/* Planet Filter */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-400">Planet:</span>
+        <div className={`flex ${compact ? 'flex-wrap' : ''} items-center gap-2`}>
+          <span className="text-xs text-slate-400">Planet:</span>
           <div className="flex gap-1 flex-wrap">
             <button
               type="button"
               onClick={() => setSelectedPlanet('all')}
-              className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+              className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
                 selectedPlanet === 'all'
                   ? 'bg-purple-500 text-white'
                   : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'
@@ -181,7 +193,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
                 key={planet}
                 type="button"
                 onClick={() => setSelectedPlanet(planet)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
                   selectedPlanet === planet
                     ? 'bg-purple-500 text-white'
                     : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'
@@ -192,7 +204,7 @@ export const ParansTab = memo(function ParansTab({ parans, displayLimit = 100 }:
                     : { color: PLANET_COLORS[planet], opacity: 0.7 }
                 }
               >
-                {PLANET_SYMBOLS[planet]} {PLANET_NAMES[planet]}
+                {PLANET_SYMBOLS[planet]}
               </button>
             ))}
           </div>

@@ -23,6 +23,8 @@ export interface ScoringTabProps {
   scoringGrid: Array<GridCell>
   /** Number of rows to display */
   displayLimit?: number
+  /** Compact mode for narrow panels */
+  compact?: boolean
 }
 
 type DominantFactorFilter = 'all' | 'zenith' | 'acg' | 'paran' | 'mixed'
@@ -35,6 +37,7 @@ type SortField = 'score' | 'zenith' | 'acg' | 'paran'
 export const ScoringTab = memo(function ScoringTab({
   scoringGrid,
   displayLimit = 50,
+  compact = false,
 }: ScoringTabProps) {
   const [expandedCells, setExpandedCells] = useState<Set<string>>(new Set())
   const [factorFilter, setFactorFilter] = useState<DominantFactorFilter>('all')
@@ -79,21 +82,23 @@ export const ScoringTab = memo(function ScoringTab({
   }, [scoringGrid, factorFilter, sortField, displayLimit])
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? 'space-y-3' : 'space-y-4'}>
       {/* Filter and Sort Controls */}
-      <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 space-y-3">
+      <div
+        className={`${compact ? 'p-2' : 'p-3'} rounded-lg bg-slate-800/50 border border-slate-700/50 space-y-2`}
+      >
         {/* Factor Filter */}
-        <div className="flex items-center gap-3">
+        <div className={`flex ${compact ? 'flex-wrap' : ''} items-center gap-2`}>
           <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-sm text-slate-400">Factor:</span>
-          <div className="flex gap-1">
+          <span className="text-xs text-slate-400">Factor:</span>
+          <div className="flex flex-wrap gap-1">
             {(['all', 'zenith', 'acg', 'paran', 'mixed'] as Array<DominantFactorFilter>).map(
               (factor) => (
                 <button
                   key={factor}
                   type="button"
                   onClick={() => setFactorFilter(factor)}
-                  className={`px-3 py-1 text-xs font-medium rounded transition-colors capitalize ${
+                  className={`px-2 py-0.5 text-xs font-medium rounded transition-colors capitalize ${
                     factorFilter === factor
                       ? 'bg-blue-500 text-white'
                       : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'
@@ -107,15 +112,15 @@ export const ScoringTab = memo(function ScoringTab({
         </div>
 
         {/* Sort Control */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-400">Sort by:</span>
-          <div className="flex gap-1">
+        <div className={`flex ${compact ? 'flex-wrap' : ''} items-center gap-2`}>
+          <span className="text-xs text-slate-400">Sort:</span>
+          <div className="flex flex-wrap gap-1">
             {(['score', 'zenith', 'acg', 'paran'] as Array<SortField>).map((field) => (
               <button
                 key={field}
                 type="button"
                 onClick={() => setSortField(field)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-colors capitalize ${
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors capitalize ${
                   sortField === field
                     ? 'bg-purple-500 text-white'
                     : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-white'

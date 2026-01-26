@@ -106,6 +106,7 @@ export const paranSummaryValidator = v.object({
   riseCulminate: v.number(),
   riseSet: v.number(),
   culminateCulminate: v.number(),
+  culminateSet: v.number(),
   setSet: v.number(),
   total: v.number(),
 })

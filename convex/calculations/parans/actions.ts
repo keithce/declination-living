@@ -6,9 +6,26 @@
 
 import { v } from 'convex/values'
 import { internalAction } from '../../_generated/server'
-import { equatorialPositionValidator, paranResultValidator, planetIdValidator } from '../validators'
+import {
+  equatorialPositionValidator,
+  paranPointValidator,
+  paranResultValidator,
+} from '../validators'
 import { findAllParans, getParanStatistics, getParansAtLatitude, getTopParans } from './catalog'
 import type { PlanetPosition } from './catalog'
+
+// =============================================================================
+// Paran Statistics Validator
+// =============================================================================
+
+const paranStatisticsValidator = v.object({
+  total: v.number(),
+  averageStrength: v.number(),
+  medianStrength: v.number(),
+  latitudeRange: v.object({ min: v.number(), max: v.number() }),
+  strongestParan: v.union(paranPointValidator, v.null()),
+  byHemisphere: v.object({ northern: v.number(), southern: v.number() }),
+})
 
 // =============================================================================
 // Calculate Parans Action
@@ -26,6 +43,11 @@ export const calculateParans = internalAction({
     strengthThreshold: v.optional(v.number()),
     topLimit: v.optional(v.number()),
   },
+  returns: v.object({
+    parans: paranResultValidator,
+    topParans: v.array(paranPointValidator),
+    statistics: paranStatisticsValidator,
+  }),
   handler: async (_ctx, args) => {
     const threshold = args.strengthThreshold ?? 0.5
     const limit = args.topLimit ?? 50

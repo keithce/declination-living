@@ -74,6 +74,93 @@ function getLSTDifferenceAtLatitude(
 }
 
 // =============================================================================
+// Bisection Helper
+// =============================================================================
+
+/** Sample point for bisection */
+interface BisectionSample {
+  lat: number
+  diff: number
+  et1: EventTime
+  et2: EventTime
+}
+
+/** Result of bisection convergence */
+interface BisectionConvergenceResult {
+  latitude: number
+  result: { diff: number; et1: EventTime; et2: EventTime }
+}
+
+/**
+ * Shared bisection helper that converges on the zero-crossing latitude.
+ *
+ * @param a - Lower bound latitude
+ * @param b - Upper bound latitude
+ * @param s1 - Sample at lower bound
+ * @param getDiff - Callback to get LST difference at a latitude
+ * @param useQuarterFallback - Whether to try quarter-point fallback on null midpoint
+ * @param s2Diff - Upper bound diff (needed for quarter fallback)
+ * @returns Convergence result or null if failed
+ */
+function bisectToConvergence(
+  a: number,
+  b: number,
+  s1: BisectionSample,
+  getDiff: (lat: number) => { diff: number; et1: EventTime; et2: EventTime } | null,
+  useQuarterFallback: boolean = false,
+  s2Diff?: number,
+): BisectionConvergenceResult | null {
+  let currentA = a
+  let currentB = b
+  let aResult = s1
+  let iterations = 0
+
+  while (iterations < PARAN_MAX_ITERATIONS && currentB - currentA > PARAN_BISECTION_TOL) {
+    const mid = (currentA + currentB) / 2
+    const midResult = getDiff(mid)
+
+    if (midResult === null) {
+      if (useQuarterFallback && s2Diff !== undefined) {
+        // Try quarter points to find valid side
+        const quarterLow = (currentA + mid) / 2
+        const quarterHigh = (mid + currentB) / 2
+
+        const lowResult = getDiff(quarterLow)
+        const highResult = getDiff(quarterHigh)
+
+        if (lowResult !== null && lowResult.diff * s1.diff <= 0) {
+          currentB = mid
+        } else if (highResult !== null && highResult.diff * s2Diff <= 0) {
+          currentA = mid
+        } else {
+          break
+        }
+      } else {
+        break
+      }
+    } else {
+      if (aResult.diff * midResult.diff <= 0) {
+        currentB = mid
+      } else {
+        currentA = mid
+        aResult = { lat: mid, ...midResult }
+      }
+    }
+
+    iterations++
+  }
+
+  const finalLat = (currentA + currentB) / 2
+  const finalResult = getDiff(finalLat)
+
+  if (finalResult !== null) {
+    return { latitude: finalLat, result: finalResult }
+  }
+
+  return null
+}
+
+// =============================================================================
 // Bisection Solver
 // =============================================================================
 
@@ -105,11 +192,13 @@ export function findParanLatitude(
   latLow: number = -85,
   latHigh: number = 85,
 ): ParanSearchResult | null {
+  const getDiff = (lat: number) => getLSTDifferenceAtLatitude(lat, planet1, event1, planet2, event2)
+
   // Sample the latitude range to find potential paran locations
-  const samples: Array<{ lat: number; diff: number; et1: EventTime; et2: EventTime }> = []
+  const samples: Array<BisectionSample> = []
 
   for (let lat = latLow; lat <= latHigh; lat += PARAN_LATITUDE_STEP) {
-    const result = getLSTDifferenceAtLatitude(lat, planet1, event1, planet2, event2)
+    const result = getDiff(lat)
     if (result !== null) {
       samples.push({ lat, ...result })
     }
@@ -128,61 +217,15 @@ export function findParanLatitude(
     const hasSignChange = s1.diff * s2.diff < 0 && Math.abs(s1.diff) < 90 && Math.abs(s2.diff) < 90
 
     if (hasSignChange) {
-      // Bisection search for exact latitude
-      let a = s1.lat
-      let b = s2.lat
-      let iterations = 0
+      const convergence = bisectToConvergence(s1.lat, s2.lat, s1, getDiff, true, s2.diff)
 
-      while (iterations < PARAN_MAX_ITERATIONS && b - a > PARAN_BISECTION_TOL) {
-        const mid = (a + b) / 2
-        const midResult = getLSTDifferenceAtLatitude(mid, planet1, event1, planet2, event2)
-
-        if (midResult === null) {
-          // Event became impossible at midpoint - narrow from both sides
-          // Try to find which side is still valid
-          const quarterLow = (a + mid) / 2
-          const quarterHigh = (mid + b) / 2
-
-          const lowResult = getLSTDifferenceAtLatitude(quarterLow, planet1, event1, planet2, event2)
-          const highResult = getLSTDifferenceAtLatitude(
-            quarterHigh,
-            planet1,
-            event1,
-            planet2,
-            event2,
-          )
-
-          if (lowResult !== null && lowResult.diff * s1.diff <= 0) {
-            b = mid
-          } else if (highResult !== null && highResult.diff * s2.diff <= 0) {
-            a = mid
-          } else {
-            // Can't continue bisection
-            break
-          }
-        } else {
-          // Normal bisection
-          if (s1.diff * midResult.diff <= 0) {
-            b = mid
-          } else {
-            a = mid
-          }
-        }
-
-        iterations++
-      }
-
-      // Get final result at converged latitude
-      const finalLat = (a + b) / 2
-      const finalResult = getLSTDifferenceAtLatitude(finalLat, planet1, event1, planet2, event2)
-
-      if (finalResult !== null) {
-        const strength = calculateParanStrength(finalResult.diff)
+      if (convergence !== null) {
+        const strength = calculateParanStrength(convergence.result.diff)
         return {
-          latitude: finalLat,
-          timeDifference: finalResult.diff,
-          event1: finalResult.et1,
-          event2: finalResult.et2,
+          latitude: convergence.latitude,
+          timeDifference: convergence.result.diff,
+          event1: convergence.result.et1,
+          event2: convergence.result.et2,
           strength,
         }
       }
@@ -234,12 +277,13 @@ function findAllParansInRange(
   latHigh: number,
 ): Array<ParanSearchResult> {
   const results: Array<ParanSearchResult> = []
+  const getDiff = (lat: number) => getLSTDifferenceAtLatitude(lat, planet1, event1, planet2, event2)
 
   // Sample the latitude range
-  const samples: Array<{ lat: number; diff: number; et1: EventTime; et2: EventTime }> = []
+  const samples: Array<BisectionSample> = []
 
   for (let lat = latLow; lat <= latHigh; lat += PARAN_LATITUDE_STEP) {
-    const result = getLSTDifferenceAtLatitude(lat, planet1, event1, planet2, event2)
+    const result = getDiff(lat)
     if (result !== null) {
       samples.push({ lat, ...result })
     }
@@ -258,40 +302,15 @@ function findAllParansInRange(
     const hasSignChange = s1.diff * s2.diff < 0 && Math.abs(s1.diff) < 90 && Math.abs(s2.diff) < 90
 
     if (hasSignChange) {
-      // Bisection for this interval
-      let a = s1.lat
-      let b = s2.lat
-      let aResult = s1
-      let iterations = 0
+      const convergence = bisectToConvergence(s1.lat, s2.lat, s1, getDiff)
 
-      while (iterations < PARAN_MAX_ITERATIONS && b - a > PARAN_BISECTION_TOL) {
-        const mid = (a + b) / 2
-        const midResult = getLSTDifferenceAtLatitude(mid, planet1, event1, planet2, event2)
-
-        if (midResult === null) {
-          break
-        }
-
-        if (aResult.diff * midResult.diff <= 0) {
-          b = mid
-        } else {
-          a = mid
-          aResult = { lat: mid, ...midResult }
-        }
-
-        iterations++
-      }
-
-      const finalLat = (a + b) / 2
-      const finalResult = getLSTDifferenceAtLatitude(finalLat, planet1, event1, planet2, event2)
-
-      if (finalResult !== null) {
-        const strength = calculateParanStrength(finalResult.diff)
+      if (convergence !== null) {
+        const strength = calculateParanStrength(convergence.result.diff)
         results.push({
-          latitude: finalLat,
-          timeDifference: finalResult.diff,
-          event1: finalResult.et1,
-          event2: finalResult.et2,
+          latitude: convergence.latitude,
+          timeDifference: convergence.result.diff,
+          event1: convergence.result.et1,
+          event2: convergence.result.et2,
           strength,
         })
       }
@@ -324,5 +343,6 @@ export function calculateParanStrength(
   if (absDiff >= maxOrb) {
     return 0
   }
+  // Clamp guards against floating-point drift that could push value slightly outside [0,1]
   return clamp(1 - absDiff / maxOrb, 0, 1)
 }

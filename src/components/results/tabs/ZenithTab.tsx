@@ -24,6 +24,8 @@ export interface ZenithTabProps {
   zenithLines: Array<ZenithLine>
   /** Initial orb value */
   initialOrb?: number
+  /** Compact mode for narrow panels */
+  compact?: boolean
 }
 
 // =============================================================================
@@ -33,6 +35,7 @@ export interface ZenithTabProps {
 export const ZenithTab = memo(function ZenithTab({
   zenithLines,
   initialOrb = 1.0,
+  compact = false,
 }: ZenithTabProps) {
   const [orb, setOrb] = useState(initialOrb)
 
@@ -46,14 +49,16 @@ export const ZenithTab = memo(function ZenithTab({
   const normalLines = sortedLines.filter((line) => Math.abs(line.declination) <= APPROX_OBLIQUITY)
 
   return (
-    <div className="space-y-4">
+    <div className={compact ? 'space-y-3' : 'space-y-4'}>
       {/* Orb Control */}
-      <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-        <div className="flex items-center justify-between mb-3">
-          <label htmlFor="zenith-orb-range" className="text-sm font-medium text-white">
-            Zenith Band Orb
+      <div
+        className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/50 border border-slate-700/50`}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <label htmlFor="zenith-orb-range" className="text-xs font-medium text-white">
+            Band Orb
           </label>
-          <span className="text-sm font-mono text-blue-400">{orb.toFixed(1)}°</span>
+          <span className="text-xs font-mono text-blue-400">{orb.toFixed(1)}°</span>
         </div>
         <input
           id="zenith-orb-range"
@@ -65,23 +70,18 @@ export const ZenithTab = memo(function ZenithTab({
           onChange={(e) => setOrb(Number.parseFloat(e.target.value))}
           className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
         />
-        <div className="flex justify-between text-xs text-slate-500 mt-1">
-          <span>0.5°</span>
-          <span>5.0°</span>
-        </div>
       </div>
 
       {/* Out of Bounds Section */}
       {oobLines.length > 0 && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
-          <div className="flex items-center gap-2 mb-3">
+        <div
+          className={`rounded-lg border border-amber-500/30 bg-amber-500/5 ${compact ? 'p-2' : 'p-4'}`}
+        >
+          <div className="flex items-center gap-2 mb-2">
             <Zap className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-medium text-amber-400">
-              Out of Bounds Planets ({oobLines.length})
+            <span className="text-xs font-medium text-amber-400">
+              OOB Planets ({oobLines.length})
             </span>
-          </div>
-          <div className="text-xs text-slate-500 mb-3">
-            Declination exceeds ±{APPROX_OBLIQUITY.toFixed(2)}° (obliquity of the ecliptic)
           </div>
           <div className="space-y-2">
             {oobLines.map((line, index) => {
@@ -95,28 +95,31 @@ export const ZenithTab = memo(function ZenithTab({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="p-3 rounded bg-slate-800/50"
+                  className={`${compact ? 'p-2' : 'p-3'} rounded bg-slate-800/50`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl" style={{ color: PLANET_COLORS[line.planet] }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={compact ? 'text-base' : 'text-xl'}
+                        style={{ color: PLANET_COLORS[line.planet] }}
+                      >
                         {PLANET_SYMBOLS[line.planet]}
                       </span>
                       <div>
-                        <div className="text-white font-medium">{PLANET_NAMES[line.planet]}</div>
-                        <div className="text-xs text-amber-400">
-                          +{oobDegrees.toFixed(2)}° beyond limit
+                        <div className="text-white text-sm font-medium">
+                          {PLANET_NAMES[line.planet]}
                         </div>
+                        <div className="text-xs text-amber-400">+{oobDegrees.toFixed(1)}° OOB</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-mono">
+                      <div className="text-white text-sm font-mono">
                         {formatDeclination(line.declination)}
                       </div>
+                      <div className="text-xs text-slate-500">
+                        {formatLatitude(orbMin)} to {formatLatitude(orbMax)}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-xs text-slate-400">
-                    Band: {formatLatitude(orbMin)} to {formatLatitude(orbMax)}
                   </div>
                 </motion.div>
               )
@@ -137,17 +140,24 @@ export const ZenithTab = memo(function ZenithTab({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: (index + oobLines.length) * 0.03 }}
-              className="p-4 rounded-lg bg-slate-800/30 hover:bg-slate-700/30 transition-colors"
+              className={`${compact ? 'p-2' : 'p-4'} rounded-lg bg-slate-800/30 hover:bg-slate-700/30 transition-colors`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl" style={{ color: PLANET_COLORS[line.planet] }}>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={compact ? 'text-base' : 'text-xl'}
+                    style={{ color: PLANET_COLORS[line.planet] }}
+                  >
                     {PLANET_SYMBOLS[line.planet]}
                   </span>
-                  <span className="text-white font-medium">{PLANET_NAMES[line.planet]}</span>
+                  <span className="text-white text-sm font-medium">
+                    {PLANET_NAMES[line.planet]}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <div className="text-white font-mono">{formatDeclination(line.declination)}</div>
+                  <div className="text-white text-sm font-mono">
+                    {formatDeclination(line.declination)}
+                  </div>
                   <div className="text-xs text-slate-500">
                     {formatLatitude(orbMin)} to {formatLatitude(orbMax)}
                   </div>
@@ -156,11 +166,6 @@ export const ZenithTab = memo(function ZenithTab({
             </motion.div>
           )
         })}
-      </div>
-
-      {/* Info Footer */}
-      <div className="text-xs text-slate-500 text-center">
-        Zenith lines show where each planet passes directly overhead
       </div>
     </div>
   )

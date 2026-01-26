@@ -37,10 +37,6 @@ import { planetDeclinationsValidator, planetWeightsValidator } from './validator
 import type { EquatorialCoordinates, PlanetId } from './core/types'
 
 // =============================================================================
-// Validators (imported from shared)
-// =============================================================================
-
-// =============================================================================
 // Result Types
 // =============================================================================
 
@@ -80,6 +76,7 @@ interface ParanSummary {
   riseCulminate: number
   riseSet: number
   culminateCulminate: number
+  culminateSet: number
   setSet: number
   total: number
 }

@@ -11,7 +11,6 @@ import {
   groupParansByLatitude,
   groupParansByPlanetPair,
 } from '../catalog'
-import { PARAN_STRENGTH_THRESHOLD } from '../../core/constants'
 import type { PlanetPosition } from '../catalog'
 
 describe('Paran Catalog', () => {

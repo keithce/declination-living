@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { calculateParanStrength, findAllParansForPair, findParanLatitude } from '../bisection'
-import { PARAN_BISECTION_TOL, PARAN_MAX_ORB } from '../../core/constants'
+import { PARAN_MAX_ORB } from '../../core/constants'
 import type { PlanetId } from '../../core/types'
 
 describe('Paran Bisection Solver', () => {
@@ -92,11 +92,15 @@ describe('Paran Bisection Solver', () => {
       )
 
       // May or may not find a result depending on latitude range
-      // The test validates the function handles extreme cases
+      // The test validates the function handles extreme cases gracefully
       if (result !== null) {
-        expect(result.latitude).toBeDefined()
+        // If a result is found, it must have valid structure
+        expect(result.latitude).toBeGreaterThanOrEqual(60)
+        expect(result.latitude).toBeLessThanOrEqual(85)
+        expect(result.strength).toBeDefined()
       }
-      expect(true).toBe(true) // Test passes regardless of result
+      // Function should return null or valid result, never throw
+      expect(result === null || typeof result.latitude === 'number').toBe(true)
     })
 
     it('handles circumpolar cases gracefully', () => {
@@ -146,7 +150,15 @@ describe('Paran Bisection Solver', () => {
       const planet2 = { planetId: 'venus' as PlanetId, ra: 100, dec: 15 }
       const results = findAllParansForPair(planet1, planet2)
 
-      // If any parans are found, they should have event types
+      const validEvents = new Set(['rise', 'set', 'culminate', 'anti_culminate'])
+
+      // All parans must have valid event types
+      for (const paran of results) {
+        expect(validEvents.has(paran.event1.event)).toBe(true)
+        expect(validEvents.has(paran.event2.event)).toBe(true)
+      }
+
+      // If parans found, verify we got multiple event types
       if (results.length > 0) {
         const eventTypes = new Set<string>()
         for (const paran of results) {
@@ -155,17 +167,16 @@ describe('Paran Bisection Solver', () => {
         }
         expect(eventTypes.size).toBeGreaterThan(0)
       }
-      // Otherwise, the test passes (no parans found is valid)
-      expect(true).toBe(true)
     })
 
-    it('returns empty array when planets are identical', () => {
-      // Same planet data should yield parans
+    it('returns empty array when planets are identical (degenerate case)', () => {
+      // Identical planets have same RA/Dec, so events occur at same time
+      // No meaningful parans can be found
       const results = findAllParansForPair(sun, sun)
 
-      // All events occur at same time for same planet
-      // This is a degenerate case
-      expect(results.length).toBeGreaterThanOrEqual(0)
+      // Degenerate case should return empty or minimal results
+      // since all event combinations occur at all latitudes simultaneously
+      expect(results.length).toBe(0)
     })
   })
 

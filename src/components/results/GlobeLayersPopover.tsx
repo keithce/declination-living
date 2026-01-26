@@ -26,39 +26,50 @@ interface GlobeLayersPopoverProps {
 export function GlobeLayersPopover({ globeState }: GlobeLayersPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
-  // Close on click outside
+  // Combined effect for event listeners and focus management
   useEffect(() => {
     if (!isOpen) return
+
+    // Focus the popover when opened
+    const firstFocusable = popoverRef.current?.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    )
+    if (firstFocusable) {
+      firstFocusable.focus()
+    } else {
+      popoverRef.current?.focus()
+    }
 
     function handleClickOutside(event: MouseEvent) {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setIsOpen(false)
+        triggerRef.current?.focus()
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+        triggerRef.current?.focus()
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen])
+    document.addEventListener('keydown', handleKeyDown)
 
-  // Close on escape key
-  useEffect(() => {
-    if (!isOpen) return
-
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-      }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen])
 
   return (
     <div ref={popoverRef} className="relative">
       {/* Trigger Button */}
       <motion.button
+        ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`

@@ -1,17 +1,27 @@
 /**
- * Floating Data Panel - Right-side collapsible panel for results data.
+ * Floating Data Panel - Right-side collapsible and resizable panel for results data.
  *
  * Contains birth summary, declinations, results, enhanced analysis, and actions.
- * Glass-morphism styling with collapse/expand functionality.
+ * Glass-morphism styling with collapse/expand and resize functionality.
  */
 
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Edit3, Loader2, Save, Settings, Sparkles } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  GripVertical,
+  Loader2,
+  Save,
+  Settings,
+  Sparkles,
+} from 'lucide-react'
 import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
 import type { Declinations } from '@/components/calculator/DeclinationTable'
+import type { Phase2Data } from '@/components/results/FullPageGlobeLayout'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
 
@@ -43,7 +53,7 @@ interface FloatingDataPanelProps {
   /** Calculation result */
   result: CalculationResult
   /** Phase 2 enhanced data */
-  phase2Data: any | null
+  phase2Data: Phase2Data | null
   /** Current weights */
   weights: PlanetWeights
   /** Globe state for ResultsTabs */
@@ -61,6 +71,15 @@ interface FloatingDataPanelProps {
 }
 
 // =============================================================================
+// Constants
+// =============================================================================
+
+const MIN_PANEL_WIDTH = 280
+const MAX_PANEL_WIDTH = 600
+const DEFAULT_PANEL_WIDTH = 384 // lg:w-96 = 24rem = 384px
+const STORAGE_KEY = 'declination-panel-width'
+
+// =============================================================================
 // Sub-components
 // =============================================================================
 
@@ -72,6 +91,7 @@ function BirthSummary({ birthData, onEdit }: { birthData: BirthData; onEdit: () 
           Birth Data
         </h3>
         <button
+          type="button"
           onClick={onEdit}
           className="flex items-center gap-1 px-2 py-1 text-xs text-amber-400 hover:text-amber-300 hover:bg-slate-800/50 rounded transition-colors"
         >
@@ -153,6 +173,52 @@ export function FloatingDataPanel({
 }: FloatingDataPanelProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [showWeights, setShowWeights] = useState(false)
+  const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH)
+  const isResizing = useRef(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Load saved width from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      const width = Number.parseInt(saved, 10)
+      if (width >= MIN_PANEL_WIDTH && width <= MAX_PANEL_WIDTH) {
+        setPanelWidth(width)
+      }
+    }
+  }, [])
+
+  // Save width to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, panelWidth.toString())
+  }, [panelWidth])
+
+  // Handle resize
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing.current) return
+    const newWidth = window.innerWidth - e.clientX
+    setPanelWidth(Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, newWidth)))
+  }, [])
+
+  const handleMouseUp = useCallback(() => {
+    isResizing.current = false
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }, [handleMouseMove])
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault()
+      isResizing.current = true
+      document.body.style.cursor = 'col-resize'
+      document.body.style.userSelect = 'none'
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    },
+    [handleMouseMove, handleMouseUp],
+  )
 
   return (
     <>
@@ -160,36 +226,37 @@ export function FloatingDataPanel({
       <motion.button
         type="button"
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className={`
-          fixed z-20 top-1/2 -translate-y-1/2
-          w-6 h-16 flex items-center justify-center
-          bg-slate-800/90 backdrop-blur-sm border border-slate-700/50
-          text-slate-300 hover:text-white hover:bg-slate-700/90
-          transition-all shadow-lg
-          ${isCollapsed ? 'right-0 rounded-l-lg' : 'right-80 lg:right-96 rounded-l-lg'}
-        `}
-        style={{ top: 'calc(50% + 28px)' }}
+        className="fixed z-20 -translate-y-1/2 w-6 h-16 flex items-center justify-center bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 text-slate-300 hover:text-white hover:bg-slate-700/90 transition-all shadow-lg rounded-l-lg"
+        style={{
+          top: '50%',
+          right: isCollapsed ? 0 : panelWidth,
+        }}
         aria-label={isCollapsed ? 'Expand panel' : 'Collapse panel'}
-        layout
       >
         {isCollapsed ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </motion.button>
 
       {/* Panel */}
       <motion.aside
-        className={`
-          fixed top-[56px] right-0 bottom-0 z-20
-          w-80 lg:w-96
-          bg-slate-900/85 backdrop-blur-md border-l border-slate-700/50
-          flex flex-col overflow-hidden
-          shadow-2xl
-        `}
+        ref={panelRef}
+        className="fixed top-0 right-0 bottom-0 z-20 bg-slate-900/85 backdrop-blur-md border-l border-slate-700/50 flex flex-col overflow-hidden shadow-2xl"
+        style={{ width: panelWidth }}
         initial={false}
         animate={{
           x: isCollapsed ? '100%' : 0,
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       >
+        {/* Resize Handle */}
+        <div
+          className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-amber-500/50 active:bg-amber-500/70 transition-colors z-10 group"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-3 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <GripVertical className="w-3 h-3 text-slate-500" />
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-900/50">
           <h2 className="font-display text-lg font-semibold text-white">Results</h2>
@@ -260,7 +327,7 @@ export function FloatingDataPanel({
 
           {/* Enhanced Analysis (Phase 2) */}
           {phase2Data && (
-            <div className="p-4 border-b border-slate-700/50">
+            <div className="px-4 py-3 border-b border-slate-700/50">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
@@ -273,6 +340,7 @@ export function FloatingDataPanel({
                 parans={phase2Data.parans}
                 scoringGrid={phase2Data.scoringGrid}
                 globeState={globeState}
+                compact
               />
             </div>
           )}
@@ -280,6 +348,7 @@ export function FloatingDataPanel({
           {/* Weights Adjuster */}
           <div className="p-4 border-b border-slate-700/50">
             <button
+              type="button"
               onClick={() => setShowWeights(!showWeights)}
               className="flex items-center gap-2 w-full text-left"
             >
@@ -312,12 +381,14 @@ export function FloatingDataPanel({
         {/* Actions Footer */}
         <div className="p-4 border-t border-slate-700/50 bg-slate-900/50 space-y-2">
           <button
+            type="button"
             onClick={onModifyWeights}
             className="w-full px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors text-sm"
           >
             Modify Weights
           </button>
           <button
+            type="button"
             onClick={onSaveChart}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-lg hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] transition-all text-sm"
           >

@@ -4,10 +4,42 @@
  * Phase 3 implementation: high-precision paran finding with modular architecture.
  */
 
-// Core paran functionality (new modular API)
-export * from './events'
-export * from './bisection'
-export * from './catalog'
+// Events module - event time calculations
+export {
+  calculateRiseTime,
+  calculateSetTime,
+  calculateCulminateTime,
+  calculateAntiCulminateTime,
+  calculateAllEventTimes,
+  calculateEventTime,
+  lstDifference,
+  lstAbsDifference,
+  type EventTime,
+} from './events'
+
+// Bisection module - paran latitude finding
+export {
+  findParanLatitude,
+  findAllParansForPair,
+  calculateParanStrength,
+  type PlanetData,
+  type ParanSearchResult,
+} from './bisection'
+
+// Catalog module - paran catalog generation and querying
+export {
+  findAllParans,
+  getTopParans,
+  getParansForPlanet,
+  getParansAtLatitude,
+  getParansByEvent,
+  getParansByStrength,
+  groupParansByLatitude,
+  groupParansByPlanetPair,
+  groupParansByEventType,
+  getParanStatistics,
+  type PlanetPosition,
+} from './catalog'
 
 // Backward compatible exports from solver (legacy API that takes ParanPoint[] arrays)
 // These are explicitly named to avoid conflicts with catalog.ts exports
@@ -16,7 +48,6 @@ export {
   calculateAllParans,
   // Re-exports from catalog with different names
   calculateAllParansNew,
-  getParanStatistics,
   // Legacy query functions (take ParanPoint[] arrays)
   getParansNearLatitude,
   getParansForPlanet as getParansForPlanetLegacy,

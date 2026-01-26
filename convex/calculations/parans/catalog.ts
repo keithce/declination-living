@@ -9,9 +9,9 @@
 
 import { PLANET_IDS } from '../core/types'
 import { PARAN_STRENGTH_THRESHOLD } from '../core/constants'
-import { calculateParanStrength, findAllParansForPair } from './bisection'
+import { findAllParansForPair } from './bisection'
 import type { AngularEvent, ParanPoint, ParanResult, PlanetId } from '../core/types'
-import type { ParanSearchResult, PlanetData } from './bisection'
+import type { PlanetData } from './bisection'
 
 // =============================================================================
 // Types
@@ -22,8 +22,6 @@ export interface PlanetPosition {
   ra: number
   dec: number
 }
-
-const ANGULAR_EVENTS: Array<AngularEvent> = ['rise', 'set', 'culminate', 'anti_culminate']
 
 // =============================================================================
 // Main Catalog Generation
@@ -50,6 +48,7 @@ export function findAllParans(
   let riseCulminate = 0
   let riseSet = 0
   let culminateCulminate = 0
+  let culminateSet = 0
   let setSet = 0
 
   // Build position map for quick lookup
@@ -103,6 +102,7 @@ export function findAllParans(
           riseCulminate: () => riseCulminate++,
           riseSet: () => riseSet++,
           culminateCulminate: () => culminateCulminate++,
+          culminateSet: () => culminateSet++,
           setSet: () => setSet++,
         })
       }
@@ -119,6 +119,7 @@ export function findAllParans(
       riseCulminate,
       riseSet,
       culminateCulminate,
+      culminateSet,
       setSet,
       total: points.length,
     },
@@ -127,6 +128,14 @@ export function findAllParans(
 
 /**
  * Helper to categorize event pairs for summary.
+ *
+ * Categories:
+ * - riseRise: rise + rise
+ * - riseCulminate: rise + (culminate | anti_culminate)
+ * - riseSet: rise + set
+ * - culminateCulminate: (culminate | anti_culminate) + (culminate | anti_culminate)
+ * - culminateSet: (culminate | anti_culminate) + set
+ * - setSet: set + set
  */
 function updateSummaryCount(
   e1: AngularEvent,
@@ -136,27 +145,25 @@ function updateSummaryCount(
     riseCulminate: () => void
     riseSet: () => void
     culminateCulminate: () => void
+    culminateSet: () => void
     setSet: () => void
   },
 ): void {
   // Normalize to handle symmetry
   const events = [e1, e2].sort()
 
+  const isCulminationType = (e: AngularEvent) => e === 'culminate' || e === 'anti_culminate'
+
   if (events[0] === 'rise' && events[1] === 'rise') {
     counters.riseRise()
-  } else if (
-    (events[0] === 'culminate' && events[1] === 'rise') ||
-    (events[0] === 'anti_culminate' && events[1] === 'rise')
-  ) {
+  } else if (events[0] === 'rise' && isCulminationType(events[1])) {
     counters.riseCulminate()
   } else if (events[0] === 'rise' && events[1] === 'set') {
     counters.riseSet()
-  } else if (
-    (events[0] === 'culminate' && events[1] === 'culminate') ||
-    (events[0] === 'anti_culminate' && events[1] === 'anti_culminate') ||
-    (events[0] === 'anti_culminate' && events[1] === 'culminate')
-  ) {
+  } else if (isCulminationType(events[0]) && isCulminationType(events[1])) {
     counters.culminateCulminate()
+  } else if (isCulminationType(events[0]) && events[1] === 'set') {
+    counters.culminateSet()
   } else if (events[0] === 'set' && events[1] === 'set') {
     counters.setSet()
   }

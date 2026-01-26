@@ -11,7 +11,8 @@
  */
 
 import { ANGULAR_EVENT_NAMES, PLANET_IDS } from '../core/types'
-import { findAllParans as findAllParansNew, getParanStatistics } from './catalog'
+import { PARAN_STRENGTH_THRESHOLD } from '../core/constants'
+import { findAllParans as findAllParansNew, groupParansByLatitude } from './catalog'
 import type {
   AngularEvent,
   EquatorialCoordinates,
@@ -58,20 +59,38 @@ export interface DetailedParanPoint extends ParanPoint {
  * Wraps the new modular implementation to maintain the same interface.
  *
  * @param positions - Equatorial positions for all planets
+ * @param threshold - Minimum strength threshold (default: PARAN_STRENGTH_THRESHOLD)
  * @returns Complete paran result
  */
 export function calculateAllParans(
   positions: Record<PlanetId, EquatorialCoordinates>,
+  threshold: number = PARAN_STRENGTH_THRESHOLD,
 ): ParanResult {
-  // Convert Record to array format expected by new implementation
-  const positionArray: Array<PlanetPosition> = PLANET_IDS.map((planetId) => ({
-    planetId,
-    ra: positions[planetId].ra,
-    dec: positions[planetId].dec,
-  }))
+  // Validate input: ensure all planets have valid positions
+  const positionArray: Array<PlanetPosition> = []
 
-  // Use new implementation with default threshold
-  return findAllParansNew(positionArray, 0.5)
+  for (const planetId of PLANET_IDS) {
+    const pos = positions[planetId]
+    if (!pos) {
+      throw new Error(`Missing position data for planet: ${planetId}`)
+    }
+    if (typeof pos.ra !== 'number' || typeof pos.dec !== 'number') {
+      throw new Error(`Invalid position data for planet ${planetId}: ra and dec must be numbers`)
+    }
+    if (!Number.isFinite(pos.ra) || !Number.isFinite(pos.dec)) {
+      throw new Error(
+        `Invalid position data for planet ${planetId}: ra and dec must be finite numbers`,
+      )
+    }
+    positionArray.push({
+      planetId,
+      ra: pos.ra,
+      dec: pos.dec,
+    })
+  }
+
+  // Use new implementation with threshold
+  return findAllParansNew(positionArray, threshold)
 }
 
 // =============================================================================
@@ -137,6 +156,7 @@ export function getStrongestParans(
 
 /**
  * Group parans into latitude bands for visualization.
+ * Delegates to catalog implementation for consistency.
  *
  * @param parans - Array of paran points
  * @param bandSize - Size of each band in degrees
@@ -146,18 +166,22 @@ export function groupParansByLatitudeBand(
   parans: Array<ParanPoint>,
   bandSize: number = 5,
 ): Map<number, Array<ParanPoint>> {
-  const bands = new Map<number, Array<ParanPoint>>()
-
-  for (const paran of parans) {
-    const bandCenter = Math.round(paran.latitude / bandSize) * bandSize
-
-    if (!bands.has(bandCenter)) {
-      bands.set(bandCenter, [])
-    }
-    bands.get(bandCenter)!.push(paran)
-  }
-
-  return bands
+  // Wrap array in ParanResult format for catalog function
+  return groupParansByLatitude(
+    {
+      points: parans,
+      summary: {
+        riseRise: 0,
+        riseCulminate: 0,
+        riseSet: 0,
+        culminateCulminate: 0,
+        culminateSet: 0,
+        setSet: 0,
+        total: parans.length,
+      },
+    },
+    bandSize,
+  )
 }
 
 // =============================================================================
