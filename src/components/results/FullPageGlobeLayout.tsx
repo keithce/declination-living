@@ -15,7 +15,7 @@ import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { Declinations } from '@/components/calculator/DeclinationTable'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
-import type { BackendACGLine, BackendParanPoint } from '@/components/globe/utils'
+import type { BackendACGLine } from '@/components/globe/utils'
 import type { PlanetId } from '@/components/globe/layers/types'
 import type { GridCell } from '@/../convex/calculations/geospatial/grid'
 import type { ParanPoint, ZenithLine } from '@/../convex/calculations/core/types'
@@ -122,10 +122,7 @@ export function FullPageGlobeLayout({
     [phase2Data?.acgLines],
   )
   const transformedParans = useMemo(
-    () =>
-      phase2Data?.parans
-        ? transformParans(phase2Data.parans as unknown as Array<BackendParanPoint>)
-        : [],
+    () => (phase2Data?.parans ? transformParans(phase2Data.parans) : []),
     [phase2Data?.parans],
   )
 

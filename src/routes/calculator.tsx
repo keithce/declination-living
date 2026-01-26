@@ -73,13 +73,6 @@ function CalculatorContent() {
   const globeState = useGlobeState()
   const chartNameInputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-focus chart name input when modal opens
-  useEffect(() => {
-    if (!showSaveModal) return
-    const timer = setTimeout(() => chartNameInputRef.current?.focus(), 100)
-    return () => clearTimeout(timer)
-  }, [showSaveModal])
-
   const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
   }
@@ -237,6 +230,7 @@ function CalculatorContent() {
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
+                onAnimationComplete={() => chartNameInputRef.current?.focus()}
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 p-6 shadow-2xl"
               >

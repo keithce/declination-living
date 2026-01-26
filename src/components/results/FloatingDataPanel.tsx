@@ -79,6 +79,12 @@ const MAX_PANEL_WIDTH = 600
 const DEFAULT_PANEL_WIDTH = 384 // lg:w-96 = 24rem = 384px
 const STORAGE_KEY = 'declination-panel-width'
 
+/** Convert panel width to ARIA value (0-100 scale per W3C Window Splitter Pattern) */
+function panelWidthToAriaValue(width: number): number {
+  const range = MAX_PANEL_WIDTH - MIN_PANEL_WIDTH
+  return Math.round(((width - MIN_PANEL_WIDTH) / range) * 100)
+}
+
 // =============================================================================
 // Sub-components
 // =============================================================================
@@ -233,6 +239,15 @@ export function FloatingDataPanel({
     else if (e.key === 'ArrowRight') delta = -STEP
     else if (e.key === 'PageUp') delta = LARGE_STEP
     else if (e.key === 'PageDown') delta = -LARGE_STEP
+    else if (e.key === 'Home') {
+      e.preventDefault()
+      setPanelWidth(MAX_PANEL_WIDTH)
+      return
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      setPanelWidth(MIN_PANEL_WIDTH)
+      return
+    }
     if (delta) {
       e.preventDefault()
       setPanelWidth((w) => Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, w + delta)))
@@ -268,6 +283,7 @@ export function FloatingDataPanel({
 
       {/* Panel */}
       <motion.aside
+        id="results-panel"
         ref={panelRef}
         className="fixed top-0 right-0 bottom-0 z-20 bg-slate-900/85 backdrop-blur-md border-l border-slate-700/50 flex flex-col overflow-hidden shadow-2xl"
         style={{ width: panelWidth }}
@@ -282,6 +298,10 @@ export function FloatingDataPanel({
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize panel"
+          aria-valuenow={panelWidthToAriaValue(panelWidth)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-controls="results-panel"
           tabIndex={0}
           className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-amber-500/50 active:bg-amber-500/70 transition-colors z-10 group focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-inset"
           onMouseDown={handleMouseDown}

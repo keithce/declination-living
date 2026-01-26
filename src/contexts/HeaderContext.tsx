@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
 interface HeaderContextValue {
@@ -10,11 +10,8 @@ const HeaderContext = createContext<HeaderContextValue | null>(null)
 
 export function HeaderProvider({ children }: { children: ReactNode }) {
   const [hideHeader, setHideHeader] = useState(false)
-  return (
-    <HeaderContext.Provider value={{ hideHeader, setHideHeader }}>
-      {children}
-    </HeaderContext.Provider>
-  )
+  const value = useMemo(() => ({ hideHeader, setHideHeader }), [hideHeader])
+  return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>
 }
 
 export function useHeaderVisibility() {
