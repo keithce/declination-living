@@ -19,6 +19,7 @@ import { isInOwnTerms } from './terms'
 import { isInOwnFace } from './decans'
 import type { TermSystem } from './terms'
 import type {
+  DignityIndicator,
   DignityScore,
   PlanetId,
   SignPosition,
@@ -247,7 +248,7 @@ export function getEssentiallyDebilitated(
  * @param score - Dignity score
  * @returns Single character indicator
  */
-export function getDignityIndicator(score: DignityScore): string {
+export function getDignityIndicator(score: DignityScore): DignityIndicator {
   if (score.domicile > 0) return 'R' // Ruler
   if (score.exaltation > 0) return 'E' // Exalted
   if (score.detriment < 0) return 'd' // Detriment

@@ -169,10 +169,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Toaster
           position="top-right"
           toastOptions={{
-            style: {
-              background: '#1e293b',
-              border: '1px solid #334155',
-              color: '#f1f5f9',
+            unstyled: true,
+            classNames: {
+              toast: 'bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-4 shadow-lg',
+              title: 'font-medium',
+              description: 'text-slate-400 text-sm',
+              success: 'border-green-700/50',
+              error: 'border-red-700/50',
+              warning: 'border-amber-700/50',
             },
           }}
         />

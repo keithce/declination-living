@@ -24,20 +24,14 @@ const equatorialCoordinatesValidator = v.object({
 })
 
 /**
- * Validator for all planet positions
+ * Validator for all planet positions - derived from PLANET_IDS for single source of truth
  */
-const planetPositionsValidator = v.object({
-  sun: equatorialCoordinatesValidator,
-  moon: equatorialCoordinatesValidator,
-  mercury: equatorialCoordinatesValidator,
-  venus: equatorialCoordinatesValidator,
-  mars: equatorialCoordinatesValidator,
-  jupiter: equatorialCoordinatesValidator,
-  saturn: equatorialCoordinatesValidator,
-  uranus: equatorialCoordinatesValidator,
-  neptune: equatorialCoordinatesValidator,
-  pluto: equatorialCoordinatesValidator,
-})
+const planetPositionsValidator = v.object(
+  Object.fromEntries(PLANET_IDS.map((id) => [id, equatorialCoordinatesValidator])) as Record<
+    (typeof PLANET_IDS)[number],
+    typeof equatorialCoordinatesValidator
+  >,
+)
 
 /**
  * Generate a cache key for ACG/zenith calculations

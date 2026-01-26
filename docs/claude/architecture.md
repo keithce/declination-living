@@ -15,7 +15,7 @@ Key routes:
 
 ### Component Hierarchy
 
-```
+```text
 src/components/
 ├── calculator/           # Calculator flow components
 │   ├── BirthDataForm.tsx    # Step 1: Birth data input
@@ -57,7 +57,7 @@ Tables defined in `convex/schema.ts`:
 
 ### Calculations (`convex/calculations/`)
 
-```
+```text
 calculations/
 ├── core/
 │   ├── types.ts        # PLANET_IDS, coordinate types
@@ -108,7 +108,7 @@ Results are cached in `calculationCache` table for 24 hours to optimize performa
 
 ## Data Flow
 
-```
+```text
 User Input → BirthDataForm
     ↓
 PlanetWeights (adjust influence)

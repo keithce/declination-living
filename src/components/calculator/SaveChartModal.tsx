@@ -60,6 +60,9 @@ export function SaveChartModal({
           onClick={onClose}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="save-chart-title"
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
@@ -70,10 +73,13 @@ export function SaveChartModal({
             className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display text-xl font-semibold text-white">Save Chart</h3>
+              <h3 id="save-chart-title" className="font-display text-xl font-semibold text-white">
+                Save Chart
+              </h3>
               <button
                 type="button"
                 onClick={onClose}
+                aria-label="Close"
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
@@ -83,6 +89,7 @@ export function SaveChartModal({
             <form
               onSubmit={(e) => {
                 e.preventDefault()
+                if (!chartName.trim() || isSaving) return
                 onSave()
               }}
             >

@@ -220,11 +220,23 @@ export const dignityScoreValidator = v.object({
 })
 
 /**
+ * Validator for dignity indicator characters.
+ * R=Ruler, E=Exalted, d=Detriment, f=Fall, -=Peregrine
+ */
+export const dignityIndicatorValidator = v.union(
+  v.literal('R'),
+  v.literal('E'),
+  v.literal('d'),
+  v.literal('f'),
+  v.literal('-'),
+)
+
+/**
  * Validator for simplified dignity (total + indicator).
  */
 export const simplifiedDignityValidator = v.object({
   total: v.number(),
-  indicator: v.string(),
+  indicator: dignityIndicatorValidator,
 })
 
 /**

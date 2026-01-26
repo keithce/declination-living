@@ -237,6 +237,7 @@ function DashboardPage() {
       toast.success('Share link copied to clipboard!')
     } catch (error) {
       console.error('Failed to generate share link:', error)
+      toast.error('Failed to share chart. Please try again.')
     }
   }
 

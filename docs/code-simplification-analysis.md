@@ -86,11 +86,13 @@ Thorough analysis of the Declination Living codebase identified **12 improvement
 
 ### Issues Identified
 
-#### HIGH: Inline SaveChartModal
+#### HIGH: Inline SaveChartModal - **COMPLETE**
 
 `calculator.tsx` is 461 lines with save modal inline (lines 233-332).
 
 **Recommendation**: Extract to `components/calculator/SaveChartModal.tsx`
+
+**Status**: Implemented in `src/components/calculator/SaveChartModal.tsx`
 
 #### HIGH: Duplicate Format Functions
 
@@ -124,11 +126,13 @@ Canonical source exists: `lib/planet-constants.ts`
 
 **Recommendation**: Standardize on `ui/Loading` component
 
-#### LOW: Phase 2 Silent Failure
+#### LOW: Phase 2 Silent Failure - **COMPLETE**
 
 `calculator.tsx:111` sets `setPhase2Data(null)` silently on error.
 
 **Recommendation**: Add warning toast after implementing toast system
+
+**Status**: Uses `toast.warning()` from sonner
 
 ---
 
@@ -150,20 +154,20 @@ Canonical source exists: `lib/planet-constants.ts`
 
 ## Improvement Priority Matrix
 
-| Priority | Issue                                 | Risk   | Effort |
-| -------- | ------------------------------------- | ------ | ------ |
-| 1        | Remove duplicate eclipticToEquatorial | Low    | 30min  |
-| 2        | Consolidate degree/radian constants   | Low    | 20min  |
-| 3        | Use PLANET_IDS everywhere             | Low    | 20min  |
-| 4        | Extract SaveChartModal                | Low    | 1hr    |
-| 5        | Consolidate format utilities          | Low    | 30min  |
-| 6        | Consolidate planet data               | Low    | 45min  |
-| 7        | Standardize loading states            | Low    | 45min  |
-| 8        | Split enhanced_actions.ts             | Medium | 3hr    |
-| 9        | Add scheduled cache cleanup           | Low    | 1hr    |
-| 10       | Create toast system                   | Medium | 2hr    |
-| 11       | Add Phase 2 feedback                  | Low    | 30min  |
-| 12       | Update documentation                  | Low    | 1hr    |
+| Priority | Issue                                 | Risk   | Effort | Status   |
+| -------- | ------------------------------------- | ------ | ------ | -------- |
+| 1        | Remove duplicate eclipticToEquatorial | Low    | 30min  | Pending  |
+| 2        | Consolidate degree/radian constants   | Low    | 20min  | Pending  |
+| 3        | Use PLANET_IDS everywhere             | Low    | 20min  | Pending  |
+| 4        | Extract SaveChartModal                | Low    | 1hr    | Complete |
+| 5        | Consolidate format utilities          | Low    | 30min  | Pending  |
+| 6        | Consolidate planet data               | Low    | 45min  | Pending  |
+| 7        | Standardize loading states            | Low    | 45min  | Pending  |
+| 8        | Split enhanced_actions.ts             | Medium | 3hr    | Pending  |
+| 9        | Add scheduled cache cleanup           | Low    | 1hr    | Pending  |
+| 10       | Create toast system                   | Medium | 2hr    | Complete |
+| 11       | Add Phase 2 feedback                  | Low    | 30min  | Complete |
+| 12       | Update documentation                  | Low    | 1hr    | Pending  |
 
 ---
 
@@ -227,5 +231,5 @@ After each phase:
 
 - `convex/calculations/actions/*.ts` (7 modules)
 - `convex/crons.ts`
-- `src/components/calculator/SaveChartModal.tsx`
-- `src/components/ui/Toaster.tsx`
+- ~~`src/components/calculator/SaveChartModal.tsx`~~ - Created
+- ~~`src/components/ui/Toaster.tsx`~~ - Using sonner's Toaster directly in `__root.tsx`
