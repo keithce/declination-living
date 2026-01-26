@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { ChevronLeft, ChevronRight, Loader2, Save, Sparkles, X } from 'lucide-react'
@@ -71,6 +71,14 @@ function CalculatorContent() {
   const recalculateWithWeights = useAction(api.calculations.actions.recalculateWithWeights)
   const createChart = useMutation(api.charts.mutations.create)
   const globeState = useGlobeState()
+  const chartNameInputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-focus chart name input when modal opens
+  useEffect(() => {
+    if (!showSaveModal) return
+    const timer = setTimeout(() => chartNameInputRef.current?.focus(), 100)
+    return () => clearTimeout(timer)
+  }, [showSaveModal])
 
   const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
@@ -257,10 +265,7 @@ function CalculatorContent() {
                     onChange={(e) => setChartName(e.target.value)}
                     placeholder="Enter a name for this chart"
                     className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                    ref={(el) => {
-                      // Focus after animation completes
-                      if (el) setTimeout(() => el.focus(), 100)
-                    }}
+                    ref={chartNameInputRef}
                   />
                 </div>
 

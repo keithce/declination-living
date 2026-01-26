@@ -10,22 +10,10 @@ import {
   equatorialPositionValidator,
   paranPointValidator,
   paranResultValidator,
+  paranStatisticsValidator,
 } from '../validators'
 import { findAllParans, getParanStatistics, getParansAtLatitude, getTopParans } from './catalog'
 import type { PlanetPosition } from './catalog'
-
-// =============================================================================
-// Paran Statistics Validator
-// =============================================================================
-
-const paranStatisticsValidator = v.object({
-  total: v.number(),
-  averageStrength: v.number(),
-  medianStrength: v.number(),
-  latitudeRange: v.object({ min: v.number(), max: v.number() }),
-  strongestParan: v.union(paranPointValidator, v.null()),
-  byHemisphere: v.object({ northern: v.number(), southern: v.number() }),
-})
 
 // =============================================================================
 // Calculate Parans Action

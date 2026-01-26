@@ -148,13 +148,19 @@ export const ResultsTabs = memo(function ResultsTabs({
       <div
         className={compact ? 'p-2' : 'p-4 rounded-xl bg-slate-800/30 border border-slate-700/50'}
       >
-        {activeTab === 'overview' && <OverviewTab scoringGrid={scoringGrid} topN={10} compact />}
-        {activeTab === 'acg' && <ACGLinesTab acgLines={acgLines} compact />}
-        {activeTab === 'zenith' && <ZenithTab zenithLines={zenithLines} initialOrb={1.0} compact />}
-        {activeTab === 'scoring' && (
-          <ScoringTab scoringGrid={scoringGrid} displayLimit={50} compact />
+        {activeTab === 'overview' && (
+          <OverviewTab scoringGrid={scoringGrid} topN={10} compact={compact} />
         )}
-        {activeTab === 'parans' && <ParansTab parans={parans} displayLimit={100} compact />}
+        {activeTab === 'acg' && <ACGLinesTab acgLines={acgLines} compact={compact} />}
+        {activeTab === 'zenith' && (
+          <ZenithTab zenithLines={zenithLines} initialOrb={1.0} compact={compact} />
+        )}
+        {activeTab === 'scoring' && (
+          <ScoringTab scoringGrid={scoringGrid} displayLimit={50} compact={compact} />
+        )}
+        {activeTab === 'parans' && (
+          <ParansTab parans={parans} displayLimit={100} compact={compact} />
+        )}
       </div>
     </div>
   )

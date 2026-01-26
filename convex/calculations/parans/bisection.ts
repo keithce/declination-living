@@ -113,6 +113,8 @@ function bisectToConvergence(
   let currentA = a
   let currentB = b
   let aResult = s1
+  // Track upper boundary diff dynamically (not just initial value)
+  let bDiff = s2Diff
   let iterations = 0
 
   while (iterations < PARAN_MAX_ITERATIONS && currentB - currentA > PARAN_BISECTION_TOL) {
@@ -120,7 +122,7 @@ function bisectToConvergence(
     const midResult = getDiff(mid)
 
     if (midResult === null) {
-      if (useQuarterFallback && s2Diff !== undefined) {
+      if (useQuarterFallback && bDiff !== undefined) {
         // Try quarter points to find valid side
         const quarterLow = (currentA + mid) / 2
         const quarterHigh = (mid + currentB) / 2
@@ -128,10 +130,13 @@ function bisectToConvergence(
         const lowResult = getDiff(quarterLow)
         const highResult = getDiff(quarterHigh)
 
-        if (lowResult !== null && lowResult.diff * s1.diff <= 0) {
+        // Use current boundary diffs, not stale initial values
+        if (lowResult !== null && lowResult.diff * aResult.diff <= 0) {
           currentB = mid
-        } else if (highResult !== null && highResult.diff * s2Diff <= 0) {
+          // bDiff stays the same since we're narrowing from the high side
+        } else if (highResult !== null && highResult.diff * bDiff <= 0) {
           currentA = mid
+          // aResult stays the same since we're narrowing from the low side
         } else {
           break
         }
@@ -141,6 +146,7 @@ function bisectToConvergence(
     } else {
       if (aResult.diff * midResult.diff <= 0) {
         currentB = mid
+        bDiff = midResult.diff // Update upper boundary diff
       } else {
         currentA = mid
         aResult = { lat: mid, ...midResult }

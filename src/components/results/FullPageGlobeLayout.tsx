@@ -5,7 +5,7 @@
  * Replaces the scrollable page layout when viewing calculation results.
  */
 
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Globe, Loader2 } from 'lucide-react'
@@ -22,6 +22,7 @@ import type { ParanPoint, ZenithLine } from '@/../convex/calculations/core/types
 import { PLANET_IDS } from '@/components/globe/layers/types'
 import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { transformACGLines, transformParans } from '@/components/globe/utils'
+import { useHeaderVisibility } from '@/contexts/HeaderContext'
 
 // =============================================================================
 // Types
@@ -92,11 +93,19 @@ export function FullPageGlobeLayout({
   onSaveChart,
   isCalculating,
 }: FullPageGlobeLayoutProps) {
-  // Convert Phase 1 declinations to globe format (Record<PlanetId, number>)
+  // Hide the root header when this layout is mounted
+  const { setHideHeader } = useHeaderVisibility()
+
+  useEffect(() => {
+    setHideHeader(true)
+    return () => setHideHeader(false)
+  }, [setHideHeader])
+
+  // Convert Phase 1 declinations to globe format (Partial<Record<PlanetId, number>>)
   // Phase 2 data has this already, but Phase 1 uses a different type
-  const declinationsForGlobe = useMemo(() => {
+  const declinationsForGlobe = useMemo((): Partial<Record<PlanetId, number>> => {
     if (phase2Data?.declinations) return phase2Data.declinations
-    // Convert from Phase 1 Declinations type to Record<PlanetId, number>
+    // Convert from Phase 1 Declinations type to Partial<Record<PlanetId, number>>
     const converted: Partial<Record<PlanetId, number>> = {}
     for (const planet of PLANET_IDS) {
       const value = result.declinations[planet as keyof Declinations]
@@ -104,7 +113,7 @@ export function FullPageGlobeLayout({
         converted[planet] = value
       }
     }
-    return converted as Record<PlanetId, number>
+    return converted
   }, [phase2Data?.declinations, result.declinations])
 
   // Transform data for globe (memoized) - empty arrays when phase2 not ready
@@ -115,7 +124,7 @@ export function FullPageGlobeLayout({
   const transformedParans = useMemo(
     () =>
       phase2Data?.parans
-        ? transformParans(phase2Data.parans as unknown as BackendParanPoint[])
+        ? transformParans(phase2Data.parans as unknown as Array<BackendParanPoint>)
         : [],
     [phase2Data?.parans],
   )

@@ -151,7 +151,7 @@ export interface ExtendedGlobeCanvasProps {
   }
 
   // New visualization data
-  declinations?: Record<PlanetId, number>
+  declinations?: Partial<Record<PlanetId, number>>
   zenithLines?: Array<ZenithLineData>
   acgLines?: Array<ACGLineData>
   parans?: Array<ParanPointData>

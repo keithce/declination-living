@@ -176,6 +176,7 @@ export function FloatingDataPanel({
   const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH)
   const isResizing = useRef(false)
   const panelRef = useRef<HTMLDivElement>(null)
+  const isInitialized = useRef(false)
 
   // Load saved width from localStorage
   useEffect(() => {
@@ -186,11 +187,14 @@ export function FloatingDataPanel({
         setPanelWidth(width)
       }
     }
+    isInitialized.current = true
   }, [])
 
-  // Save width to localStorage when it changes
+  // Save width to localStorage when it changes (only after initialization)
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, panelWidth.toString())
+    if (isInitialized.current) {
+      localStorage.setItem(STORAGE_KEY, panelWidth.toString())
+    }
   }, [panelWidth])
 
   // Handle resize
@@ -219,6 +223,32 @@ export function FloatingDataPanel({
     },
     [handleMouseMove, handleMouseUp],
   )
+
+  // Keyboard handler for accessible resize
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const STEP = 10
+    const LARGE_STEP = 50
+    let delta = 0
+    if (e.key === 'ArrowLeft') delta = STEP
+    else if (e.key === 'ArrowRight') delta = -STEP
+    else if (e.key === 'PageUp') delta = LARGE_STEP
+    else if (e.key === 'PageDown') delta = -LARGE_STEP
+    if (delta) {
+      e.preventDefault()
+      setPanelWidth((w) => Math.min(MAX_PANEL_WIDTH, Math.max(MIN_PANEL_WIDTH, w + delta)))
+    }
+  }, [])
+
+  // Cleanup on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      isResizing.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [handleMouseMove, handleMouseUp])
 
   return (
     <>
@@ -249,10 +279,15 @@ export function FloatingDataPanel({
       >
         {/* Resize Handle */}
         <div
-          className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-amber-500/50 active:bg-amber-500/70 transition-colors z-10 group"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize panel"
+          tabIndex={0}
+          className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-amber-500/50 active:bg-amber-500/70 transition-colors z-10 group focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-inset"
           onMouseDown={handleMouseDown}
+          onKeyDown={handleKeyDown}
         >
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-3 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-3 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity">
             <GripVertical className="w-3 h-3 text-slate-500" />
           </div>
         </div>

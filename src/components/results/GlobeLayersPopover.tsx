@@ -66,7 +66,7 @@ export function GlobeLayersPopover({ globeState }: GlobeLayersPopoverProps) {
   }, [isOpen])
 
   return (
-    <div ref={popoverRef} className="relative">
+    <div ref={popoverRef} className="relative" tabIndex={-1}>
       {/* Trigger Button */}
       <motion.button
         ref={triggerRef}

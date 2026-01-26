@@ -126,6 +126,14 @@ export function findAllParans(
   }
 }
 
+/** Precedence order for angular events (for consistent sorting) */
+const EVENT_ORDER: Record<AngularEvent, number> = {
+  rise: 0,
+  culminate: 1,
+  anti_culminate: 2,
+  set: 3,
+}
+
 /**
  * Helper to categorize event pairs for summary.
  *
@@ -149,8 +157,8 @@ function updateSummaryCount(
     setSet: () => void
   },
 ): void {
-  // Normalize to handle symmetry
-  const events = [e1, e2].sort()
+  // Normalize to handle symmetry using precedence-based ordering
+  const events = [e1, e2].sort((a, b) => EVENT_ORDER[a] - EVENT_ORDER[b])
 
   const isCulminationType = (e: AngularEvent) => e === 'culminate' || e === 'anti_culminate'
 
