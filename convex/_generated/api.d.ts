@@ -28,6 +28,7 @@ import type * as calculations_core_types from "../calculations/core/types.js";
 import type * as calculations_dignity_calculator from "../calculations/dignity/calculator.js";
 import type * as calculations_dignity_decans from "../calculations/dignity/decans.js";
 import type * as calculations_dignity_index from "../calculations/dignity/index.js";
+import type * as calculations_dignity_sect from "../calculations/dignity/sect.js";
 import type * as calculations_dignity_tables from "../calculations/dignity/tables.js";
 import type * as calculations_dignity_terms from "../calculations/dignity/terms.js";
 import type * as calculations_enhanced_actions from "../calculations/enhanced_actions.js";
@@ -90,6 +91,7 @@ declare const fullApi: ApiFromModules<{
   "calculations/dignity/calculator": typeof calculations_dignity_calculator;
   "calculations/dignity/decans": typeof calculations_dignity_decans;
   "calculations/dignity/index": typeof calculations_dignity_index;
+  "calculations/dignity/sect": typeof calculations_dignity_sect;
   "calculations/dignity/tables": typeof calculations_dignity_tables;
   "calculations/dignity/terms": typeof calculations_dignity_terms;
   "calculations/enhanced_actions": typeof calculations_enhanced_actions;

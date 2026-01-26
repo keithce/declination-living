@@ -166,3 +166,80 @@ export function validateEquatorialPosition(ra: number, dec: number): void {
     throw new Error(`Declination must be -90 to +90 degrees, got ${dec}`)
   }
 }
+
+// =============================================================================
+// Zodiac Sign Validator
+// =============================================================================
+
+/**
+ * Validator for zodiac signs.
+ */
+export const zodiacSignValidator = v.union(
+  v.literal('aries'),
+  v.literal('taurus'),
+  v.literal('gemini'),
+  v.literal('cancer'),
+  v.literal('leo'),
+  v.literal('virgo'),
+  v.literal('libra'),
+  v.literal('scorpio'),
+  v.literal('sagittarius'),
+  v.literal('capricorn'),
+  v.literal('aquarius'),
+  v.literal('pisces'),
+)
+
+// =============================================================================
+// Sect Validator
+// =============================================================================
+
+/**
+ * Validator for chart sect (day or night).
+ */
+export const sectValidator = v.union(v.literal('day'), v.literal('night'))
+
+// =============================================================================
+// Dignity Validators
+// =============================================================================
+
+/**
+ * Validator for complete dignity score.
+ */
+export const dignityScoreValidator = v.object({
+  planet: planetIdValidator,
+  domicile: v.number(),
+  exaltation: v.number(),
+  triplicity: v.number(),
+  terms: v.number(),
+  face: v.number(),
+  detriment: v.number(),
+  fall: v.number(),
+  peregrine: v.number(),
+  total: v.number(),
+  breakdown: v.array(v.string()),
+})
+
+/**
+ * Validator for dignity indicator characters.
+ * R=Ruler, E=Exalted, d=Detriment, f=Fall, -=Peregrine
+ */
+export const dignityIndicatorValidator = v.union(
+  v.literal('R'),
+  v.literal('E'),
+  v.literal('d'),
+  v.literal('f'),
+  v.literal('-'),
+)
+
+/**
+ * Validator for simplified dignity (total + indicator).
+ */
+export const simplifiedDignityValidator = v.object({
+  total: v.number(),
+  indicator: dignityIndicatorValidator,
+})
+
+/**
+ * Validator for term system selection.
+ */
+export const termSystemValidator = v.union(v.literal('egyptian'), v.literal('ptolemaic'))

@@ -1,5 +1,6 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useConvexAuth, useMutation, useQuery } from 'convex/react'
+import { toast } from 'sonner'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Calendar,
@@ -233,9 +234,10 @@ function DashboardPage() {
       const slug = await generateShareSlug({ id })
       const url = `${window.location.origin}/chart/${slug}`
       await navigator.clipboard.writeText(url)
-      alert('Share link copied to clipboard!')
+      toast.success('Share link copied to clipboard!')
     } catch (error) {
       console.error('Failed to generate share link:', error)
+      toast.error('Failed to share chart. Please try again.')
     }
   }
 

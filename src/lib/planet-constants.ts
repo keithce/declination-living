@@ -55,3 +55,50 @@ export const PLANET_NAMES: Record<string, string> = {
   neptune: 'Neptune',
   pluto: 'Pluto',
 }
+
+// =============================================================================
+// Planet IDs (ordered array for iteration)
+// =============================================================================
+
+export type PlanetId =
+  | 'sun'
+  | 'moon'
+  | 'mercury'
+  | 'venus'
+  | 'mars'
+  | 'jupiter'
+  | 'saturn'
+  | 'uranus'
+  | 'neptune'
+  | 'pluto'
+
+export const PLANET_IDS: ReadonlyArray<PlanetId> = [
+  'sun',
+  'moon',
+  'mercury',
+  'venus',
+  'mars',
+  'jupiter',
+  'saturn',
+  'uranus',
+  'neptune',
+  'pluto',
+] as const
+
+// =============================================================================
+// Combined Planet Data (for UI iteration)
+// =============================================================================
+
+export interface PlanetData {
+  key: PlanetId
+  name: string
+  symbol: string
+  color: string
+}
+
+export const PLANETS: ReadonlyArray<PlanetData> = PLANET_IDS.map((key) => ({
+  key,
+  name: PLANET_NAMES[key],
+  symbol: PLANET_SYMBOLS[key],
+  color: PLANET_COLORS[key],
+}))

@@ -7,8 +7,7 @@
  * - Geodetic → Cartesian
  */
 
-const toRad = (deg: number): number => (deg * Math.PI) / 180
-const toDeg = (rad: number): number => (rad * 180) / Math.PI
+import { toDegrees as toDeg, toRadians as toRad } from '../core/math'
 
 /**
  * Convert Ecliptic coordinates to Equatorial

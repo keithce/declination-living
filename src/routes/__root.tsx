@@ -9,6 +9,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Compass, Home } from 'lucide-react'
 
+import { Toaster } from 'sonner'
 import Header from '../components/Header'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import ConvexProvider from '../integrations/convex/provider'
@@ -165,6 +166,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             ]}
           />
         </ConvexProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            unstyled: true,
+            classNames: {
+              toast: 'bg-slate-800 border border-slate-700 text-slate-100 rounded-lg p-4 shadow-lg',
+              title: 'font-medium',
+              description: 'text-slate-400 text-sm',
+              success: 'border-green-700/50',
+              error: 'border-red-700/50',
+              warning: 'border-amber-700/50',
+            },
+          }}
+        />
         <Scripts />
       </body>
     </html>

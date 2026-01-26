@@ -260,6 +260,20 @@ export interface DignityScore {
   breakdown: Array<string>
 }
 
+/** Chart sect - day (Sun above horizon) or night (Sun below horizon) */
+export type Sect = 'day' | 'night'
+
+/** Dignity indicator characters: R=Ruler, E=Exalted, d=Detriment, f=Fall, -=Peregrine */
+export type DignityIndicator = 'R' | 'E' | 'd' | 'f' | '-'
+
+/** Simplified dignity for storage and display */
+export interface SimplifiedDignity {
+  /** Total dignity score */
+  total: number
+  /** Single-character indicator (R, E, d, f, -) */
+  indicator: DignityIndicator
+}
+
 // =============================================================================
 // Vibe/Search Types
 // =============================================================================

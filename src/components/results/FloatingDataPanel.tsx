@@ -26,6 +26,7 @@ import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
 import { debounce } from '@/lib/utils'
 import { formatDeclination } from '@/components/results/shared/constants'
+import { PLANETS } from '@/lib/planet-constants'
 
 // =============================================================================
 // Types
@@ -118,32 +119,19 @@ function BirthSummary({ birthData, onEdit }: { birthData: BirthData; onEdit: () 
 }
 
 function CompactDeclinations({ declinations }: { declinations: Declinations }) {
-  const planets = [
-    { key: 'sun', symbol: '☉', color: '#fbbf24' },
-    { key: 'moon', symbol: '☽', color: '#e2e8f0' },
-    { key: 'mercury', symbol: '☿', color: '#a78bfa' },
-    { key: 'venus', symbol: '♀', color: '#f472b6' },
-    { key: 'mars', symbol: '♂', color: '#ef4444' },
-    { key: 'jupiter', symbol: '♃', color: '#f97316' },
-    { key: 'saturn', symbol: '♄', color: '#78716c' },
-    { key: 'uranus', symbol: '♅', color: '#22d3ee' },
-    { key: 'neptune', symbol: '♆', color: '#818cf8' },
-    { key: 'pluto', symbol: '♇', color: '#a3a3a3' },
-  ] as const
-
   return (
     <div className="p-4 border-b border-slate-700/50">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
         Declinations
       </h3>
       <div className="grid grid-cols-5 gap-2">
-        {planets.map((planet) => {
+        {PLANETS.map((planet) => {
           const value = declinations[planet.key as keyof Declinations]
           return (
             <div
               key={planet.key}
               className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg"
-              title={planet.key.charAt(0).toUpperCase() + planet.key.slice(1)}
+              title={planet.name}
             >
               <span className="text-lg" style={{ color: planet.color }}>
                 {planet.symbol}

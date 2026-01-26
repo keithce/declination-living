@@ -14,6 +14,8 @@ import { PLANET_IDS } from './core/types'
 import { calculateAllParans } from './parans/solver'
 import { generateScoringGrid } from './geospatial/grid'
 import { planetWeightsValidator } from './validators'
+import { eclipticToEquatorial } from './coordinates/transform'
+import { MEAN_OBLIQUITY_J2000 } from './core/constants'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from './core/types'
 
 // =============================================================================
@@ -25,56 +27,6 @@ function throwWithContext(error: unknown, context: string): never {
   throw new Error(`${context}: ${message}`, {
     cause: error instanceof Error ? error : undefined,
   })
-}
-
-// =============================================================================
-// Coordinate Conversion Utilities
-// =============================================================================
-
-const DEG_TO_RAD = Math.PI / 180
-const RAD_TO_DEG = 180 / Math.PI
-
-/** Mean obliquity of the ecliptic (J2000.0) in degrees */
-const OBLIQUITY_DEG = 23.439291
-
-/**
- * Convert ecliptic coordinates to equatorial coordinates.
- *
- * @param eclLon - Ecliptic longitude (λ) in degrees
- * @param eclLat - Ecliptic latitude (β) in degrees
- * @returns Equatorial coordinates { ra, dec } in degrees
- */
-function eclipticToEquatorial(eclLon: number, eclLat: number): { ra: number; dec: number } {
-  // Convert to radians
-  const lambda = eclLon * DEG_TO_RAD
-  const beta = eclLat * DEG_TO_RAD
-  const eps = OBLIQUITY_DEG * DEG_TO_RAD
-
-  const sinBeta = Math.sin(beta)
-  const cosBeta = Math.cos(beta)
-  const sinLambda = Math.sin(lambda)
-  const cosLambda = Math.cos(lambda)
-  const sinEps = Math.sin(eps)
-  const cosEps = Math.cos(eps)
-
-  // Calculate declination: sin(δ) = cos(β)sin(λ)sin(ε) + sin(β)cos(ε)
-  const sinDec = cosBeta * sinLambda * sinEps + sinBeta * cosEps
-  const dec = Math.asin(sinDec)
-
-  // Calculate right ascension: α = atan2(cos(β)sin(λ)cos(ε) - sin(β)sin(ε), cos(β)cos(λ))
-  const y = cosBeta * sinLambda * cosEps - sinBeta * sinEps
-  const x = cosBeta * cosLambda
-  let ra = Math.atan2(y, x)
-
-  // Normalize RA to 0..2π
-  if (ra < 0) {
-    ra += 2 * Math.PI
-  }
-
-  return {
-    ra: ra * RAD_TO_DEG,
-    dec: dec * RAD_TO_DEG,
-  }
 }
 
 // =============================================================================
@@ -129,10 +81,10 @@ export const calculatePhase2Complete = action({
     for (const planet of PLANET_IDS) {
       const pos = positions[planet]
       // Proper ecliptic to equatorial conversion
-      const eq = eclipticToEquatorial(pos.longitude, pos.latitude)
+      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
       equatorialPositions[planet] = {
-        ra: eq.ra,
-        dec: eq.dec,
+        ra: eq.rightAscension,
+        dec: eq.declination,
       }
     }
 
