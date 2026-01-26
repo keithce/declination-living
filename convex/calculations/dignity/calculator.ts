@@ -18,7 +18,16 @@ import { isInDetriment, isInDomicile, isInExaltation, isInFall, isTriplicityRule
 import { isInOwnTerms } from './terms'
 import { isInOwnFace } from './decans'
 import type { TermSystem } from './terms'
-import type { DignityScore, PlanetId, SignPosition } from '../core/types'
+import type {
+  DignityScore,
+  PlanetId,
+  SignPosition,
+  SimplifiedDignity,
+  ZodiacSign,
+} from '../core/types'
+
+// Re-export SimplifiedDignity for convenience
+export type { SimplifiedDignity }
 
 // =============================================================================
 // Position Conversion
@@ -228,19 +237,22 @@ export function getEssentiallyDebilitated(
 /**
  * Get a single-character dignity indicator.
  *
+ * Shows only major dignities/debilities:
+ * - R = Ruler (domicile)
+ * - E = Exalted
+ * - d = Detriment
+ * - f = Fall
+ * - '-' = Peregrine or neutral
+ *
  * @param score - Dignity score
- * @returns Character like "R" (ruler), "E" (exalted), "d" (detriment), etc.
+ * @returns Single character indicator
  */
 export function getDignityIndicator(score: DignityScore): string {
   if (score.domicile > 0) return 'R' // Ruler
   if (score.exaltation > 0) return 'E' // Exalted
-  if (score.triplicity > 0) return 'T' // Triplicity
-  if (score.terms > 0) return 't' // Terms (lowercase)
-  if (score.face > 0) return 'F' // Face
   if (score.detriment < 0) return 'd' // Detriment
   if (score.fall < 0) return 'f' // Fall
-  if (score.peregrine < 0) return 'p' // Peregrine
-  return '-' // No significant dignity
+  return '-' // Peregrine/neutral
 }
 
 /**
@@ -301,5 +313,40 @@ export function isDayChart(sunLongitude: number, ascendant: number): boolean {
   } else {
     // ASC > DSC (e.g., ASC = 350°, DSC = 170°)
     return sunNorm >= ascNorm || sunNorm < dscNorm
+  }
+}
+
+// =============================================================================
+// Sign Utilities
+// =============================================================================
+
+/**
+ * Get the sign opposite to the given sign.
+ *
+ * @param sign - Source sign
+ * @returns The opposite sign (6 signs away)
+ */
+export function getOppositeSign(sign: ZodiacSign): ZodiacSign {
+  const index = ZODIAC_SIGNS.indexOf(sign)
+  return ZODIAC_SIGNS[(index + 6) % 12]
+}
+
+// =============================================================================
+// Simplified Dignity
+// =============================================================================
+
+/**
+ * Get a simplified dignity representation.
+ *
+ * Useful for storage and compact display, containing only the
+ * total score and single-character indicator.
+ *
+ * @param score - Full dignity score
+ * @returns Simplified dignity object
+ */
+export function getSimplifiedDignity(score: DignityScore): SimplifiedDignity {
+  return {
+    total: score.total,
+    indicator: getDignityIndicator(score),
   }
 }
