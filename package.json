@@ -53,6 +53,7 @@
     "nitro": "npm:nitro-nightly@latest",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "sonner": "^2.0.7",
     "superjson": "^2.2.6",
     "sweph-wasm": "^2.6.9",
     "tailwind-merge": "^3.4.0",

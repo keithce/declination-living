@@ -3,6 +3,7 @@
  * Calculates how well a given latitude aligns with planetary declinations
  */
 
+import { PLANET_IDS } from './core/types'
 import type { PlanetDeclinations } from './ephemeris'
 
 export interface PlanetWeights {
@@ -37,18 +38,7 @@ export interface CityScore {
   dominantPlanet: string
 }
 
-const PLANET_NAMES: Array<keyof PlanetDeclinations> = [
-  'sun',
-  'moon',
-  'mercury',
-  'venus',
-  'mars',
-  'jupiter',
-  'saturn',
-  'uranus',
-  'neptune',
-  'pluto',
-]
+// Use canonical PLANET_IDS from core/types
 
 /**
  * Calculate alignment score for a given latitude
@@ -90,7 +80,7 @@ export function calculateLatitudeScore(
   let maxContribution = 0
   let dominantPlanet = 'sun'
 
-  for (const planet of PLANET_NAMES) {
+  for (const planet of PLANET_IDS) {
     const declination = declinations[planet]
     const weight = weights[planet]
 

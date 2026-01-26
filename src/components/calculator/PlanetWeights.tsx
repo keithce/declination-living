@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import * as Slider from '@radix-ui/react-slider'
+import { PLANETS } from '@/lib/planet-constants'
 
 export interface PlanetWeights {
   sun: number
@@ -65,19 +66,6 @@ const PRESETS = [
     weights: { ...DEFAULT_WEIGHTS, neptune: 3, jupiter: 2.5, moon: 2 },
   },
 ]
-
-const PLANETS = [
-  { key: 'sun', name: 'Sun', symbol: '☉', color: '#fbbf24' },
-  { key: 'moon', name: 'Moon', symbol: '☽', color: '#e2e8f0' },
-  { key: 'mercury', name: 'Mercury', symbol: '☿', color: '#a78bfa' },
-  { key: 'venus', name: 'Venus', symbol: '♀', color: '#f472b6' },
-  { key: 'mars', name: 'Mars', symbol: '♂', color: '#ef4444' },
-  { key: 'jupiter', name: 'Jupiter', symbol: '♃', color: '#f97316' },
-  { key: 'saturn', name: 'Saturn', symbol: '♄', color: '#78716c' },
-  { key: 'uranus', name: 'Uranus', symbol: '♅', color: '#22d3ee' },
-  { key: 'neptune', name: 'Neptune', symbol: '♆', color: '#818cf8' },
-  { key: 'pluto', name: 'Pluto', symbol: '♇', color: '#a3a3a3' },
-] as const
 
 interface PlanetWeightsProps {
   weights: PlanetWeights

@@ -9,6 +9,7 @@ import { v } from 'convex/values'
 import { internalAction } from '../../_generated/server'
 import { internal } from '../../_generated/api'
 import { DEFAULT_DECLINATION_ORB } from '../core/constants'
+import { PLANET_IDS } from '../core/types'
 import { calculateAllACGLines } from './line_solver'
 import { calculateAllZenithLines } from './zenith'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from '../core/types'
@@ -54,20 +55,8 @@ function generateACGCacheKey(args: {
 
   // Hash the positions (using RA and Dec only, ignore distance)
   let posHash = 0
-  const planets: Array<PlanetId> = [
-    'sun',
-    'moon',
-    'mercury',
-    'venus',
-    'mars',
-    'jupiter',
-    'saturn',
-    'uranus',
-    'neptune',
-    'pluto',
-  ]
 
-  for (const planet of planets) {
+  for (const planet of PLANET_IDS) {
     const pos = args.positions[planet]
     const ra = Math.round(pos.ra * 1000) // 0.001° precision
     const dec = Math.round(pos.dec * 1000)
@@ -88,20 +77,8 @@ function extractDeclinations(
   positions: Record<PlanetId, EquatorialCoordinates>,
 ): Record<PlanetId, number> {
   const declinations: Partial<Record<PlanetId, number>> = {}
-  const planets: Array<PlanetId> = [
-    'sun',
-    'moon',
-    'mercury',
-    'venus',
-    'mars',
-    'jupiter',
-    'saturn',
-    'uranus',
-    'neptune',
-    'pluto',
-  ]
 
-  for (const planet of planets) {
+  for (const planet of PLANET_IDS) {
     declinations[planet] = positions[planet].dec
   }
 
