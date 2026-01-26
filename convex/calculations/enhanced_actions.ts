@@ -33,7 +33,12 @@ import { calculateAllDignities, isDayChart, longitudeToSignPosition } from './di
 import { DEFAULT_WEIGHTS, getVibeById, matchVibeFromQuery } from './vibes/translator'
 import { generateSearchBands } from './geospatial/search'
 import { quickSafetyCheck } from './safety/filter'
+import { planetDeclinationsValidator, planetWeightsValidator } from './validators'
 import type { EquatorialCoordinates, PlanetId } from './core/types'
+
+// =============================================================================
+// Validators (imported from shared)
+// =============================================================================
 
 // =============================================================================
 // Result Types
@@ -106,12 +111,6 @@ interface CompleteEnhancedResult {
   dignities: Record<string, DignityScore>
   sect: 'day' | 'night'
 }
-
-// =============================================================================
-// Validators (imported from shared)
-// =============================================================================
-
-import { planetDeclinationsValidator, planetWeightsValidator } from './validators'
 
 // =============================================================================
 // Enhanced Position Actions

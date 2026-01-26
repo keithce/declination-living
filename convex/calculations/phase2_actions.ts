@@ -13,7 +13,12 @@ import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from '.
 import { PLANET_IDS } from './core/types'
 import { calculateAllParans } from './parans/solver'
 import { generateScoringGrid } from './geospatial/grid'
+import { planetWeightsValidator } from './validators'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from './core/types'
+
+// =============================================================================
+// Validators (imported from shared)
+// =============================================================================
 
 // =============================================================================
 // Error Handling
@@ -75,12 +80,6 @@ function eclipticToEquatorial(eclLon: number, eclLat: number): { ra: number; dec
     dec: dec * RAD_TO_DEG,
   }
 }
-
-// =============================================================================
-// Validators (imported from shared)
-// =============================================================================
-
-import { planetWeightsValidator } from './validators'
 
 // =============================================================================
 // Phase 2 Complete Calculation

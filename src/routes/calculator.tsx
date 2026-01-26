@@ -9,11 +9,7 @@ import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import { BirthDataForm } from '@/components/calculator/BirthDataForm'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { useCalculatorState } from '@/hooks/use-calculator-state'
-import { DeclinationTable } from '@/components/calculator/DeclinationTable'
-import { ResultsPanel } from '@/components/calculator/ResultsPanel'
-import { ResultsTabs } from '@/components/results/ResultsTabs'
-import { EnhancedGlobeSection } from '@/components/results/EnhancedGlobeSection'
-import { GlobeView } from '@/components/globe'
+import { FullPageGlobeLayout } from '@/components/results/FullPageGlobeLayout'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
 
 export const Route = createFileRoute('/calculator')({
@@ -202,6 +198,114 @@ function CalculatorContent() {
     return <CalculatorLoading />
   }
 
+  // Full-page layout for results step
+  if (step === 'results' && result) {
+    return (
+      <>
+        <FullPageGlobeLayout
+          birthData={birthData}
+          result={result}
+          phase2Data={phase2Data}
+          weights={weights}
+          globeState={globeState}
+          onEditBirthData={() => setStep('birth-data')}
+          onModifyWeights={() => setStep('weights')}
+          onRecalculate={handleRecalculate}
+          onSaveChart={openSaveModal}
+          isCalculating={isCalculating}
+        />
+
+        {/* Save Chart Modal */}
+        <AnimatePresence>
+          {showSaveModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => setShowSaveModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 p-6 shadow-2xl"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-display text-xl font-semibold text-white">Save Chart</h3>
+                  <button
+                    onClick={() => setShowSaveModal(false)}
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="chart-name"
+                    className="block text-sm font-medium text-slate-300 mb-2"
+                  >
+                    Chart Name
+                  </label>
+                  <input
+                    id="chart-name"
+                    type="text"
+                    value={chartName}
+                    onChange={(e) => setChartName(e.target.value)}
+                    placeholder="Enter a name for this chart"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
+                    autoFocus
+                  />
+                </div>
+
+                {birthData && (
+                  <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-700">
+                    <div className="text-sm text-slate-400">
+                      <span className="text-white font-medium">
+                        {birthData.birthCity}, {birthData.birthCountry}
+                      </span>
+                      <br />
+                      {birthData.birthDate} at {birthData.birthTime}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowSaveModal(false)}
+                    className="flex-1 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 rounded-xl transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveChart}
+                    disabled={!chartName.trim() || isSaving}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        Save
+                      </>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    )
+  }
+
+  // Standard scrollable layout for birth-data and weights steps
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#050714] via-[#0a0f1f] to-[#0f172a] py-12 px-6">
       <div className="max-w-4xl mx-auto">
@@ -318,215 +422,6 @@ function CalculatorContent() {
                   </motion.button>
                 </div>
               </div>
-            </motion.div>
-          )}
-
-          {step === 'results' && result && (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="space-y-8"
-            >
-              {/* Birth data summary */}
-              {birthData && (
-                <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-4 flex items-center justify-between">
-                  <div className="text-slate-400 text-sm">
-                    <span className="text-white font-medium">
-                      {birthData.birthCity}, {birthData.birthCountry}
-                    </span>{' '}
-                    • {birthData.birthDate} at {birthData.birthTime}
-                  </div>
-                  <button
-                    onClick={() => setStep('birth-data')}
-                    className="text-sm text-amber-400 hover:text-amber-300"
-                  >
-                    Edit
-                  </button>
-                </div>
-              )}
-
-              {/* Declinations */}
-              <DeclinationTable declinations={result.declinations} />
-
-              {/* 3D Globe Visualization */}
-              <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-4">
-                <h3 className="font-display text-lg font-semibold text-white mb-4">
-                  Global Visualization
-                </h3>
-                {phase2Data ? (
-                  <EnhancedGlobeSection
-                    birthLocation={
-                      birthData
-                        ? {
-                            latitude: birthData.birthLatitude,
-                            longitude: birthData.birthLongitude,
-                            city: birthData.birthCity,
-                          }
-                        : undefined
-                    }
-                    declinations={phase2Data.declinations}
-                    acgLines={phase2Data.acgLines}
-                    parans={phase2Data.parans}
-                    globeState={globeState}
-                  />
-                ) : (
-                  <GlobeView
-                    optimalLatitudes={result.optimalLatitudes}
-                    latitudeBands={result.latitudeBands}
-                    birthLocation={
-                      birthData
-                        ? {
-                            latitude: birthData.birthLatitude,
-                            longitude: birthData.birthLongitude,
-                            city: birthData.birthCity,
-                          }
-                        : undefined
-                    }
-                  />
-                )}
-              </div>
-
-              {/* Weights adjuster (collapsed) */}
-              <details className="group rounded-xl bg-slate-800/30 border border-slate-700/50 overflow-hidden">
-                <summary className="p-4 cursor-pointer flex items-center justify-between hover:bg-slate-800/50 transition-colors">
-                  <span className="font-medium text-white">Adjust Weights</span>
-                  <ChevronRight className="w-4 h-4 text-slate-400 transition-transform group-open:rotate-90" />
-                </summary>
-                <div className="p-4 border-t border-slate-700/30">
-                  <PlanetWeightsEditor weights={weights} onChange={handleRecalculate} />
-                </div>
-              </details>
-
-              {/* Phase 1 Results */}
-              <ResultsPanel
-                optimalLatitudes={result.optimalLatitudes}
-                latitudeBands={result.latitudeBands}
-              />
-
-              {/* Phase 2 Enhanced Results */}
-              {phase2Data && (
-                <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Sparkles className="w-5 h-5 text-amber-400" />
-                    <h3 className="font-display text-xl font-semibold text-white">
-                      Enhanced Analysis
-                    </h3>
-                  </div>
-                  <ResultsTabs
-                    acgLines={phase2Data.acgLines}
-                    zenithLines={phase2Data.zenithLines}
-                    parans={phase2Data.parans}
-                    scoringGrid={phase2Data.scoringGrid}
-                    globeState={globeState}
-                  />
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => setStep('weights')}
-                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
-                >
-                  Modify Weights
-                </button>
-                <button
-                  onClick={openSaveModal}
-                  className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors"
-                >
-                  <Save className="w-4 h-4" />
-                  Save Chart
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Save Chart Modal */}
-        <AnimatePresence>
-          {showSaveModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-              onClick={() => setShowSaveModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 p-6 shadow-2xl"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-display text-xl font-semibold text-white">Save Chart</h3>
-                  <button
-                    onClick={() => setShowSaveModal(false)}
-                    className="text-slate-400 hover:text-white transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="mb-6">
-                  <label
-                    htmlFor="chart-name"
-                    className="block text-sm font-medium text-slate-300 mb-2"
-                  >
-                    Chart Name
-                  </label>
-                  <input
-                    id="chart-name"
-                    type="text"
-                    value={chartName}
-                    onChange={(e) => setChartName(e.target.value)}
-                    placeholder="Enter a name for this chart"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-colors"
-                    autoFocus
-                  />
-                </div>
-
-                {birthData && (
-                  <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-700">
-                    <div className="text-sm text-slate-400">
-                      <span className="text-white font-medium">
-                        {birthData.birthCity}, {birthData.birthCountry}
-                      </span>
-                      <br />
-                      {birthData.birthDate} at {birthData.birthTime}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowSaveModal(false)}
-                    className="flex-1 px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 rounded-xl transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveChart}
-                    disabled={!chartName.trim() || isSaving}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-900 font-semibold rounded-xl hover:shadow-[0_0_20px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        Save
-                      </>
-                    )}
-                  </button>
-                </div>
-              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
