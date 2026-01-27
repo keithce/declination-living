@@ -50,6 +50,7 @@ export default function ConceptCard({
               </motion.div>
 
               <button
+                type="button"
                 onClick={() => setExpanded(!expanded)}
                 className="mt-4 flex items-center gap-1 text-sm text-celestial-gold hover:text-celestial-amber transition-colors"
               >

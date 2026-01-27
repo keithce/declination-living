@@ -95,6 +95,7 @@ export default function TableOfContents({ className = '' }: TableOfContentsProps
           {TOC_ITEMS.map((item) => (
             <li key={item.id}>
               <button
+                type="button"
                 onClick={() => scrollToSection(item.id)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
                   activeSection === item.id
@@ -127,9 +128,11 @@ export default function TableOfContents({ className = '' }: TableOfContentsProps
       {isOpen && (
         <>
           {/* Overlay */}
-          <div
+          <button
+            type="button"
             className="lg:hidden fixed inset-0 bg-black/50 z-40"
             onClick={() => setIsOpen(false)}
+            aria-label="Close table of contents"
           />
 
           {/* Drawer content */}
@@ -158,6 +161,7 @@ export default function TableOfContents({ className = '' }: TableOfContentsProps
                 {TOC_ITEMS.map((item) => (
                   <li key={item.id}>
                     <button
+                      type="button"
                       onClick={() => scrollToSection(item.id)}
                       className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
                         activeSection === item.id

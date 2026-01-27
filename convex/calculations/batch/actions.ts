@@ -10,7 +10,7 @@
 import { v } from 'convex/values'
 import { action } from '../../_generated/server'
 import { api } from '../../_generated/api'
-import { planetWeightsValidator } from '../validators'
+import { gridOptionsValidator, planetWeightsValidator } from '../validators'
 import type { ACGLine, ParanPoint, ZenithLine } from '../core/types'
 import type { PlanetDeclinations } from '../ephemeris'
 import type { GridCell } from '../geospatial/grid'
@@ -37,24 +37,6 @@ interface AllVisualizationDataResult {
   scoringGrid: Array<GridCell>
   declinations: PlanetDeclinations
 }
-
-// =============================================================================
-// Validators
-// =============================================================================
-
-/** Grid options validator */
-const gridOptionsValidator = v.optional(
-  v.object({
-    latStep: v.optional(v.number()),
-    lonStep: v.optional(v.number()),
-    latMin: v.optional(v.number()),
-    latMax: v.optional(v.number()),
-    lonMin: v.optional(v.number()),
-    lonMax: v.optional(v.number()),
-    acgOrb: v.optional(v.number()),
-    paranOrb: v.optional(v.number()),
-  }),
-)
 
 // =============================================================================
 // Batch Convenience Action

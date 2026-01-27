@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = join(__dirname, '..', 'data')
 const OUTPUT_FILE = join(DATA_DIR, 'cities.json')
-const CITIES_URL = 'http://download.geonames.org/export/dump/cities15000.zip'
+const CITIES_URL = 'https://download.geonames.org/export/dump/cities15000.zip'
 const TEMP_ZIP = join(DATA_DIR, 'cities15000.zip')
 const TEMP_TXT = join(DATA_DIR, 'cities15000.txt')
 
@@ -132,14 +132,20 @@ function getTier(population: number): CityRecord['tier'] {
  */
 async function downloadFile(url: string, dest: string): Promise<void> {
   console.log(`Downloading ${url}...`)
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(`Failed to download: ${response.statusText}`)
-  }
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30_000)
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+    if (!response.ok) {
+      throw new Error(`Failed to download: ${response.statusText}`)
+    }
 
-  const buffer = await response.arrayBuffer()
-  writeFileSync(dest, Buffer.from(buffer))
-  console.log(`Downloaded to ${dest}`)
+    const buffer = await response.arrayBuffer()
+    writeFileSync(dest, Buffer.from(buffer))
+    console.log(`Downloaded to ${dest}`)
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 /**
@@ -153,7 +159,10 @@ async function extractZip(zipPath: string, destDir: string): Promise<void> {
   })
   await proc.exited
   if (proc.exitCode !== 0) {
-    throw new Error(`Failed to extract zip: exit code ${proc.exitCode}`)
+    const stderr = await new Response(proc.stderr).text()
+    throw new Error(
+      `Failed to extract zip: exit code ${proc.exitCode}${stderr ? `\n${stderr}` : ''}`,
+    )
   }
   console.log('Extracted successfully')
 }
@@ -162,7 +171,7 @@ async function extractZip(zipPath: string, destDir: string): Promise<void> {
  * Parse TSV line into city record.
  */
 function parseLine(line: string): CityRecord | null {
-  const cols = line.split('\t')
+  const cols = line.trim().split('\t')
   if (cols.length < 18) return null
 
   const population = parseInt(cols[COL.POPULATION], 10)

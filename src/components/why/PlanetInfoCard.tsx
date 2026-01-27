@@ -97,6 +97,7 @@ export default function PlanetInfoCard({
 
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700/50">
             <button
+              type="button"
               onClick={() => setExpanded(!expanded)}
               className="flex items-center gap-1 text-sm text-celestial-gold hover:text-celestial-amber transition-colors"
             >

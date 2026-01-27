@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { PLANET_COLORS, PLANET_SYMBOLS } from '@/lib/planet-constants'
+import { PLANET_COLORS, PLANET_IDS, PLANET_SYMBOLS } from '@/lib/planet-constants'
 
 interface WeightingDiagramProps {
   className?: string
@@ -79,19 +79,6 @@ const PRESETS: Array<Preset> = [
   },
 ]
 
-const PLANETS = [
-  'sun',
-  'moon',
-  'mercury',
-  'venus',
-  'mars',
-  'jupiter',
-  'saturn',
-  'uranus',
-  'neptune',
-  'pluto',
-]
-
 export default function WeightingDiagram({ className = '' }: WeightingDiagramProps) {
   const [activePreset, setActivePreset] = useState(0)
   const currentWeights = PRESETS[activePreset].weights
@@ -104,6 +91,7 @@ export default function WeightingDiagram({ className = '' }: WeightingDiagramPro
       <div className="flex flex-wrap gap-2 justify-center mb-6">
         {PRESETS.map((preset, index) => (
           <button
+            type="button"
             key={preset.name}
             onClick={() => setActivePreset(index)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -137,7 +125,7 @@ export default function WeightingDiagram({ className = '' }: WeightingDiagramPro
         <line x1="40" y1="120" x2="380" y2="120" stroke="#334155" strokeWidth="1" />
 
         {/* Bars */}
-        {PLANETS.map((planet, index) => {
+        {PLANET_IDS.map((planet, index) => {
           const x = 50 + index * 34
           const weight = currentWeights[planet]
           const barHeight = weight * maxBarHeight

@@ -14,11 +14,11 @@ import { action, internalAction } from '../../_generated/server'
 import { components, internal } from '../../_generated/api'
 import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from '../ephemeris'
 import { eclipticToEquatorial } from '../coordinates/transform'
-import { MEAN_OBLIQUITY_J2000 } from '../core/constants'
+import { CACHE_TTL_30_DAYS_MS, MEAN_OBLIQUITY_J2000 } from '../core/constants'
 import { PLANET_IDS } from '../core/types'
 import { calculateAllACGLines } from '../acg/line_solver'
 import { calculateAllParans } from '../parans/solver'
-import { planetWeightsValidator } from '../validators'
+import { gridOptionsValidator, planetWeightsValidator } from '../validators'
 import { generateScoringGrid } from './grid'
 import type { EquatorialCoordinates, PlanetId } from '../core/types'
 import type { GridCell, ScoringGridOptions } from './grid'
@@ -36,31 +36,6 @@ interface ScoringGridResult {
     minScore: number
   }
 }
-
-// =============================================================================
-// Validators
-// =============================================================================
-
-/** Grid options validator */
-const gridOptionsValidator = v.optional(
-  v.object({
-    latStep: v.optional(v.number()),
-    lonStep: v.optional(v.number()),
-    latMin: v.optional(v.number()),
-    latMax: v.optional(v.number()),
-    lonMin: v.optional(v.number()),
-    lonMax: v.optional(v.number()),
-    acgOrb: v.optional(v.number()),
-    paranOrb: v.optional(v.number()),
-  }),
-)
-
-// =============================================================================
-// Cache Configuration
-// =============================================================================
-
-// 30-day TTL in milliseconds
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 // =============================================================================
 // Scoring Grid Calculation (Cached)
@@ -146,7 +121,7 @@ export const calculateScoringGridUncached = internalAction({
 const scoringGridCache = new ActionCache(components.actionCache, {
   action: internal.calculations.geospatial.actions.calculateScoringGridUncached,
   name: 'calculateScoringGrid:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**

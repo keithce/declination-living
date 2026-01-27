@@ -91,7 +91,8 @@ function getGlowTexture(): THREE.Texture {
   canvas.width = size
   canvas.height = size
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Failed to get 2D canvas context for glow texture')
   const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
 
   gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
@@ -120,7 +121,8 @@ function createLabelTexture(text: string): THREE.Texture {
   canvas.width = LABEL_CANVAS_WIDTH
   canvas.height = LABEL_CANVAS_HEIGHT
 
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Failed to get 2D canvas context for label texture')
 
   // Clear with transparent background
   ctx.clearRect(0, 0, canvas.width, canvas.height)

@@ -11,7 +11,11 @@ import { v } from 'convex/values'
 import { ActionCache } from '@convex-dev/action-cache'
 import { action, internalAction } from '../../_generated/server'
 import { components, internal } from '../../_generated/api'
-import { DEFAULT_DECLINATION_ORB, MEAN_OBLIQUITY_J2000 } from '../core/constants'
+import {
+  CACHE_TTL_30_DAYS_MS,
+  DEFAULT_DECLINATION_ORB,
+  MEAN_OBLIQUITY_J2000,
+} from '../core/constants'
 import { PLANET_IDS } from '../core/types'
 import { calculateAllPositions, dateToJulianDay } from '../ephemeris'
 import { eclipticToEquatorial } from '../coordinates/transform'
@@ -160,9 +164,6 @@ export const calculateACGAndZenith = internalAction({
 // Public ACG Calculation (Cached)
 // =============================================================================
 
-// 30-day TTL in milliseconds
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
-
 /** Result type for public ACG calculation */
 interface ACGPublicResult {
   julianDay: number
@@ -225,7 +226,7 @@ export const calculateACGAndZenithFromBirthDataUncached = internalAction({
 const acgPublicCache = new ActionCache(components.actionCache, {
   action: internal.calculations.acg.actions.calculateACGAndZenithFromBirthDataUncached,
   name: 'calculateACGFromBirthData:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**

@@ -1,10 +1,16 @@
 import { motion } from 'framer-motion'
+import { useId } from 'react'
 
 interface CelestialSphereDiagramProps {
   className?: string
 }
 
 export default function CelestialSphereDiagram({ className = '' }: CelestialSphereDiagramProps) {
+  const id = useId()
+  const sphereGlowId = `sphereGlow${id}`
+  const goldGradientId = `goldGradient${id}`
+  const eclipticGradientId = `eclipticGradient${id}`
+
   return (
     <svg
       viewBox="0 0 400 400"
@@ -21,22 +27,22 @@ export default function CelestialSphereDiagram({ className = '' }: CelestialSphe
 
       {/* Background glow */}
       <defs>
-        <radialGradient id="sphereGlow" cx="50%" cy="50%" r="50%">
+        <radialGradient id={sphereGlowId} cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#1e1b4b" stopOpacity="0.5" />
           <stop offset="100%" stopColor="#050714" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={goldGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#fbbf24" />
           <stop offset="100%" stopColor="#d97706" />
         </linearGradient>
-        <linearGradient id="eclipticGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={eclipticGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#818cf8" />
           <stop offset="100%" stopColor="#6366f1" />
         </linearGradient>
       </defs>
 
       {/* Background */}
-      <circle cx="200" cy="200" r="190" fill="url(#sphereGlow)" />
+      <circle cx="200" cy="200" r="190" fill={`url(#${sphereGlowId})`} />
 
       {/* Celestial sphere outline */}
       <motion.circle
@@ -59,7 +65,7 @@ export default function CelestialSphereDiagram({ className = '' }: CelestialSphe
         rx="180"
         ry="40"
         fill="none"
-        stroke="url(#goldGradient)"
+        stroke={`url(#${goldGradientId})`}
         strokeWidth="2"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
@@ -73,7 +79,7 @@ export default function CelestialSphereDiagram({ className = '' }: CelestialSphe
         rx="180"
         ry="50"
         fill="none"
-        stroke="url(#eclipticGradient)"
+        stroke={`url(#${eclipticGradientId})`}
         strokeWidth="2"
         strokeDasharray="8 4"
         transform="rotate(-23.4 200 200)"

@@ -6,6 +6,7 @@
  * preventing unnecessary re-renders when unrelated state changes.
  */
 
+import { useShallow } from 'zustand/react/shallow'
 import { useCalculatorStore } from './calculator-store'
 import type {
   ACGData,
@@ -125,35 +126,23 @@ export function useVisualizationProgress(): number {
  * Useful when you need multiple setters without subscribing to state changes.
  */
 export function useVisualizationActions() {
-  const setZenithLoading = useCalculatorStore((state) => state.setZenithLoading)
-  const setZenithData = useCalculatorStore((state) => state.setZenithData)
-  const setZenithError = useCalculatorStore((state) => state.setZenithError)
-  const setACGLoading = useCalculatorStore((state) => state.setACGLoading)
-  const setACGData = useCalculatorStore((state) => state.setACGData)
-  const setACGError = useCalculatorStore((state) => state.setACGError)
-  const setParansLoading = useCalculatorStore((state) => state.setParansLoading)
-  const setParansData = useCalculatorStore((state) => state.setParansData)
-  const setParansError = useCalculatorStore((state) => state.setParansError)
-  const setScoringGridLoading = useCalculatorStore((state) => state.setScoringGridLoading)
-  const setScoringGridData = useCalculatorStore((state) => state.setScoringGridData)
-  const setScoringGridError = useCalculatorStore((state) => state.setScoringGridError)
-  const resetVisualization = useCalculatorStore((state) => state.resetVisualization)
-
-  return {
-    setZenithLoading,
-    setZenithData,
-    setZenithError,
-    setACGLoading,
-    setACGData,
-    setACGError,
-    setParansLoading,
-    setParansData,
-    setParansError,
-    setScoringGridLoading,
-    setScoringGridData,
-    setScoringGridError,
-    resetVisualization,
-  }
+  return useCalculatorStore(
+    useShallow((state) => ({
+      setZenithLoading: state.setZenithLoading,
+      setZenithData: state.setZenithData,
+      setZenithError: state.setZenithError,
+      setACGLoading: state.setACGLoading,
+      setACGData: state.setACGData,
+      setACGError: state.setACGError,
+      setParansLoading: state.setParansLoading,
+      setParansData: state.setParansData,
+      setParansError: state.setParansError,
+      setScoringGridLoading: state.setScoringGridLoading,
+      setScoringGridData: state.setScoringGridData,
+      setScoringGridError: state.setScoringGridError,
+      resetVisualization: state.resetVisualization,
+    })),
+  )
 }
 
 // =============================================================================

@@ -1,10 +1,15 @@
 import { motion } from 'framer-motion'
+import { useId } from 'react'
 
 interface ZenithConceptDiagramProps {
   className?: string
 }
 
 export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDiagramProps) {
+  const id = useId()
+  const zenithBandId = `zenithBand${id}`
+  const earthGradientId = `earthGradient${id}`
+
   return (
     <svg
       viewBox="0 0 400 350"
@@ -19,12 +24,12 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
       </desc>
 
       <defs>
-        <linearGradient id="zenithBand" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id={zenithBandId} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#fbbf24" stopOpacity="0" />
           <stop offset="50%" stopColor="#fbbf24" stopOpacity="0.4" />
           <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
         </linearGradient>
-        <radialGradient id="earthGradient" cx="30%" cy="30%" r="70%">
+        <radialGradient id={earthGradientId} cx="30%" cy="30%" r="70%">
           <stop offset="0%" stopColor="#1e40af" />
           <stop offset="100%" stopColor="#0f172a" />
         </radialGradient>
@@ -36,7 +41,7 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
         cy="200"
         rx="150"
         ry="130"
-        fill="url(#earthGradient)"
+        fill={`url(#${earthGradientId})`}
         stroke="#3b82f6"
         strokeWidth="2"
         initial={{ scale: 0 }}
@@ -85,7 +90,7 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
           y={200 - 23 * 1.8 - 15}
           width="280"
           height="30"
-          fill="url(#zenithBand)"
+          fill={`url(#${zenithBandId})`}
           opacity="0.5"
         />
       </motion.g>

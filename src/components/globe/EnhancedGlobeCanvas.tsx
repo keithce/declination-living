@@ -413,7 +413,9 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         currentRef.controls.dispose()
 
         // Remove and dispose layers (remove from scene BEFORE disposing)
-        Object.values(currentRef.layers).forEach((layer) => {
+        // Cast needed: optional properties can be explicitly set to undefined at runtime
+        ;(Object.values(currentRef.layers) as Array<LayerGroup | undefined>).forEach((layer) => {
+          if (!layer) return
           sceneToDispose.remove(layer.group)
           layer.dispose()
         })

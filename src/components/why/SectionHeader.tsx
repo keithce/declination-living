@@ -48,6 +48,7 @@ export default function SectionHeader({ id, title, subtitle, highlight }: Sectio
           {renderTitle()}
         </h2>
         <button
+          type="button"
           onClick={copyLink}
           className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-slate-800 rounded-lg"
           aria-label={`Copy link to ${title} section`}
