@@ -8,15 +8,15 @@ export const getCitiesForRanking = internalQuery({
     ),
   },
   handler: async (ctx, { tiers }) => {
-    const results = []
-    for (const tier of tiers) {
-      const cities = await ctx.db
-        .query('cities')
-        .withIndex('by_tier_latitude', (q) => q.eq('tier', tier))
-        .collect()
-      results.push(...cities)
-    }
-    return results
+    const results = await Promise.all(
+      tiers.map((tier) =>
+        ctx.db
+          .query('cities')
+          .withIndex('by_tier_latitude', (q) => q.eq('tier', tier))
+          .collect(),
+      ),
+    )
+    return results.flat()
   },
 })
 

@@ -113,6 +113,9 @@ export const seedCitiesFromJson = action({
     } catch (e) {
       throw new Error(`Failed to parse citiesJson: ${e instanceof Error ? e.message : String(e)}`)
     }
+    if (!Array.isArray(allCities)) {
+      throw new Error(`citiesJson must parse to an array, got ${typeof allCities}`)
+    }
     const cities = maxCities ? allCities.slice(0, maxCities) : allCities
 
     console.log(`Seeding ${cities.length} cities in batches of ${BATCH_SIZE}...`)

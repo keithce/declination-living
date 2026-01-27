@@ -1,7 +1,7 @@
-import {  useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { convexAction } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api'
-import type {UseQueryResult} from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query'
 import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { FunctionReturnType } from 'convex/server'
@@ -109,7 +109,7 @@ export function useProgressiveVisualization(
 
   const queries = [zenith, acg, parans, scoringGrid, rankedCities]
   const isAnyLoading = queries.some((q) => q.isLoading || q.isFetching)
-  const progress = queries.filter((q) => q.isSuccess).length / 5
+  const progress = queries.filter((q) => q.isSuccess).length / queries.length
 
   return { zenith, acg, parans, scoringGrid, rankedCities, isAnyLoading, progress }
 }

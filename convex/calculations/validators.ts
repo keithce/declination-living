@@ -296,6 +296,9 @@ export function validateGridOptions(options: {
   if (lonMax !== undefined && (lonMax < -180 || lonMax > 180)) {
     throw new Error(`lonMax must be between -180 and 180, got ${lonMax}`)
   }
+  if (lonMin !== undefined && lonMax !== undefined && lonMin >= lonMax) {
+    throw new Error(`lonMin (${lonMin}) must be less than lonMax (${lonMax})`)
+  }
   if (latStep !== undefined && (latStep <= 0 || latStep > 90)) {
     throw new Error(`latStep must be between 0 (exclusive) and 90, got ${latStep}`)
   }

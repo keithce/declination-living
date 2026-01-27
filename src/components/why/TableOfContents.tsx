@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { BookOpen, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface TocItem {
   id: string
@@ -109,10 +109,14 @@ function MobileToc({ isOpen, activeSection, onOpen, onClose, onScrollToSection }
         {isOpen && (
           <>
             {/* Overlay */}
-            <motion.button
-              type="button"
+            <motion.div
+              role="button"
+              tabIndex={0}
               className="lg:hidden fixed inset-0 bg-black/50 z-40"
               onClick={onClose}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === 'Escape') onClose()
+              }}
               aria-label="Close table of contents"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -215,13 +219,13 @@ export function TableOfContents({ className = '' }: TableOfContentsProps) {
     }
   }, [])
 
-  const scrollToSection = (id: string) => {
+  const scrollToSection = useCallback((id: string) => {
     const element = document.getElementById(id)
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' })
       setIsOpen(false)
     }
-  }
+  }, [])
 
   return (
     <>

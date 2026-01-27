@@ -30,6 +30,8 @@ export interface GlobeState {
   highlightedCity: string | null
   /** Whether to show city labels on the globe */
   showCityLabels: boolean
+  /** Sun time of day in hours (0-24) */
+  sunTimeOfDay: number
 }
 
 export interface GlobeStateActions {
@@ -53,6 +55,8 @@ export interface GlobeStateActions {
   setHighlightedCity: (cityId: string | null) => void
   /** Toggle city labels visibility */
   toggleCityLabels: () => void
+  /** Set sun time of day (0-24 hours) */
+  setSunTimeOfDay: (hour: number) => void
   /** Reset all state to defaults */
   resetState: () => void
 }
@@ -94,6 +98,7 @@ const DEFAULT_STATE: GlobeState = {
   highlightedPlanet: null,
   highlightedCity: null,
   showCityLabels: false,
+  sunTimeOfDay: 12,
 }
 
 // =============================================================================
@@ -195,6 +200,14 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
     }))
   }, [])
 
+  // Sun time of day
+  const setSunTimeOfDay = useCallback((hour: number) => {
+    setState((prev) => ({
+      ...prev,
+      sunTimeOfDay: Math.max(0, Math.min(24, hour)),
+    }))
+  }, [])
+
   // Toggle city labels
   const toggleCityLabels = useCallback(() => {
     setState((prev) => ({
@@ -222,6 +235,7 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHighlightedPlanet,
       setHighlightedCity,
       toggleCityLabels,
+      setSunTimeOfDay,
       resetState,
     }),
     [
@@ -236,6 +250,7 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHighlightedPlanet,
       setHighlightedCity,
       toggleCityLabels,
+      setSunTimeOfDay,
       resetState,
     ],
   )

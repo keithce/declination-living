@@ -11,6 +11,12 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {
+  createAtmosphereMaterial,
+  createEarthMaterial,
+  disposeEarthTextures,
+  loadEarthTextures,
+} from './shaders'
 import { createZenithBandLayer, updateZenithBandVisibility } from './layers/ZenithBandLayer'
 import { createACGLineLayer, updateACGLineVisibility } from './layers/ACGLineLayer'
 import { createParanPointLayer, updateParanPointVisibility } from './layers/ParanPointLayer'
@@ -22,6 +28,7 @@ import {
   updateCityLabels,
 } from './layers/CityMarkerLayer'
 import { PLANET_IDS } from './layers/types'
+import type { EarthTextures } from './shaders'
 import type { UseGlobeStateReturn } from './hooks/useGlobeState'
 import type { CityMarkerData, ExtendedGlobeCanvasProps, LayerGroup } from './layers/types'
 
@@ -133,6 +140,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     const sceneRef = useRef<SceneRefs | null>(null)
     const raycasterRef = useRef<THREE.Raycaster | null>(null)
     const hitTestSphereRef = useRef<THREE.Mesh | null>(null)
+    const earthTexturesRef = useRef<EarthTextures | null>(null)
 
     // Refs for visibility state to avoid recreation when visibility changes
     const planetsRef = useRef(globeState.planets)
@@ -142,6 +150,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     const layersVisibilityRef = useRef(globeState.layers)
     const showCityLabelsRef = useRef(globeState.showCityLabels)
     const highlightedCityRef = useRef(globeState.highlightedCity)
+    const sunTimeOfDayRef = useRef(globeState.sunTimeOfDay)
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -152,6 +161,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       layersVisibilityRef.current = globeState.layers
       showCityLabelsRef.current = globeState.showCityLabels
       highlightedCityRef.current = globeState.highlightedCity
+      sunTimeOfDayRef.current = globeState.sunTimeOfDay
     }, [
       globeState.planets,
       globeState.acgLineTypes,
@@ -160,6 +170,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       globeState.layers,
       globeState.showCityLabels,
       globeState.highlightedCity,
+      globeState.sunTimeOfDay,
     ])
 
     // ==========================================================================
@@ -281,35 +292,48 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       controls.maxDistance = 8
       controls.enablePan = false
 
-      // Earth sphere
+      // Renderer color space for correct gamma
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+
+      // Earth sphere with custom shader
       const earthGeometry = new THREE.SphereGeometry(1, 64, 64)
-      const earthMaterial = new THREE.MeshPhongMaterial({
-        color: 0x1e3a5f,
-        emissive: 0x112244,
-        emissiveIntensity: 0.2,
-        shininess: 5,
-      })
+      const earthMaterial = createEarthMaterial()
       const earth = new THREE.Mesh(earthGeometry, earthMaterial)
       scene.add(earth)
 
-      // Wireframe overlay
-      const wireframeGeometry = new THREE.SphereGeometry(1.001, 32, 32)
-      const wireframeMaterial = new THREE.MeshBasicMaterial({
-        color: 0x334455,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.3,
-      })
-      const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial)
-      scene.add(wireframe)
+      // Atmosphere glow (BackSide sphere outside all overlay layers)
+      const atmosphereGeometry = new THREE.SphereGeometry(1.04, 64, 64)
+      const atmosphereMaterial = createAtmosphereMaterial()
+      const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial)
+      scene.add(atmosphere)
 
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+      // Load textures asynchronously
+      let isMounted = true
+      loadEarthTextures()
+        .then((textures) => {
+          if (!isMounted) {
+            disposeEarthTextures(textures)
+            return
+          }
+          earthTexturesRef.current = textures
+          const u = earthMaterial.uniforms
+          u.uDayMap.value = textures.day
+          u.uNightMap.value = textures.night
+          u.uNormalMap.value = textures.normal
+          u.uSpecularMap.value = textures.specular
+          earthMaterial.needsUpdate = true
+        })
+        .catch((err) => {
+          console.error('Failed to load earth textures:', err)
+        })
+
+      // Lighting — directional for shader sun direction, low ambient
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.15)
       scene.add(ambientLight)
 
-      const pointLight = new THREE.PointLight(0xffeedd, 1, 100)
-      pointLight.position.set(5, 3, 5)
-      scene.add(pointLight)
+      const dirLight = new THREE.DirectionalLight(0xffeedd, 1.5)
+      dirLight.position.set(5, 3, 5)
+      scene.add(dirLight)
 
       // Stars
       const stars = createStars()
@@ -351,6 +375,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
       // Animation loop
       let time = 0
+      const sunDirection = new THREE.Vector3(5, 3, 5).normalize()
       const animate = () => {
         const animationId = requestAnimationFrame(animate)
         if (sceneRef.current) {
@@ -359,6 +384,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
         time += 0.016 // ~60fps
         controls.update()
+
+        // Sun position controlled by time-of-day slider (hour → radians)
+        const sunAngle = (sunTimeOfDayRef.current / 24) * Math.PI * 2
+        sunDirection.set(Math.cos(sunAngle) * 5, 3, Math.sin(sunAngle) * 5).normalize()
+        earthMaterial.uniforms.uSunDirection.value.copy(sunDirection)
+        ;(atmosphereMaterial.uniforms.uSunDirection as THREE.IUniform<THREE.Vector3>).value.copy(
+          sunDirection,
+        )
 
         // Update layer animations
         const layers = sceneRef.current?.layers
@@ -388,7 +421,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
       // Cleanup
       return () => {
+        isMounted = false
         window.removeEventListener('resize', handleResize)
+
+        // Dispose loaded earth textures
+        if (earthTexturesRef.current) {
+          disposeEarthTextures(earthTexturesRef.current)
+          earthTexturesRef.current = null
+        }
 
         // Capture ref value at cleanup time to avoid stale closure issues
         const currentRef = sceneRef.current

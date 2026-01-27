@@ -243,6 +243,12 @@ export function convertAllToEquatorial(
 
   for (const planet of PLANET_IDS) {
     const pos = positions[planet]
+    if (!Number.isFinite(pos.longitude) || !Number.isFinite(pos.latitude)) {
+      throw new TypeError(
+        `convertAllToEquatorial: missing or invalid position for "${planet}". ` +
+          `Ensure calculateAllPositions returned valid data.`,
+      )
+    }
     const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
     result[planet] = {
       ra: eq.rightAscension,

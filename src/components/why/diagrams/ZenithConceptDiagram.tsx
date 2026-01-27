@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import { useId } from 'react'
 
-/** Y position for the 23° latitude line: ZENITH_BAND_Y */
-const ZENITH_BAND_Y = ZENITH_BAND_Y
+/** Y position for the 23° latitude line: y = 200 - lat * 1.8 */
+const ZENITH_BAND_Y = 200 - 23 * 1.8
 
 interface ZenithConceptDiagramProps {
   className?: string

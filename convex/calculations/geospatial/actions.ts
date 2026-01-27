@@ -245,6 +245,8 @@ export const rankTopCities = action({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args): Promise<Array<RankedCityResultDTO>> => {
+    // Safe cast: rankTopCitiesUncached returns Array<RankedCityResultDTO> but
+    // ActionCache.fetch types it as the generic cache return type.
     return cityRankingCache.fetch(ctx, args) as Promise<Array<RankedCityResultDTO>>
   },
 })
