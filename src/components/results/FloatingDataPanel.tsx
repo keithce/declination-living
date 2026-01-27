@@ -22,7 +22,6 @@ import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
 import type { Declinations, EnhancedDeclination } from '@/components/calculator/DeclinationTable'
 import type { PlanetId } from '@/lib/planet-constants'
-import type { Phase2Data } from '@/components/results/FullPageGlobeLayout'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
 import { debounce } from '@/lib/utils'
@@ -65,8 +64,6 @@ interface FloatingDataPanelProps {
   birthData: BirthData | null
   /** Calculation result */
   result: CalculationResult
-  /** Phase 2 enhanced data */
-  phase2Data: Phase2Data | null
   /** Current weights */
   weights: PlanetWeights
   /** Globe state for ResultsTabs */
@@ -178,7 +175,6 @@ function CompactDeclinations({
 export function FloatingDataPanel({
   birthData,
   result,
-  phase2Data,
   weights,
   globeState,
   onEditBirthData,
@@ -201,22 +197,16 @@ export function FloatingDataPanel({
   const scoringGridState = useScoringGridData()
   const isAnyVisualizationLoading = useAnyVisualizationLoading()
 
-  // Combine progressive data with legacy phase2Data for backward compatibility
-  const combinedACGLines = useMemo(
-    () => acgState.data?.acgLines ?? phase2Data?.acgLines ?? [],
-    [acgState.data?.acgLines, phase2Data?.acgLines],
-  )
+  // Get visualization data from progressive loading store
+  const combinedACGLines = useMemo(() => acgState.data?.acgLines ?? [], [acgState.data?.acgLines])
   const combinedZenithLines = useMemo(
-    () => zenithState.data?.zenithLines ?? phase2Data?.zenithLines ?? [],
-    [zenithState.data?.zenithLines, phase2Data?.zenithLines],
+    () => zenithState.data?.zenithLines ?? [],
+    [zenithState.data?.zenithLines],
   )
-  const combinedParans = useMemo(
-    () => paransState.data?.points ?? phase2Data?.parans ?? [],
-    [paransState.data?.points, phase2Data?.parans],
-  )
+  const combinedParans = useMemo(() => paransState.data?.points ?? [], [paransState.data?.points])
   const combinedScoringGrid = useMemo(
-    () => scoringGridState.data?.grid ?? phase2Data?.scoringGrid ?? [],
-    [scoringGridState.data?.grid, phase2Data?.scoringGrid],
+    () => scoringGridState.data?.grid ?? [],
+    [scoringGridState.data?.grid],
   )
 
   // Check if we have any visualization data to show

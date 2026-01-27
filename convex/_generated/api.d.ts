@@ -54,7 +54,6 @@ import type * as calculations_parans_catalog from "../calculations/parans/catalo
 import type * as calculations_parans_events from "../calculations/parans/events.js";
 import type * as calculations_parans_index from "../calculations/parans/index.js";
 import type * as calculations_parans_solver from "../calculations/parans/solver.js";
-import type * as calculations_phase2_actions from "../calculations/phase2_actions.js";
 import type * as calculations_safety_filter from "../calculations/safety/filter.js";
 import type * as calculations_safety_index from "../calculations/safety/index.js";
 import type * as calculations_validators from "../calculations/validators.js";
@@ -125,7 +124,6 @@ declare const fullApi: ApiFromModules<{
   "calculations/parans/events": typeof calculations_parans_events;
   "calculations/parans/index": typeof calculations_parans_index;
   "calculations/parans/solver": typeof calculations_parans_solver;
-  "calculations/phase2_actions": typeof calculations_phase2_actions;
   "calculations/safety/filter": typeof calculations_safety_filter;
   "calculations/safety/index": typeof calculations_safety_index;
   "calculations/validators": typeof calculations_validators;

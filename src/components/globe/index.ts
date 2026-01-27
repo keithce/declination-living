@@ -20,7 +20,7 @@ export { useGlobeState, getVisiblePlanetCount, getVisibleACGLineTypeCount } from
 export type { GlobeState, GlobeStateActions, UseGlobeStateReturn } from './hooks'
 
 // Utils
-export { transformACGLines, transformZenithLines, transformParans, hasPhase2Data } from './utils'
+export { transformACGLines, transformZenithLines, transformParans } from './utils'
 
 // Layer types
 export type {

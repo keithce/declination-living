@@ -39,19 +39,45 @@ export const BirthDataSchema = z.object({
   birthTimezone: z.string(),
 })
 
-// Phase 2 data schema - permissive since it's complex and refetchable
-// We validate structure exists but don't deeply validate all fields
-const Phase2DataSchema = z
+// Domain-specific visualization schemas (permissive - complex data is refetchable)
+const ZenithDataSchema = z
+  .object({
+    julianDay: z.number(),
+    zenithLines: z.array(z.any()),
+    declinations: z.object(planetNumberSchema),
+  })
+  .nullable()
+
+const ACGDataSchema = z
   .object({
     julianDay: z.number(),
     acgLines: z.array(z.any()),
     zenithLines: z.array(z.any()),
-    parans: z.array(z.any()),
-    paranSummary: z.any(),
-    scoringGrid: z.any(),
-    declinations: z.object(planetNumberSchema),
   })
   .nullable()
+
+const ParanDataSchema = z
+  .object({
+    points: z.array(z.any()),
+    summary: z.any(),
+  })
+  .nullable()
+
+const ScoringGridDataSchema = z
+  .object({
+    grid: z.array(z.any()),
+    gridStats: z.any(),
+  })
+  .nullable()
+
+const VisualizationDataSchema = z
+  .object({
+    zenith: ZenithDataSchema,
+    acg: ACGDataSchema,
+    parans: ParanDataSchema,
+    scoringGrid: ScoringGridDataSchema,
+  })
+  .optional()
 
 const PersistedStateSchema = z.object({
   step: z.enum(['birth-data', 'weights', 'results']),
@@ -76,7 +102,7 @@ const PersistedStateSchema = z.object({
       ),
     })
     .nullable(),
-  phase2Data: Phase2DataSchema.optional(),
+  visualizationData: VisualizationDataSchema,
 })
 
 // Types
@@ -87,18 +113,6 @@ export interface CalculationResultState {
   declinations: Declinations
   optimalLatitudes: Array<{ latitude: number; score: number; dominantPlanet: string }>
   latitudeBands: Array<{ min: number; max: number; dominantPlanet: string }>
-}
-
-// Phase 2 data type (ACG lines, parans, scoring grid, etc.)
-// @deprecated Use visualization slice for progressive loading
-export interface Phase2DataState {
-  julianDay: number
-  acgLines: Array<unknown>
-  zenithLines: Array<unknown>
-  parans: Array<unknown>
-  paranSummary: unknown
-  scoringGrid: unknown
-  declinations: Declinations
 }
 
 // =============================================================================
@@ -171,8 +185,6 @@ interface CalculatorState {
   birthData: BirthDataState | null
   weights: PlanetWeights
   result: CalculationResultState | null
-  /** @deprecated Use visualization slice instead */
-  phase2Data: Phase2DataState | null
   /** Progressive loading visualization state */
   visualization: VisualizationState
 }
@@ -182,8 +194,6 @@ interface CalculatorActions {
   setBirthData: (birthData: BirthDataState) => void
   setWeights: (weights: PlanetWeights) => void
   setResult: (result: CalculationResultState) => void
-  /** @deprecated Use setZenithData, setACGData, setParansData, setScoringGridData */
-  setPhase2Data: (phase2Data: Phase2DataState | null) => void
   updateResult: (result: CalculationResultState, weights: PlanetWeights) => void
   resetState: () => void
 
@@ -244,8 +254,6 @@ const createValidatedStorage = (): StateStorage => ({
           step: state.step,
           hasBirthData: !!state.birthData,
           hasResult: !!state.result,
-          hasPhase2Data: !!state.phase2Data,
-          // visualization is transient, not persisted
         })
       }
 
@@ -264,7 +272,6 @@ const createValidatedStorage = (): StateStorage => ({
           step: parsed.state?.step,
           hasBirthData: !!parsed.state?.birthData,
           hasResult: !!parsed.state?.result,
-          hasPhase2Data: !!parsed.state?.phase2Data,
         })
       } catch {
         // Ignore parse errors in debug logging
@@ -284,7 +291,6 @@ export const useCalculatorStore = create<CalculatorStore>()(
       birthData: null,
       weights: DEFAULT_WEIGHTS,
       result: null,
-      phase2Data: null,
       visualization: initialVisualizationState,
 
       // Actions
@@ -292,7 +298,6 @@ export const useCalculatorStore = create<CalculatorStore>()(
       setBirthData: (birthData) => set({ birthData, step: 'weights' }),
       setWeights: (weights) => set({ weights }),
       setResult: (result) => set({ result, step: 'results' }),
-      setPhase2Data: (phase2Data) => set({ phase2Data }),
       updateResult: (result, weights) => set({ result, weights }),
       resetState: () =>
         set({
@@ -300,7 +305,6 @@ export const useCalculatorStore = create<CalculatorStore>()(
           birthData: null,
           weights: DEFAULT_WEIGHTS,
           result: null,
-          phase2Data: null,
           visualization: initialVisualizationState,
         }),
 
@@ -413,16 +417,53 @@ export const useCalculatorStore = create<CalculatorStore>()(
     }),
     {
       name: STORAGE_KEY,
-      version: 3, // Bump version for visualization slice
+      version: 4, // Bump: removed phase2Data, persist visualization data
       storage: createJSONStorage(() => createValidatedStorage()),
       partialize: (state) => ({
         step: state.step,
         birthData: state.birthData,
         weights: state.weights,
         result: state.result,
-        phase2Data: state.phase2Data,
-        // Note: visualization state is not persisted - it's transient and refetchable
+        // Persist visualization data (domain-specific, replaces old phase2Data)
+        visualizationData: {
+          zenith: state.visualization.zenith.data,
+          acg: state.visualization.acg.data,
+          parans: state.visualization.parans.data,
+          scoringGrid: state.visualization.scoringGrid.data,
+        },
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        // Restore persisted visualization data into the loading state structure
+        const persisted = (state as Record<string, unknown>).visualizationData as
+          | {
+              zenith: unknown
+              acg: unknown
+              parans: unknown
+              scoringGrid: unknown
+            }
+          | undefined
+        if (persisted) {
+          state.visualization = {
+            zenith: {
+              data: (persisted.zenith as ZenithData | null) ?? null,
+              loading: false,
+              error: null,
+            },
+            acg: { data: (persisted.acg as ACGData | null) ?? null, loading: false, error: null },
+            parans: {
+              data: (persisted.parans as ParanData | null) ?? null,
+              loading: false,
+              error: null,
+            },
+            scoringGrid: {
+              data: (persisted.scoringGrid as ScoringGridData | null) ?? null,
+              loading: false,
+              error: null,
+            },
+          }
+        }
+      },
     },
   ),
 )

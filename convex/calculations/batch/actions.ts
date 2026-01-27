@@ -19,7 +19,7 @@ import type { GridCell } from '../geospatial/grid'
 // Types
 // =============================================================================
 
-/** Complete visualization data result (matches Phase2Data interface) */
+/** Complete visualization data result */
 interface AllVisualizationDataResult {
   julianDay: number
   acgLines: Array<ACGLine>

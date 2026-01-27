@@ -7,7 +7,6 @@ import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
-import type { Phase2Data } from '@/components/results/FullPageGlobeLayout'
 import { BirthDataForm } from '@/components/calculator/BirthDataForm'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { SaveChartModal } from '@/components/calculator/SaveChartModal'
@@ -50,12 +49,10 @@ function CalculatorContent() {
     birthData,
     weights,
     result,
-    phase2Data,
     setStep,
     setBirthData,
     setWeights,
     setResult,
-    setPhase2Data,
     updateResult,
     resetState,
   } = useCalculatorStore()
@@ -66,7 +63,6 @@ function CalculatorContent() {
   const [error, setError] = useState<string | null>(null)
 
   const calculateComplete = useAction(api.calculations.actions.calculateComplete)
-  const calculatePhase2 = useAction(api.calculations.phase2_actions.calculatePhase2Complete)
   const recalculateWithWeights = useAction(api.calculations.actions.recalculateWithWeights)
   const createChart = useMutation(api.charts.mutations.create)
   const globeState = useGlobeState()
@@ -198,24 +194,6 @@ function CalculatorContent() {
       // Phase 2: Progressive visualization loading (non-blocking)
       // Trigger progressive loading but don't await - let UI update as data arrives
       triggerProgressiveLoading(birthData, weights)
-
-      // Also load via legacy Phase 2 for backward compatibility with components
-      // that still use phase2Data prop
-      try {
-        const phase2Result = await calculatePhase2({
-          birthDate: birthData.birthDate,
-          birthTime: birthData.birthTime,
-          timezone: birthData.birthTimezone,
-          weights,
-        })
-        setPhase2Data(phase2Result)
-      } catch (phase2Err) {
-        console.error('Phase 2 calculation failed:', phase2Err)
-        toast.warning('Enhanced features unavailable', {
-          description: 'Core results are displayed. ACG lines and parans could not be loaded.',
-        })
-        setPhase2Data(null)
-      }
     } catch (err) {
       console.error('Calculation failed:', err)
       setError('Calculation failed. Please try again.')
@@ -247,15 +225,6 @@ function CalculatorContent() {
 
       // Trigger progressive visualization loading with new weights
       triggerProgressiveLoading(birthData, newWeights)
-
-      // Also load via legacy Phase 2 for backward compatibility
-      const phase2Result = await calculatePhase2({
-        birthDate: birthData.birthDate,
-        birthTime: birthData.birthTime,
-        timezone: birthData.birthTimezone,
-        weights: newWeights,
-      })
-      setPhase2Data(phase2Result)
     } catch (err) {
       console.error('Recalculation failed:', err)
     } finally {
@@ -310,7 +279,6 @@ function CalculatorContent() {
         <FullPageGlobeLayout
           birthData={birthData}
           result={result}
-          phase2Data={phase2Data as Phase2Data | null}
           weights={weights}
           globeState={globeState}
           onEditBirthData={() => setStep('birth-data')}

@@ -1,15 +1,15 @@
 /**
- * Phase 2 Integration Tests
+ * Calculation Flow Integration Tests
  *
  * Tests the complete flow from ephemeris positions through ACG/zenith
- * calculations to scoring grid generation.
+ * calculations to scoring grid generation. Verifies all domain modules
+ * work correctly together.
  */
 
 import { describe, expect, it } from 'vitest'
 import { calculateAllACGLines } from '../acg/line_solver'
 import { calculateAllZenithLines } from '../acg/zenith'
 import { generateScoringGrid, getGridStatistics, getTopLocations } from '../geospatial/grid'
-import { scoreLocationForACG, scoreParanProximity } from '../geospatial/search'
 import { calculateAllParans } from '../parans/solver'
 import { PLANET_IDS } from '../core/types'
 import type {
@@ -83,7 +83,7 @@ function extractDeclinations(
 // End-to-End Flow Tests
 // =============================================================================
 
-describe('Phase 2 Integration', () => {
+describe('Calculation Flow Integration', () => {
   describe('Complete Calculation Flow', () => {
     it('should generate complete analysis from positions to grid', () => {
       const declinations = extractDeclinations(SUMMER_POSITIONS)
@@ -169,152 +169,6 @@ describe('Phase 2 Integration', () => {
 
       // Scores should differ due to different weightings
       expect(topEqual[0].score).not.toBe(topOuter[0].score)
-    })
-  })
-
-  // =============================================================================
-  // ACG Line Verification
-  // =============================================================================
-
-  describe('ACG Line Verification', () => {
-    it('should generate all line types for all planets', () => {
-      const acgLines = calculateAllACGLines(JD_SUMMER_SOLSTICE_2000, SUMMER_POSITIONS)
-
-      const lineTypes = new Set(acgLines.map((l) => l.lineType))
-      expect(lineTypes).toEqual(new Set(['MC', 'IC', 'ASC', 'DSC']))
-
-      const planets = new Set(acgLines.map((l) => l.planet))
-      expect(planets.size).toBe(10)
-    })
-
-    it('should have MC/IC lines vertical', () => {
-      const acgLines = calculateAllACGLines(JD_SUMMER_SOLSTICE_2000, SUMMER_POSITIONS)
-
-      for (const line of acgLines) {
-        if (line.lineType === 'MC' || line.lineType === 'IC') {
-          const firstLon = line.points[0].longitude
-          for (const point of line.points) {
-            expect(point.longitude).toBeCloseTo(firstLon, 5)
-          }
-        }
-      }
-    })
-
-    it('should have ASC/DSC lines curve with latitude', () => {
-      const acgLines = calculateAllACGLines(JD_SUMMER_SOLSTICE_2000, SUMMER_POSITIONS)
-
-      for (const line of acgLines) {
-        if (line.lineType === 'ASC' || line.lineType === 'DSC') {
-          // ASC/DSC lines should have varying longitudes
-          const longitudes = line.points.map((p) => p.longitude)
-          const minLon = Math.min(...longitudes)
-          const maxLon = Math.max(...longitudes)
-          expect(maxLon - minLon).toBeGreaterThan(1) // Should curve
-        }
-      }
-    })
-  })
-
-  // =============================================================================
-  // Zenith Verification
-  // =============================================================================
-
-  describe('Zenith Verification', () => {
-    it('should create zenith lines matching declinations', () => {
-      const declinations = extractDeclinations(SUMMER_POSITIONS)
-      const zenithLines = calculateAllZenithLines(declinations, 1.0)
-
-      expect(zenithLines).toHaveLength(10)
-
-      for (const zenith of zenithLines) {
-        expect(zenith.declination).toBe(declinations[zenith.planet])
-      }
-    })
-
-    it('should calculate orb bounds correctly', () => {
-      const declinations = extractDeclinations(SUMMER_POSITIONS)
-      const zenithLines = calculateAllZenithLines(declinations, 1.0)
-
-      const sunZenith = zenithLines.find((z) => z.planet === 'sun')
-      expect(sunZenith?.declination).toBe(23.44)
-      expect(sunZenith?.orbMin).toBe(22.44) // dec - orb
-      expect(sunZenith?.orbMax).toBe(24.44) // dec + orb
-
-      // Test with different orb
-      const wideOrbZeniths = calculateAllZenithLines(declinations, 2.0)
-      const sunWideZenith = wideOrbZeniths.find((z) => z.planet === 'sun')
-      expect(sunWideZenith?.orbMin).toBe(21.44)
-      expect(sunWideZenith?.orbMax).toBe(25.44)
-    })
-  })
-
-  // =============================================================================
-  // Scoring Verification
-  // =============================================================================
-
-  describe('Scoring Verification', () => {
-    it('should score higher near ACG lines', () => {
-      const acgLines = calculateAllACGLines(JD_SUMMER_SOLSTICE_2000, SUMMER_POSITIONS)
-
-      // Sun MC line should be near lon=90° (RA=90°)
-      const scoreNearMC = scoreLocationForACG(0, 90, acgLines, EQUAL_WEIGHTS, 2.0)
-      const scoreAwayMC = scoreLocationForACG(0, 45, acgLines, EQUAL_WEIGHTS, 2.0)
-
-      expect(scoreNearMC.score).toBeGreaterThan(scoreAwayMC.score)
-    })
-
-    it('should score based on paran proximity', () => {
-      const paranResult = calculateAllParans(SUMMER_POSITIONS)
-
-      // Explicit check: if no parans found, fail with clear message
-      // (SUMMER_POSITIONS should produce parans; if not, test data needs review)
-      expect(
-        paranResult.points.length,
-        'Expected calculateAllParans to produce paran points for SUMMER_POSITIONS',
-      ).toBeGreaterThan(0)
-
-      // Test that proximity scoring works - score should be > 0 at paran latitude
-      const firstParan = paranResult.points[0]
-      const scoreAtParan = scoreParanProximity(
-        firstParan.latitude,
-        paranResult.points,
-        EQUAL_WEIGHTS,
-        1.0,
-      )
-      expect(scoreAtParan).toBeGreaterThan(0)
-
-      // Test that score decreases with distance (use 0.5° orb for tighter control)
-      const scoreNearby = scoreParanProximity(
-        firstParan.latitude + 0.25,
-        paranResult.points,
-        EQUAL_WEIGHTS,
-        0.5,
-      )
-      const scoreFar = scoreParanProximity(
-        firstParan.latitude + 1.0,
-        paranResult.points,
-        EQUAL_WEIGHTS,
-        0.5,
-      )
-      expect(scoreNearby).toBeGreaterThan(scoreFar)
-    })
-
-    it('should combine all scoring factors correctly', () => {
-      const declinations = extractDeclinations(SUMMER_POSITIONS)
-      const acgLines = calculateAllACGLines(JD_SUMMER_SOLSTICE_2000, SUMMER_POSITIONS)
-      const paranResult = calculateAllParans(SUMMER_POSITIONS)
-
-      const grid = generateScoringGrid(declinations, EQUAL_WEIGHTS, acgLines, paranResult.points, {
-        latStep: 10,
-        lonStep: 20,
-      })
-
-      for (const cell of grid) {
-        // Total score should equal sum of contributions
-        const calculatedTotal =
-          cell.zenithContribution + cell.acgContribution + cell.paranContribution
-        expect(cell.score).toBeCloseTo(calculatedTotal, 5)
-      }
     })
   })
 

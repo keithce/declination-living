@@ -15,10 +15,7 @@ import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { Declinations } from '@/components/calculator/DeclinationTable'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
-import type { BackendACGLine } from '@/components/globe/utils'
 import type { PlanetId } from '@/components/globe/layers/types'
-import type { GridCell } from '@convex/calculations/geospatial/grid'
-import type { ParanPoint, ZenithLine } from '@convex/calculations/core/types'
 import { PLANET_IDS } from '@/components/globe/layers/types'
 import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { transformACGLines, transformParans } from '@/components/globe/utils'
@@ -54,21 +51,11 @@ interface CalculationResult {
   latitudeBands: Array<LatitudeBand>
 }
 
-export interface Phase2Data {
-  declinations: Record<PlanetId, number>
-  acgLines: Array<BackendACGLine>
-  zenithLines: Array<ZenithLine>
-  parans: Array<ParanPoint>
-  scoringGrid: Array<GridCell>
-}
-
 interface FullPageGlobeLayoutProps {
   /** Birth data */
   birthData: BirthData | null
   /** Calculation result */
   result: CalculationResult
-  /** Phase 2 enhanced data (optional) */
-  phase2Data: Phase2Data | null
   /** Current weights */
   weights: PlanetWeights
   /** Globe state from useGlobeState hook */
@@ -92,7 +79,6 @@ interface FullPageGlobeLayoutProps {
 export function FullPageGlobeLayout({
   birthData,
   result,
-  phase2Data,
   weights,
   globeState,
   onEditBirthData,
@@ -118,12 +104,10 @@ export function FullPageGlobeLayout({
   }, [setHideHeader])
 
   // Convert Phase 1 declinations to globe format (Partial<Record<PlanetId, number>>)
-  // Use progressive zenith data if available, otherwise fall back to phase2Data or Phase 1
+  // Use progressive zenith data if available, otherwise fall back to Phase 1
   const declinationsForGlobe = useMemo((): Partial<Record<PlanetId, number>> => {
     // Prefer progressive zenith data (includes declinations)
     if (zenithState.data?.declinations) return zenithState.data.declinations
-    // Fall back to legacy phase2Data
-    if (phase2Data?.declinations) return phase2Data.declinations
     // Convert from Phase 1 Declinations type to Partial<Record<PlanetId, number>>
     const converted: Partial<Record<PlanetId, number>> = {}
     for (const planet of PLANET_IDS) {
@@ -133,24 +117,18 @@ export function FullPageGlobeLayout({
       }
     }
     return converted
-  }, [zenithState.data?.declinations, phase2Data?.declinations, result.declinations])
+  }, [zenithState.data?.declinations, result.declinations])
 
-  // Transform data for globe (memoized) - use progressive data first, then fall back to phase2Data
+  // Transform data for globe (memoized) - use progressive data from store
   const transformedACGLines = useMemo(() => {
-    // Prefer progressive ACG data
     if (acgState.data?.acgLines) return transformACGLines(acgState.data.acgLines)
-    // Fall back to legacy phase2Data
-    if (phase2Data?.acgLines) return transformACGLines(phase2Data.acgLines)
     return []
-  }, [acgState.data?.acgLines, phase2Data?.acgLines])
+  }, [acgState.data?.acgLines])
 
   const transformedParans = useMemo(() => {
-    // Prefer progressive paran data
     if (paransState.data?.points) return transformParans(paransState.data.points)
-    // Fall back to legacy phase2Data
-    if (phase2Data?.parans) return transformParans(phase2Data.parans)
     return []
-  }, [paransState.data?.points, phase2Data?.parans])
+  }, [paransState.data?.points])
 
   // Birth location for marker (memoized to prevent scene recreation)
   const birthLocation = useMemo(
@@ -256,7 +234,6 @@ export function FullPageGlobeLayout({
       <FloatingDataPanel
         birthData={birthData}
         result={result}
-        phase2Data={phase2Data}
         weights={weights}
         globeState={globeState}
         onEditBirthData={onEditBirthData}
@@ -279,13 +256,13 @@ export function FullPageGlobeLayout({
             {zenithState.loading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
           </div>
         )}
-        {globeState.layers.acgLines && (acgState.data || phase2Data) && (
+        {globeState.layers.acgLines && acgState.data && (
           <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300 flex items-center gap-1.5">
             ACG Lines ({transformedACGLines.length})
             {acgState.loading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
           </div>
         )}
-        {globeState.layers.paranPoints && (paransState.data || phase2Data) && (
+        {globeState.layers.paranPoints && paransState.data && (
           <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300 flex items-center gap-1.5">
             Parans ({transformedParans.length})
             {paransState.loading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
