@@ -117,7 +117,7 @@ function IndicatorBadge({
 
   const badge = (
     <span
-      className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded ${config.bgColor} text-white cursor-help`}
+      className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded ${config.bgColor} text-white${breakdown && breakdown.length > 0 ? ' cursor-help' : ''}`}
     >
       {indicator}
     </span>
@@ -173,7 +173,8 @@ export const DignityScores = memo(function DignityScores({
         {/* Planet List */}
         <div className="space-y-2">
           {sortedPlanets.map((planet, index) => {
-            const dignity = dignities[planet.key]
+            const dignity = dignities[planet.key] as DignityScoreData | undefined
+            if (!dignity) return null
             const normalizedScore = normalizeScore(dignity.total)
             const progressColor = getProgressColor(dignity.total)
 

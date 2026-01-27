@@ -4,9 +4,7 @@ interface DeclinationLatitudeDiagramProps {
   className?: string
 }
 
-export default function DeclinationLatitudeDiagram({
-  className = '',
-}: DeclinationLatitudeDiagramProps) {
+export function DeclinationLatitudeDiagram({ className = '' }: DeclinationLatitudeDiagramProps) {
   return (
     <svg
       viewBox="0 0 600 300"
@@ -26,6 +24,9 @@ export default function DeclinationLatitudeDiagram({
           <stop offset="0%" stopColor="#fbbf24" />
           <stop offset="100%" stopColor="#f97316" />
         </linearGradient>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#f97316" />
+        </marker>
       </defs>
 
       {/* Left side - Earth with latitude */}
@@ -49,7 +50,7 @@ export default function DeclinationLatitudeDiagram({
                 y1={y}
                 x2={120 + width}
                 y2={y}
-                stroke={lat === 23 ? '#fbbf24' : '#64748b'}
+                stroke="#64748b"
                 strokeWidth={lat === 0 ? 2 : 1}
                 strokeDasharray={lat === 0 ? 'none' : '4 2'}
               />
@@ -96,18 +97,6 @@ export default function DeclinationLatitudeDiagram({
           strokeWidth="3"
           markerEnd="url(#arrowhead)"
         />
-        <defs>
-          <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 10 3.5, 0 7" fill="#f97316" />
-          </marker>
-        </defs>
         <text x="300" y={150 - 23 * 1.5 - 15} textAnchor="middle" fill="#fbbf24" fontSize="11">
           = Same position
         </text>
@@ -134,7 +123,7 @@ export default function DeclinationLatitudeDiagram({
                 y1={y}
                 x2={480 + width}
                 y2={y}
-                stroke={dec === 23 ? '#fbbf24' : '#64748b'}
+                stroke="#64748b"
                 strokeWidth={dec === 0 ? 2 : 1}
                 strokeDasharray={dec === 0 ? 'none' : '4 2'}
               />

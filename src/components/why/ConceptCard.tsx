@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
@@ -11,7 +11,7 @@ interface ConceptCardProps {
   iconColor?: string
 }
 
-export default function ConceptCard({
+export function ConceptCard({
   icon: Icon,
   title,
   description,
@@ -39,15 +39,21 @@ export default function ConceptCard({
 
           {expandedContent && (
             <>
-              <motion.div
-                initial={false}
-                animate={{ height: expanded ? 'auto' : 0, opacity: expanded ? 1 : 0 }}
-                className="overflow-hidden"
-              >
-                <p className="mt-4 pt-4 border-t border-slate-700/50 text-slate-400 leading-relaxed">
-                  {expandedContent}
-                </p>
-              </motion.div>
+              <AnimatePresence initial={false}>
+                {expanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <p className="mt-4 pt-4 border-t border-slate-700/50 text-slate-400 leading-relaxed">
+                      {expandedContent}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <button
                 type="button"

@@ -14,7 +14,7 @@ interface FAQAccordionProps {
   items: Array<FAQItem>
 }
 
-export default function FAQAccordion({ items }: FAQAccordionProps) {
+export function FAQAccordion({ items }: FAQAccordionProps) {
   return (
     <Accordion type="single" collapsible className="space-y-4">
       {items.map((item, index) => (

@@ -5,7 +5,7 @@ interface CelestialSphereDiagramProps {
   className?: string
 }
 
-export default function CelestialSphereDiagram({ className = '' }: CelestialSphereDiagramProps) {
+export function CelestialSphereDiagram({ className = '' }: CelestialSphereDiagramProps) {
   const id = useId()
   const sphereGlowId = `sphereGlow${id}`
   const goldGradientId = `goldGradient${id}`

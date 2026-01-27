@@ -6,7 +6,7 @@
  * Run with: bun run scripts/prepare-cities.ts
  */
 
-import { createWriteStream, existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -269,4 +269,7 @@ async function main(): Promise<void> {
   await processCities()
 }
 
-main().catch(console.error)
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

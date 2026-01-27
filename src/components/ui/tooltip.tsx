@@ -19,11 +19,11 @@ function TooltipProvider({
 }
 
 function Tooltip({
-  noProvider = false,
+  standalone = false,
   ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root> & { noProvider?: boolean }) {
+}: React.ComponentProps<typeof TooltipPrimitive.Root> & { standalone?: boolean }) {
   const content = <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-  return noProvider ? content : <TooltipProvider>{content}</TooltipProvider>
+  return standalone ? content : <TooltipProvider>{content}</TooltipProvider>
 }
 
 function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {

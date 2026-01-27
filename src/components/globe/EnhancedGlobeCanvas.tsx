@@ -146,31 +146,21 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     // Keep refs in sync with state
     useEffect(() => {
       planetsRef.current = globeState.planets
-    }, [globeState.planets])
-
-    useEffect(() => {
       acgLineTypesRef.current = globeState.acgLineTypes
-    }, [globeState.acgLineTypes])
-
-    useEffect(() => {
       heatmapIntensityRef.current = globeState.heatmapIntensity
-    }, [globeState.heatmapIntensity])
-
-    useEffect(() => {
       heatmapSpreadRef.current = globeState.heatmapSpread
-    }, [globeState.heatmapSpread])
-
-    useEffect(() => {
       layersVisibilityRef.current = globeState.layers
-    }, [globeState.layers])
-
-    useEffect(() => {
       showCityLabelsRef.current = globeState.showCityLabels
-    }, [globeState.showCityLabels])
-
-    useEffect(() => {
       highlightedCityRef.current = globeState.highlightedCity
-    }, [globeState.highlightedCity])
+    }, [
+      globeState.planets,
+      globeState.acgLineTypes,
+      globeState.heatmapIntensity,
+      globeState.heatmapSpread,
+      globeState.layers,
+      globeState.showCityLabels,
+      globeState.highlightedCity,
+    ])
 
     // ==========================================================================
     // Imperative Handle

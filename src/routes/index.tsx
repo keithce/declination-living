@@ -246,7 +246,7 @@ function HeroSection() {
             className="px-8 py-4 text-slate-300 font-medium hover:text-white transition-colors flex items-center gap-2"
           >
             Learn More
-            <ChevronDown className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
       </motion.div>

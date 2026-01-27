@@ -1,11 +1,14 @@
 import { motion } from 'framer-motion'
 import { useId } from 'react'
 
+/** Y position for the 23° latitude line: ZENITH_BAND_Y */
+const ZENITH_BAND_Y = ZENITH_BAND_Y
+
 interface ZenithConceptDiagramProps {
   className?: string
 }
 
-export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDiagramProps) {
+export function ZenithConceptDiagram({ className = '' }: ZenithConceptDiagramProps) {
   const id = useId()
   const zenithBandId = `zenithBand${id}`
   const earthGradientId = `earthGradient${id}`
@@ -76,7 +79,7 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
         {/* Band highlight */}
         <ellipse
           cx="200"
-          cy={200 - 23 * 1.8}
+          cy={ZENITH_BAND_Y}
           rx={Math.cos((23 * Math.PI) / 180) * 150}
           ry={Math.cos((23 * Math.PI) / 180) * 150 * 0.3}
           fill="none"
@@ -87,7 +90,7 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
         {/* Band width visualization */}
         <rect
           x="60"
-          y={200 - 23 * 1.8 - 15}
+          y={ZENITH_BAND_Y - 15}
           width="280"
           height="30"
           fill={`url(#${zenithBandId})`}
@@ -98,29 +101,29 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
       {/* Observer on Earth */}
       <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }}>
         {/* Observer body (stick figure) */}
-        <circle cx="280" cy={200 - 23 * 1.8 - 5} r="5" fill="#22c55e" />
+        <circle cx="280" cy={ZENITH_BAND_Y - 5} r="5" fill="#22c55e" />
         <line
           x1="280"
-          y1={200 - 23 * 1.8}
+          y1={ZENITH_BAND_Y}
           x2="280"
-          y2={200 - 23 * 1.8 + 15}
+          y2={ZENITH_BAND_Y + 15}
           stroke="#22c55e"
           strokeWidth="2"
         />
         {/* Arms pointing up */}
         <line
           x1="275"
-          y1={200 - 23 * 1.8 + 5}
+          y1={ZENITH_BAND_Y + 5}
           x2="270"
-          y2={200 - 23 * 1.8 - 5}
+          y2={ZENITH_BAND_Y - 5}
           stroke="#22c55e"
           strokeWidth="2"
         />
         <line
           x1="285"
-          y1={200 - 23 * 1.8 + 5}
+          y1={ZENITH_BAND_Y + 5}
           x2="290"
-          y2={200 - 23 * 1.8 - 5}
+          y2={ZENITH_BAND_Y - 5}
           stroke="#22c55e"
           strokeWidth="2"
         />
@@ -140,7 +143,7 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
         {/* Line from observer to planet */}
         <line
           x1="280"
-          y1={200 - 23 * 1.8 - 10}
+          y1={ZENITH_BAND_Y - 10}
           x2="280"
           y2="55"
           stroke="#fbbf24"
@@ -161,7 +164,7 @@ export default function ZenithConceptDiagram({ className = '' }: ZenithConceptDi
       {/* Labels */}
       <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}>
         {/* Zenith band label */}
-        <text x="50" y={200 - 23 * 1.8 + 5} fill="#fbbf24" fontSize="11" fontWeight="500">
+        <text x="50" y={ZENITH_BAND_Y + 5} fill="#fbbf24" fontSize="11" fontWeight="500">
           23°N Zenith Band
         </text>
 

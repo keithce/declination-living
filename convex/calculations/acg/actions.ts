@@ -11,14 +11,10 @@ import { v } from 'convex/values'
 import { ActionCache } from '@convex-dev/action-cache'
 import { action, internalAction } from '../../_generated/server'
 import { components, internal } from '../../_generated/api'
-import {
-  CACHE_TTL_30_DAYS_MS,
-  DEFAULT_DECLINATION_ORB,
-  MEAN_OBLIQUITY_J2000,
-} from '../core/constants'
+import { CACHE_TTL_30_DAYS_MS, DEFAULT_DECLINATION_ORB } from '../core/constants'
 import { PLANET_IDS } from '../core/types'
 import { calculateAllPositions, dateToJulianDay } from '../ephemeris'
-import { eclipticToEquatorial } from '../coordinates/transform'
+import { convertAllToEquatorial } from '../coordinates/transform'
 import { calculateAllACGLines } from './line_solver'
 import { calculateAllZenithLines } from './zenith'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from '../core/types'
@@ -190,19 +186,7 @@ export const calculateACGAndZenithFromBirthDataUncached = internalAction({
     const positions = calculateAllPositions(jd)
 
     // 2. Convert from ecliptic to equatorial coordinates
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
-      equatorialPositions[planet] = {
-        ra: eq.rightAscension,
-        dec: eq.declination,
-      }
-    }
+    const equatorialPositions = convertAllToEquatorial(positions)
 
     // 3. Extract declinations for zenith calculation
     const declinations: Record<PlanetId, number> = {} as Record<PlanetId, number>

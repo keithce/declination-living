@@ -79,6 +79,7 @@ function getScoreColor(score: number): number {
 // =============================================================================
 
 let cachedGlowTexture: THREE.Texture | null = null
+let glowTextureRefCount = 0
 
 /**
  * Create or reuse a glow texture for markers.
@@ -185,20 +186,19 @@ function createCityMarker(city: CityMarkerData, showLabel: boolean): THREE.Group
   glow.name = 'cityGlow'
   markerGroup.add(glow)
 
-  // Label sprite (billboard)
-  if (showLabel) {
-    const labelTexture = createLabelTexture(city.name)
-    const labelMaterial = new THREE.SpriteMaterial({
-      map: labelTexture,
-      transparent: true,
-      depthTest: false,
-    })
-    const label = new THREE.Sprite(labelMaterial)
-    label.scale.set(0.15, 0.04, 1)
-    label.position.y = size * 3 // Position above marker
-    label.name = 'cityLabel'
-    markerGroup.add(label)
-  }
+  // Label sprite (billboard) - always create, toggle visibility
+  const labelTexture = createLabelTexture(city.name)
+  const labelMaterial = new THREE.SpriteMaterial({
+    map: labelTexture,
+    transparent: true,
+    depthTest: false,
+  })
+  const label = new THREE.Sprite(labelMaterial)
+  label.scale.set(0.15, 0.04, 1)
+  label.position.y = size * 3 // Position above marker
+  label.name = 'cityLabel'
+  label.visible = showLabel
+  markerGroup.add(label)
 
   // Position on globe
   const position = latLonToVector3(city.latitude, city.longitude, 1 + MARKER_OFFSET)
@@ -253,6 +253,7 @@ export function createCityMarkerLayer(
     const marker = createCityMarker(city, showLabels)
     group.add(marker)
   }
+  glowTextureRefCount++
 
   // Pulse animation for glow
   const update = (time: number) => {
@@ -281,6 +282,14 @@ export function createCityMarkerLayer(
       }
     })
     group.clear()
+
+    // Dispose shared glow texture when no more layers reference it
+    glowTextureRefCount--
+    if (glowTextureRefCount <= 0 && cachedGlowTexture) {
+      cachedGlowTexture.dispose()
+      cachedGlowTexture = null
+      glowTextureRefCount = 0
+    }
   }
 
   return { group, update, dispose }
@@ -315,7 +324,7 @@ export function highlightCityMarker(group: THREE.Group, cityId: string | null): 
           const material = subChild.material as THREE.MeshBasicMaterial
           if (isHighlighted) {
             // Store original color if not already stored
-            if (!subChild.userData.originalColor) {
+            if (subChild.userData.originalColor === undefined) {
               subChild.userData.originalColor = material.color.getHex()
             }
             material.color.setHex(HIGHLIGHT_COLOR)
@@ -332,7 +341,7 @@ export function highlightCityMarker(group: THREE.Group, cityId: string | null): 
         if (subChild instanceof THREE.Sprite && subChild.name === 'cityGlow') {
           const material = subChild.material
           if (isHighlighted) {
-            if (!subChild.userData.originalColor) {
+            if (subChild.userData.originalColor === undefined) {
               subChild.userData.originalColor = material.color.getHex()
             }
             material.color.setHex(HIGHLIGHT_COLOR)

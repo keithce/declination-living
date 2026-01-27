@@ -1,5 +1,5 @@
 import { Link2 } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface SectionHeaderProps {
   id: string
@@ -8,15 +8,28 @@ interface SectionHeaderProps {
   highlight?: string
 }
 
-export default function SectionHeader({ id, title, subtitle, highlight }: SectionHeaderProps) {
+export function SectionHeader({ id, title, subtitle, highlight }: SectionHeaderProps) {
   const [copied, setCopied] = useState(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const copyLink = async () => {
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
+  const copyLink = useCallback(async () => {
     const url = `${window.location.origin}${window.location.pathname}#${id}`
-    await navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+      timeoutRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard API may fail in insecure contexts or without permission
+      console.warn('Failed to copy link to clipboard')
+    }
+  }, [id])
 
   // Split title to insert gradient on highlight word
   const renderTitle = () => {

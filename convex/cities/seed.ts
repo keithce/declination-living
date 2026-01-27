@@ -5,7 +5,7 @@
  */
 
 import { v } from 'convex/values'
-import { action, internalMutation } from '../_generated/server'
+import { action, internalMutation, internalQuery } from '../_generated/server'
 import { internal } from '../_generated/api'
 
 /** City record from prepared JSON data */
@@ -72,18 +72,17 @@ export const insertCityBatch = internalMutation({
 export const seedCities = action({
   args: {
     maxCities: v.optional(v.number()),
-    clearExisting: v.optional(v.boolean()),
   },
   handler: async (
     _ctx,
-    { maxCities, clearExisting = false },
+    { maxCities },
   ): Promise<{
     status: string
     message: string
     steps: Array<string>
   }> => {
     console.log('City seeding started')
-    console.log('Options:', { maxCities, clearExisting })
+    console.log('Options:', { maxCities })
 
     // Return instructions for manual seeding
     return {
@@ -108,7 +107,12 @@ export const seedCitiesFromJson = action({
     maxCities: v.optional(v.number()),
   },
   handler: async (ctx, { citiesJson, maxCities }) => {
-    const allCities: Array<CityRecord> = JSON.parse(citiesJson)
+    let allCities: Array<CityRecord>
+    try {
+      allCities = JSON.parse(citiesJson)
+    } catch (e) {
+      throw new Error(`Failed to parse citiesJson: ${e instanceof Error ? e.message : String(e)}`)
+    }
     const cities = maxCities ? allCities.slice(0, maxCities) : allCities
 
     console.log(`Seeding ${cities.length} cities in batches of ${BATCH_SIZE}...`)
@@ -176,12 +180,12 @@ export const deleteAllCities = internalMutation({
 export const getCityCount = action({
   args: {},
   handler: async (ctx): Promise<{ count: number }> => {
-    const count: number = await ctx.runMutation(internal.cities.seed.countCities, {})
+    const count: number = await ctx.runQuery(internal.cities.seed.countCities, {})
     return { count }
   },
 })
 
-export const countCities = internalMutation({
+export const countCities = internalQuery({
   args: {},
   handler: async (ctx) => {
     const cities = await ctx.db.query('cities').collect()

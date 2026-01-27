@@ -27,167 +27,12 @@ import {
   WeightingDiagram,
   ZenithConceptDiagram,
 } from '@/components/why'
+import { FAQ_ITEMS } from '@/components/why/data/faq-items'
+import { PLANET_DATA } from '@/components/why/data/planet-data'
 
 export const Route = createFileRoute('/why')({
   component: WhyPage,
 })
-
-// Planet data with detailed interpretations
-const PLANET_DATA = [
-  {
-    planetId: 'sun' as const,
-    name: 'Sun',
-    lifeAreas: ['Identity', 'Vitality', 'Purpose', 'Leadership'],
-    whenStrong:
-      'Strong sense of self, natural leadership, creative expression flows easily, good health and energy.',
-    whenChallenging:
-      'May feel pressured to perform, ego conflicts, need to balance self-expression with humility.',
-    detailedInterpretation:
-      'Living on your Sun line brings your core essence into focus. You feel more "yourself" here, with opportunities to shine and express your unique gifts. Career advancement and recognition often come more easily in these locations.',
-  },
-  {
-    planetId: 'moon' as const,
-    name: 'Moon',
-    lifeAreas: ['Emotions', 'Home', 'Intuition', 'Nurturing'],
-    whenStrong:
-      'Deep emotional fulfillment, strong intuition, nurturing environment, sense of belonging.',
-    whenChallenging:
-      'Emotional sensitivity heightened, may feel exposed or vulnerable, mood fluctuations.',
-    detailedInterpretation:
-      'Moon lines create a sense of home and emotional security. These are places where you can truly rest, connect with your inner self, and feel emotionally nourished. Excellent for family life and personal healing.',
-  },
-  {
-    planetId: 'mercury' as const,
-    name: 'Mercury',
-    lifeAreas: ['Communication', 'Learning', 'Commerce', 'Travel'],
-    whenStrong:
-      'Mental clarity, excellent communication, successful negotiations, good for writing and teaching.',
-    whenChallenging: 'Mental restlessness, nervous energy, may overthink, scattered focus.',
-    detailedInterpretation:
-      'Mercury lines enhance intellectual pursuits and communication. Ideal for students, writers, teachers, and those in media or commerce. Ideas flow more easily and networking opportunities abound.',
-  },
-  {
-    planetId: 'venus' as const,
-    name: 'Venus',
-    lifeAreas: ['Love', 'Beauty', 'Relationships', 'Pleasure'],
-    whenStrong:
-      'Romantic opportunities, aesthetic appreciation, harmonious relationships, financial ease.',
-    whenChallenging:
-      'May become too focused on pleasure, superficiality, or dependent on others for validation.',
-    detailedInterpretation:
-      'Venus lines bring love, beauty, and harmony into your life. These locations favor romantic relationships, artistic pursuits, and financial growth. Social connections come naturally here.',
-  },
-  {
-    planetId: 'mars' as const,
-    name: 'Mars',
-    lifeAreas: ['Action', 'Energy', 'Courage', 'Competition'],
-    whenStrong:
-      'High energy and motivation, courage to take action, athletic success, passionate pursuits.',
-    whenChallenging:
-      'Conflicts and confrontations, accidents if not careful, aggression, impatience.',
-    detailedInterpretation:
-      'Mars lines energize and motivate. Excellent for starting new ventures, physical training, and competitive environments. Be mindful of the increased potential for conflict and channel energy constructively.',
-  },
-  {
-    planetId: 'jupiter' as const,
-    name: 'Jupiter',
-    lifeAreas: ['Expansion', 'Luck', 'Wisdom', 'Abundance'],
-    whenStrong:
-      'Opportunities abound, philosophical growth, travel blessings, generous support from others.',
-    whenChallenging:
-      'Over-expansion, excess, weight gain, taking on too much, unrealistic optimism.',
-    detailedInterpretation:
-      'Jupiter lines are traditionally the most fortunate. These locations bring expansion, luck, and opportunity. Excellent for education, publishing, legal matters, and spiritual growth. Life tends to feel more hopeful here.',
-  },
-  {
-    planetId: 'saturn' as const,
-    name: 'Saturn',
-    lifeAreas: ['Structure', 'Discipline', 'Mastery', 'Responsibility'],
-    whenStrong:
-      'Building lasting foundations, career achievements through hard work, respected authority.',
-    whenChallenging:
-      'Heavy responsibilities, delays and obstacles, feelings of limitation, isolation.',
-    detailedInterpretation:
-      'Saturn lines demand discipline but reward perseverance. These locations are ideal for serious career building, establishing structure, and long-term goals. Expect challenges that ultimately strengthen you.',
-  },
-  {
-    planetId: 'uranus' as const,
-    name: 'Uranus',
-    lifeAreas: ['Innovation', 'Freedom', 'Revolution', 'Technology'],
-    whenStrong:
-      'Breakthrough insights, exciting changes, technological innovation, authentic self-expression.',
-    whenChallenging:
-      'Instability, sudden disruptions, difficulty maintaining routine, rebellious tendencies.',
-    detailedInterpretation:
-      'Uranus lines bring awakening and revolution. Perfect for those seeking radical change, technological innovation, or breaking free from limitations. Life here is never boring but can be unpredictable.',
-  },
-  {
-    planetId: 'neptune' as const,
-    name: 'Neptune',
-    lifeAreas: ['Spirituality', 'Creativity', 'Dreams', 'Compassion'],
-    whenStrong:
-      'Spiritual growth, artistic inspiration, compassionate connections, transcendent experiences.',
-    whenChallenging:
-      'Confusion, escapism, boundary issues, susceptibility to deception or addiction.',
-    detailedInterpretation:
-      'Neptune lines dissolve boundaries and open spiritual doors. Ideal for artists, healers, and spiritual seekers. Be mindful of staying grounded and maintaining clear boundaries in these locations.',
-  },
-  {
-    planetId: 'pluto' as const,
-    name: 'Pluto',
-    lifeAreas: ['Transformation', 'Power', 'Rebirth', 'Depth'],
-    whenStrong:
-      'Profound personal transformation, accessing hidden power, psychological depth, influence.',
-    whenChallenging:
-      'Power struggles, intense experiences, confronting shadow aspects, manipulation.',
-    detailedInterpretation:
-      'Pluto lines catalyze deep transformation. These locations strip away the superficial and demand authenticity. Life here involves profound change—death and rebirth of old patterns. Not for the faint of heart, but incredibly powerful for growth.',
-  },
-]
-
-// FAQ data
-const FAQ_ITEMS = [
-  {
-    question: 'How accurate are these calculations?',
-    answer:
-      'Our calculations use the Swiss Ephemeris, the gold standard for astronomical precision used by professional astrologers worldwide. Planetary positions are accurate to within fractions of a degree. However, astrology interpretation is an art as much as a science—the calculations show potential, not guarantees.',
-  },
-  {
-    question: 'Do I need to know my exact birth time?',
-    answer:
-      "An exact birth time gives the most accurate results, especially for the Moon (which moves quickly) and for angular house positions. If you only know an approximate time, you can still get valuable results for slower-moving planets. If you don't know your birth time at all, you can still explore planetary declinations, though some features will be limited.",
-  },
-  {
-    question: 'What if I already live in a "bad" location for me?',
-    answer:
-      'First, remember that no location is entirely good or bad—each has its own gifts and challenges. The calculations show tendencies, not fate. Many people thrive in locations that might seem challenging astrologically because other factors (community, career, family) outweigh the astrological influences. Use this as one factor among many in your decision-making.',
-  },
-  {
-    question: 'How is this different from regular Astro*Carto*Graphy?',
-    answer:
-      "Traditional Astro*Carto*Graphy (ACG) focuses on zodiacal longitude—where planets are in the zodiac signs. Declination-based relocation adds a second dimension: how far north or south planets are from the celestial equator. This creates a direct correspondence with Earth's latitude lines, revealing influences that traditional ACG misses.",
-  },
-  {
-    question: 'Can I use this for travel as well as relocation?',
-    answer:
-      'Absolutely! While long-term residence amplifies planetary influences, even short visits to powerful locations can be meaningful. Many people use this for timing important trips, choosing vacation destinations, or planning business travel.',
-  },
-  {
-    question: 'What are "out of bounds" planets?',
-    answer:
-      'Planets are "out of bounds" (OOB) when their declination exceeds the Sun\'s maximum (about 23.4°). OOB planets operate outside normal rules, often indicating exceptional abilities or unusual experiences in that planet\'s domain. If you have OOB planets, locations at higher latitudes may particularly resonate for you.',
-  },
-  {
-    question: 'How do I interpret multiple planetary influences at one location?',
-    answer:
-      'Multiple planets at the same location create a blend of influences. The overall effect depends on which planets are involved and how they relate to your personal goals. Our weighting system lets you prioritize what matters most to you, so the scoring reflects your unique priorities.',
-  },
-  {
-    question: 'Why do some locations feel different than their score suggests?',
-    answer:
-      "Astrological influences interact with many other factors: local culture, climate, economic opportunities, social connections, and your own life circumstances. A location might score highly for career (Saturn, Jupiter) but feel challenging if you're seeking relaxation. Always balance astrological insights with practical considerations.",
-  },
-]
 
 function WhyPage() {
   return (
@@ -259,10 +104,7 @@ function WhyPage() {
         </section>
 
         {/* Section 2: The Basics */}
-        <section
-          id="basics"
-          className="relative py-24 px-6 bg-gradient-to-b from-[#050714] to-[#0a0f1f]"
-        >
+        <section className="relative py-24 px-6 bg-gradient-to-b from-[#050714] to-[#0a0f1f]">
           <div className="max-w-4xl mx-auto">
             <SectionHeader
               id="basics"

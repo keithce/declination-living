@@ -98,6 +98,7 @@ function FilterControls({
             <button
               key={tier}
               type="button"
+              aria-pressed={tierFilter === tier}
               onClick={() => setTierFilter(tier)}
               className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
                 tierFilter === tier
@@ -119,6 +120,7 @@ function FilterControls({
             <button
               key={sort}
               type="button"
+              aria-pressed={sortOption === sort}
               onClick={() => setSortOption(sort)}
               className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
                 sortOption === sort

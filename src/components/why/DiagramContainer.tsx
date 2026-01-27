@@ -8,7 +8,7 @@ interface DiagramContainerProps {
   animate?: boolean
 }
 
-export default function DiagramContainer({
+export function DiagramContainer({
   children,
   caption,
   className = '',

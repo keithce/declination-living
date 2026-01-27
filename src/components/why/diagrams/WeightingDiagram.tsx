@@ -79,7 +79,7 @@ const PRESETS: Array<Preset> = [
   },
 ]
 
-export default function WeightingDiagram({ className = '' }: WeightingDiagramProps) {
+export function WeightingDiagram({ className = '' }: WeightingDiagramProps) {
   const [activePreset, setActivePreset] = useState(0)
   const currentWeights = PRESETS[activePreset].weights
 
@@ -108,8 +108,9 @@ export default function WeightingDiagram({ className = '' }: WeightingDiagramPro
       {/* Description */}
       <p className="text-center text-slate-400 text-sm mb-6">{PRESETS[activePreset].description}</p>
 
-      {/* Bar chart */}
+      {/* Bar chart - key forces remount to replay bar animations on preset change */}
       <svg
+        key={activePreset}
         viewBox="0 0 400 150"
         className="w-full max-w-lg mx-auto"
         role="img"
@@ -124,7 +125,7 @@ export default function WeightingDiagram({ className = '' }: WeightingDiagramPro
         {/* Axis */}
         <line x1="40" y1="120" x2="380" y2="120" stroke="#334155" strokeWidth="1" />
 
-        {/* Bars */}
+        {/* Bars - key forces remount on preset change to replay animation */}
         {PLANET_IDS.map((planet, index) => {
           const x = 50 + index * 34
           const weight = currentWeights[planet]

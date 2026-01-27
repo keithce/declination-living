@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { toast } from 'sonner'
@@ -11,9 +11,9 @@ import { BirthDataForm } from '@/components/calculator/BirthDataForm'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { SaveChartModal } from '@/components/calculator/SaveChartModal'
 import { useCalculatorHydration, useCalculatorStore } from '@/stores/calculator-store'
-import { useVisualizationActions } from '@/stores/selectors'
 import { FullPageGlobeLayout } from '@/components/results/FullPageGlobeLayout'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
+import { useProgressiveVisualization } from '@/hooks/useProgressiveVisualization'
 
 export const Route = createFileRoute('/calculator')({
   component: CalculatorPage,
@@ -66,111 +66,11 @@ function CalculatorContent() {
   const recalculateWithWeights = useAction(api.calculations.actions.recalculateWithWeights)
   const createChart = useMutation(api.charts.mutations.create)
   const globeState = useGlobeState()
-
-  // Progressive loading actions
-  const calculateZenithLines = useAction(api.calculations.zenith.actions.calculateZenithLines)
-  const calculateACGLines = useAction(api.calculations.acg.actions.calculateACGAndZenithPublic)
-  const calculateParans = useAction(api.calculations.parans.actions.calculateParansFromBirthData)
-  const calculateScoringGrid = useAction(api.calculations.geospatial.actions.calculateScoringGrid)
-  const vizActions = useVisualizationActions()
+  const viz = useProgressiveVisualization(birthData, weights, step === 'results' && !!result)
 
   const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
   }
-
-  /**
-   * Trigger progressive visualization loading.
-   * Loads data in order: zenith (fastest) -> ACG + parans (parallel) -> scoring grid (depends on others)
-   */
-  const triggerProgressiveLoading = useCallback(
-    (bd: BirthData, w: PlanetWeights) => {
-      // Reset visualization state
-      vizActions.resetVisualization()
-
-      // 1. Zenith (fastest - render immediately)
-      vizActions.setZenithLoading(true)
-      calculateZenithLines({
-        birthDate: bd.birthDate,
-        birthTime: bd.birthTime,
-        timezone: bd.birthTimezone,
-      })
-        .then((zenithResult) => {
-          vizActions.setZenithData({
-            julianDay: zenithResult.julianDay,
-            zenithLines: zenithResult.zenithLines,
-            declinations: zenithResult.declinations,
-          })
-        })
-        .catch((err) => {
-          console.error('Zenith calculation failed:', err)
-          vizActions.setZenithError('Failed to load zenith lines')
-        })
-
-      // 2. ACG + Parans (parallel)
-      vizActions.setACGLoading(true)
-      vizActions.setParansLoading(true)
-
-      const acgPromise = calculateACGLines({
-        birthDate: bd.birthDate,
-        birthTime: bd.birthTime,
-        timezone: bd.birthTimezone,
-      })
-        .then((acgResult) => {
-          vizActions.setACGData({
-            julianDay: acgResult.julianDay,
-            acgLines: acgResult.acgLines,
-            zenithLines: acgResult.zenithLines,
-          })
-          return acgResult
-        })
-        .catch((err) => {
-          console.error('ACG calculation failed:', err)
-          vizActions.setACGError('Failed to load ACG lines')
-          throw err
-        })
-
-      const paranPromise = calculateParans({
-        birthDate: bd.birthDate,
-        birthTime: bd.birthTime,
-        timezone: bd.birthTimezone,
-      })
-        .then((paranResult) => {
-          vizActions.setParansData({
-            points: paranResult.points,
-            summary: paranResult.summary,
-          })
-          return paranResult
-        })
-        .catch((err) => {
-          console.error('Paran calculation failed:', err)
-          vizActions.setParansError('Failed to load parans')
-          throw err
-        })
-
-      // 3. Scoring grid (after ACG + Parans complete)
-      Promise.all([acgPromise, paranPromise])
-        .then(() => {
-          vizActions.setScoringGridLoading(true)
-          return calculateScoringGrid({
-            birthDate: bd.birthDate,
-            birthTime: bd.birthTime,
-            timezone: bd.birthTimezone,
-            weights: w,
-          })
-        })
-        .then((gridResult) => {
-          vizActions.setScoringGridData({
-            grid: gridResult.grid,
-            gridStats: gridResult.gridStats,
-          })
-        })
-        .catch((err) => {
-          console.error('Scoring grid calculation failed:', err)
-          vizActions.setScoringGridError('Failed to load scoring grid')
-        })
-    },
-    [calculateZenithLines, calculateACGLines, calculateParans, calculateScoringGrid, vizActions],
-  )
 
   const handleCalculate = async () => {
     setError(null)
@@ -182,7 +82,6 @@ function CalculatorContent() {
 
     setIsCalculating(true)
     try {
-      // Phase 1: Core calculation (must succeed)
       const calcResult = await calculateComplete({
         birthDate: birthData.birthDate,
         birthTime: birthData.birthTime,
@@ -190,10 +89,7 @@ function CalculatorContent() {
         weights,
       })
       setResult(calcResult)
-
-      // Phase 2: Progressive visualization loading (non-blocking)
-      // Trigger progressive loading but don't await - let UI update as data arrives
-      triggerProgressiveLoading(birthData, weights)
+      // TanStack Query auto-fetches: step transitions to 'results' → enabled becomes true
     } catch (err) {
       console.error('Calculation failed:', err)
       setError('Calculation failed. Please try again.')
@@ -206,9 +102,7 @@ function CalculatorContent() {
     if (!result || !birthData) return
 
     setIsCalculating(true)
-
     try {
-      // Recalculate Phase 1 results (lightweight)
       const recalcResult = await recalculateWithWeights({
         declinations: result.declinations,
         weights: newWeights,
@@ -222,9 +116,8 @@ function CalculatorContent() {
         },
         newWeights,
       )
-
-      // Trigger progressive visualization loading with new weights
-      triggerProgressiveLoading(birthData, newWeights)
+      // TanStack Query auto-refetches scoringGrid + rankedCities
+      // (weights changed in query key). Zenith/ACG/parans stay cached.
     } catch (err) {
       console.error('Recalculation failed:', err)
     } finally {
@@ -277,6 +170,7 @@ function CalculatorContent() {
     return (
       <>
         <FullPageGlobeLayout
+          viz={viz}
           birthData={birthData}
           result={result}
           weights={weights}

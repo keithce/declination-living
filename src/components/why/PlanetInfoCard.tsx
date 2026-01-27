@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import { ChevronDown, ExternalLink } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { PlanetId } from '@/lib/planet-constants'
@@ -14,7 +14,7 @@ interface PlanetInfoCardProps {
   detailedInterpretation?: string
 }
 
-export default function PlanetInfoCard({
+export function PlanetInfoCard({
   planetId,
   name,
   lifeAreas,
@@ -23,8 +23,8 @@ export default function PlanetInfoCard({
   detailedInterpretation,
 }: PlanetInfoCardProps) {
   const [expanded, setExpanded] = useState(false)
-  const color = PLANET_COLORS[planetId]
-  const symbol = PLANET_SYMBOLS[planetId]
+  const color = PLANET_COLORS[planetId] ?? '#6b7280'
+  const symbol = PLANET_SYMBOLS[planetId] ?? '?'
 
   return (
     <motion.div
@@ -82,18 +82,24 @@ export default function PlanetInfoCard({
       {/* Expandable detailed interpretation */}
       {detailedInterpretation && (
         <>
-          <motion.div
-            initial={false}
-            animate={{ height: expanded ? 'auto' : 0, opacity: expanded ? 1 : 0 }}
-            className="overflow-hidden"
-          >
-            <div className="pt-4 border-t border-slate-700/50">
-              <h4 className="text-sm font-medium text-slate-400 uppercase tracking-wide mb-2">
-                Detailed Interpretation
-              </h4>
-              <p className="text-slate-300 leading-relaxed">{detailedInterpretation}</p>
-            </div>
-          </motion.div>
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="pt-4 border-t border-slate-700/50">
+                  <h4 className="text-sm font-medium text-slate-400 uppercase tracking-wide mb-2">
+                    Detailed Interpretation
+                  </h4>
+                  <p className="text-slate-300 leading-relaxed">{detailedInterpretation}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700/50">
             <button
@@ -112,7 +118,7 @@ export default function PlanetInfoCard({
               className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
             >
               See on globe
-              <ExternalLink className="w-3 h-3" />
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
         </>

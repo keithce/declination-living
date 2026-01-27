@@ -13,15 +13,15 @@ import { ActionCache } from '@convex-dev/action-cache'
 import { action, internalAction } from '../../_generated/server'
 import { components, internal } from '../../_generated/api'
 import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from '../ephemeris'
-import { eclipticToEquatorial } from '../coordinates/transform'
-import { CACHE_TTL_30_DAYS_MS, MEAN_OBLIQUITY_J2000 } from '../core/constants'
-import { PLANET_IDS } from '../core/types'
+import { convertAllToEquatorial } from '../coordinates/transform'
+import { CACHE_TTL_30_DAYS_MS } from '../core/constants'
 import { calculateAllACGLines } from '../acg/line_solver'
 import { calculateAllParans } from '../parans/solver'
-import { gridOptionsValidator, planetWeightsValidator } from '../validators'
+import { gridOptionsValidator, planetWeightsValidator, validateGridOptions } from '../validators'
 import { generateScoringGrid } from './grid'
-import type { EquatorialCoordinates, PlanetId } from '../core/types'
+import { rankCities } from './ranking'
 import type { GridCell, ScoringGridOptions } from './grid'
+import type { CityData } from './ranking'
 
 // =============================================================================
 // Types
@@ -35,6 +35,19 @@ interface ScoringGridResult {
     maxScore: number
     minScore: number
   }
+}
+
+/** City ranking result returned to the frontend */
+interface RankedCityResultDTO {
+  id: string
+  name: string
+  country: string
+  latitude: number
+  longitude: number
+  score: number
+  rank: number
+  tier: 'major' | 'medium' | 'minor' | 'small'
+  highlights: Array<string>
 }
 
 // =============================================================================
@@ -68,25 +81,18 @@ export const calculateScoringGridUncached = internalAction({
       }
     }
 
+    // Validate grid options ranges
+    if (gridOptions) {
+      validateGridOptions(gridOptions)
+    }
+
     // 1. Calculate Julian Day and positions
     const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
 
     // 2. Convert from ecliptic to equatorial coordinates for ACG/parans
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
-      equatorialPositions[planet] = {
-        ra: eq.rightAscension,
-        dec: eq.declination,
-      }
-    }
+    const equatorialPositions = convertAllToEquatorial(positions)
 
     // 3. Calculate ACG lines
     const acgLines = calculateAllACGLines(jd, equatorialPositions)
@@ -149,5 +155,96 @@ export const calculateScoringGrid = action({
   },
   handler: async (ctx, args): Promise<ScoringGridResult> => {
     return scoringGridCache.fetch(ctx, args)
+  },
+})
+
+// =============================================================================
+// City Ranking
+// =============================================================================
+
+/**
+ * Rank top cities by astrological score (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
+ */
+export const rankTopCitiesUncached = internalAction({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    weights: planetWeightsValidator,
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, { birthDate, birthTime, timezone, weights, limit }) => {
+    // 1. Calculate ephemeris
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
+    const positions = calculateAllPositions(jd)
+    const declinations = calculateDeclinations(jd)
+    const equatorialPositions = convertAllToEquatorial(positions)
+    const acgLines = calculateAllACGLines(jd, equatorialPositions)
+    const paranResult = calculateAllParans(equatorialPositions)
+
+    // 2. Fetch major + medium tier cities from DB
+    const cities = await ctx.runQuery(internal.cities.queries.getCitiesForRanking, {
+      tiers: ['major', 'medium'],
+    })
+
+    // 3. Run ranking pure function
+    const ranked = rankCities(
+      cities as Array<CityData>,
+      {
+        declinations,
+        positions: equatorialPositions,
+        weights,
+        acgLines,
+        parans: paranResult.points,
+      },
+      { limit: limit ?? 10, tiers: ['major', 'medium'] },
+    )
+
+    // 4. Return serializable result (strip Convex Id types)
+    return ranked.map((city, i) => ({
+      id: city.cityId.toString(),
+      name: city.name,
+      country: city.country,
+      latitude: city.latitude,
+      longitude: city.longitude,
+      score: city.score,
+      rank: i + 1,
+      tier: city.tier,
+      highlights: city.highlights,
+    }))
+  },
+})
+
+/** Cache for city ranking calculations */
+const cityRankingCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.geospatial.actions.rankTopCitiesUncached,
+  name: 'rankTopCities:v1',
+  ttl: CACHE_TTL_30_DAYS_MS,
+})
+
+/**
+ * Rank top cities by astrological score (cached, 30-day TTL).
+ *
+ * Fetches major + medium tier cities from the database and scores them
+ * based on zenith proximity, ACG line proximity, and paran activity.
+ *
+ * @param birthDate - Birth date in YYYY-MM-DD format
+ * @param birthTime - Birth time in HH:MM format
+ * @param timezone - IANA timezone string
+ * @param weights - Planet weights for scoring
+ * @param limit - Maximum number of cities to return (default 10)
+ * @returns Array of ranked cities with scores and highlights
+ */
+export const rankTopCities = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    weights: planetWeightsValidator,
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<Array<RankedCityResultDTO>> => {
+    return cityRankingCache.fetch(ctx, args) as Promise<Array<RankedCityResultDTO>>
   },
 })

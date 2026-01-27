@@ -22,18 +22,12 @@ import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
 import type { Declinations, EnhancedDeclination } from '@/components/calculator/DeclinationTable'
 import type { PlanetId } from '@/lib/planet-constants'
+import type { ProgressiveVisualization } from '@/hooks/useProgressiveVisualization'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
 import { debounce } from '@/lib/utils'
 import { formatDeclination } from '@/components/results/shared/constants'
 import { PLANETS } from '@/lib/planet-constants'
-import {
-  useACGData,
-  useAnyVisualizationLoading,
-  useParansData,
-  useScoringGridData,
-  useZenithData,
-} from '@/stores/selectors'
 
 // =============================================================================
 // Types
@@ -60,6 +54,8 @@ interface CalculationResult {
 }
 
 interface FloatingDataPanelProps {
+  /** Progressive visualization state from TanStack Query */
+  viz: ProgressiveVisualization
   /** Birth data for summary */
   birthData: BirthData | null
   /** Calculation result */
@@ -173,6 +169,7 @@ function CompactDeclinations({
 // =============================================================================
 
 export function FloatingDataPanel({
+  viz,
   birthData,
   result,
   weights,
@@ -190,23 +187,16 @@ export function FloatingDataPanel({
   const panelRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
 
-  // Progressive visualization data from store selectors
-  const zenithState = useZenithData()
-  const acgState = useACGData()
-  const paransState = useParansData()
-  const scoringGridState = useScoringGridData()
-  const isAnyVisualizationLoading = useAnyVisualizationLoading()
-
-  // Get visualization data from progressive loading store
-  const combinedACGLines = useMemo(() => acgState.data?.acgLines ?? [], [acgState.data?.acgLines])
+  // Get visualization data from TanStack Query
+  const combinedACGLines = useMemo(() => viz.acg.data?.acgLines ?? [], [viz.acg.data?.acgLines])
   const combinedZenithLines = useMemo(
-    () => zenithState.data?.zenithLines ?? [],
-    [zenithState.data?.zenithLines],
+    () => viz.zenith.data?.zenithLines ?? [],
+    [viz.zenith.data?.zenithLines],
   )
-  const combinedParans = useMemo(() => paransState.data?.points ?? [], [paransState.data?.points])
+  const combinedParans = useMemo(() => viz.parans.data?.points ?? [], [viz.parans.data?.points])
   const combinedScoringGrid = useMemo(
-    () => scoringGridState.data?.grid ?? [],
-    [scoringGridState.data?.grid],
+    () => viz.scoringGrid.data?.grid ?? [],
+    [viz.scoringGrid.data?.grid],
   )
 
   // Check if we have any visualization data to show
@@ -434,19 +424,19 @@ export function FloatingDataPanel({
           </div>
 
           {/* Enhanced Analysis (Progressive Loading) */}
-          {(hasAnyVisualizationData || isAnyVisualizationLoading) && (
+          {(hasAnyVisualizationData || viz.isAnyLoading) && (
             <div className="px-4 py-3 border-b border-slate-700/50">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                   Enhanced Analysis
                 </h3>
-                {isAnyVisualizationLoading && (
+                {viz.isAnyLoading && (
                   <Loader2 className="w-3 h-3 animate-spin text-amber-400 ml-auto" />
                 )}
               </div>
               {/* Loading state indicators */}
-              {isAnyVisualizationLoading && !hasAnyVisualizationData && (
+              {viz.isAnyLoading && !hasAnyVisualizationData && (
                 <div className="flex items-center gap-2 py-4 text-slate-400 text-sm">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Loading visualization data...</span>
@@ -462,10 +452,10 @@ export function FloatingDataPanel({
                   globeState={globeState}
                   compact
                   // Pass loading states for individual tabs
-                  isACGLoading={acgState.loading}
-                  isZenithLoading={zenithState.loading}
-                  isParansLoading={paransState.loading}
-                  isScoringGridLoading={scoringGridState.loading}
+                  isACGLoading={viz.acg.isFetching}
+                  isZenithLoading={viz.zenith.isFetching}
+                  isParansLoading={viz.parans.isFetching}
+                  isScoringGridLoading={viz.scoringGrid.isFetching}
                 />
               )}
             </div>

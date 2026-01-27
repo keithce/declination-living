@@ -4,7 +4,7 @@ interface ACGLinesDiagramProps {
   className?: string
 }
 
-export default function ACGLinesDiagram({ className = '' }: ACGLinesDiagramProps) {
+export function ACGLinesDiagram({ className = '' }: ACGLinesDiagramProps) {
   return (
     <svg
       viewBox="0 0 500 350"

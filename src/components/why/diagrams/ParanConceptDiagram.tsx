@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
+import { useId } from 'react'
 
 interface ParanConceptDiagramProps {
   className?: string
 }
 
-export default function ParanConceptDiagram({ className = '' }: ParanConceptDiagramProps) {
+export function ParanConceptDiagram({ className = '' }: ParanConceptDiagramProps) {
+  const markerId = useId()
   return (
     <svg
       viewBox="0 0 500 300"
@@ -84,7 +86,7 @@ export default function ParanConceptDiagram({ className = '' }: ParanConceptDiag
           fill="none"
           stroke="#475569"
           strokeWidth="1"
-          markerEnd="url(#arrow)"
+          markerEnd={`url(#${markerId})`}
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ delay: 1.4, duration: 0.3 }}
@@ -124,7 +126,7 @@ export default function ParanConceptDiagram({ className = '' }: ParanConceptDiag
           fill="none"
           stroke="#475569"
           strokeWidth="1"
-          markerEnd="url(#arrow)"
+          markerEnd={`url(#${markerId})`}
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ delay: 2, duration: 0.3 }}
@@ -133,7 +135,7 @@ export default function ParanConceptDiagram({ className = '' }: ParanConceptDiag
 
       {/* Arrow marker definition */}
       <defs>
-        <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <marker id={markerId} markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
           <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
         </marker>
       </defs>

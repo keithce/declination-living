@@ -20,11 +20,11 @@ import {
   paranSummaryValidator,
 } from '../validators'
 import { calculateAllPositions, dateToJulianDay } from '../ephemeris'
-import { eclipticToEquatorial } from '../coordinates/transform'
-import { MEAN_OBLIQUITY_J2000 } from '../core/constants'
+import { convertAllToEquatorial } from '../coordinates/transform'
+import { CACHE_TTL_30_DAYS_MS } from '../core/constants'
 import { PLANET_IDS } from '../core/types'
 import { findAllParans, getParanStatistics, getParansAtLatitude, getTopParans } from './catalog'
-import type { EquatorialCoordinates, ParanPoint, ParanResult, PlanetId } from '../core/types'
+import type { ParanPoint, ParanResult } from '../core/types'
 import type { PlanetPosition } from './catalog'
 
 // =============================================================================
@@ -32,17 +32,10 @@ import type { PlanetPosition } from './catalog'
 // =============================================================================
 
 /** Public paran calculation result */
-interface ParanCalculationResult {
+export interface ParanCalculationResult {
   points: Array<ParanPoint>
   summary: ParanResult['summary']
 }
-
-// =============================================================================
-// Cache Configuration
-// =============================================================================
-
-// 30-day TTL in milliseconds
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 // =============================================================================
 // Calculate Parans Action
@@ -194,19 +187,7 @@ export const calculateParansFromBirthDataUncached = internalAction({
     const positions = calculateAllPositions(jd)
 
     // 2. Convert from ecliptic to equatorial coordinates
-    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
-      PlanetId,
-      EquatorialCoordinates
-    >
-
-    for (const planet of PLANET_IDS) {
-      const pos = positions[planet]
-      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
-      equatorialPositions[planet] = {
-        ra: eq.rightAscension,
-        dec: eq.declination,
-      }
-    }
+    const equatorialPositions = convertAllToEquatorial(positions)
 
     // 3. Convert to PlanetPosition array for paran calculation
     const planetPositions: Array<PlanetPosition> = PLANET_IDS.map((planetId) => ({
@@ -229,7 +210,7 @@ export const calculateParansFromBirthDataUncached = internalAction({
 const paranCalculationCache = new ActionCache(components.actionCache, {
   action: internal.calculations.parans.actions.calculateParansFromBirthDataUncached,
   name: 'calculateParansFromBirthData:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**
