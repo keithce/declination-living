@@ -171,11 +171,7 @@ export function createParanPointLayer(
   const latitudeGroups = new Map<number, Array<ParanPointData>>()
 
   for (const paran of parans) {
-    // Skip if either planet is not visible
-    if (!planetVisibility[paran.planet1] || !planetVisibility[paran.planet2]) {
-      continue
-    }
-
+    // Create ALL points regardless of visibility - visibility applied after
     const roundedLat = Math.round(paran.latitude * 10) / 10
     if (!latitudeGroups.has(roundedLat)) {
       latitudeGroups.set(roundedLat, [])
@@ -193,6 +189,9 @@ export function createParanPointLayer(
       group.add(marker)
     })
   }
+
+  // Apply initial visibility after all points are created
+  updateParanPointVisibility(group, planetVisibility)
 
   // Animation update for pulsing effect
   const update = (time: number) => {

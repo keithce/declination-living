@@ -97,25 +97,3 @@ export function transformParans(parans: Array<BackendParanPoint>): Array<ParanPo
     strength: paran.strength,
   }))
 }
-
-/**
- * Check if Phase 2 data is available and valid.
- */
-export function hasPhase2Data(phase2Data: unknown): phase2Data is {
-  acgLines: Array<BackendACGLine>
-  zenithLines: Array<BackendZenithLine>
-  parans: Array<BackendParanPoint>
-  declinations: Record<PlanetId, number>
-} {
-  if (!phase2Data || typeof phase2Data !== 'object') return false
-
-  const data = phase2Data as Record<string, unknown>
-  return (
-    Array.isArray(data.acgLines) &&
-    Array.isArray(data.zenithLines) &&
-    Array.isArray(data.parans) &&
-    typeof data.declinations === 'object' &&
-    data.declinations !== null &&
-    !Array.isArray(data.declinations)
-  )
-}

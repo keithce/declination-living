@@ -1,5 +1,24 @@
 import { v } from 'convex/values'
-import { query } from '../_generated/server'
+import { internalQuery, query } from '../_generated/server'
+
+export const getCitiesForRanking = internalQuery({
+  args: {
+    tiers: v.array(
+      v.union(v.literal('major'), v.literal('medium'), v.literal('minor'), v.literal('small')),
+    ),
+  },
+  handler: async (ctx, { tiers }) => {
+    const results = await Promise.all(
+      tiers.map((tier) =>
+        ctx.db
+          .query('cities')
+          .withIndex('by_tier_latitude', (q) => q.eq('tier', tier))
+          .collect(),
+      ),
+    )
+    return results.flat()
+  },
+})
 
 export const search = query({
   args: { query: v.string() },

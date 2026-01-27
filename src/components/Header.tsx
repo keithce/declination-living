@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useConvexAuth } from 'convex/react'
 import { useAuthActions } from '@convex-dev/auth/react'
 import {
+  BookOpen,
   Calculator,
   Globe,
   Home,
@@ -79,6 +80,13 @@ export default function Header({ minimal = false }: HeaderProps) {
           >
             Calculator
           </Link>
+          <Link
+            to="/why"
+            className="text-slate-300 hover:text-white transition-colors"
+            activeProps={{ className: 'text-amber-400 font-medium' }}
+          >
+            Why?
+          </Link>
           {isAuthenticated && (
             <Link
               to="/dashboard"
@@ -154,6 +162,19 @@ export default function Header({ minimal = false }: HeaderProps) {
           >
             <Calculator size={20} />
             <span className="font-medium">Calculator</span>
+          </Link>
+
+          <Link
+            to="/why"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors mb-2"
+            activeProps={{
+              className:
+                'flex items-center gap-3 p-3 rounded-lg bg-amber-600 hover:bg-amber-700 transition-colors mb-2',
+            }}
+          >
+            <BookOpen size={20} />
+            <span className="font-medium">Why?</span>
           </Link>
 
           {isAuthenticated && (

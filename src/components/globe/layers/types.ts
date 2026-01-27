@@ -85,6 +85,28 @@ export interface ParanPointData {
   strength?: number
 }
 
+/** City marker data for globe visualization */
+export interface CityMarkerData {
+  /** Unique identifier (database ID) */
+  id: string
+  /** City name */
+  name: string
+  /** Country name */
+  country: string
+  /** City latitude */
+  latitude: number
+  /** City longitude */
+  longitude: number
+  /** Combined score (0-100) */
+  score: number
+  /** Rank in the results (1-based) */
+  rank: number
+  /** City population tier */
+  tier: 'major' | 'medium' | 'minor' | 'small'
+  /** Human-readable highlight strings */
+  highlights: Array<string>
+}
+
 // =============================================================================
 // Visibility State
 // =============================================================================
@@ -97,6 +119,7 @@ export interface LayerVisibility {
   heatmap: boolean
   latitudeBands: boolean // Original latitude bands
   birthLocation: boolean
+  cityMarkers: boolean
 }
 
 /** ACG line type filters */
@@ -138,12 +161,12 @@ export interface ExtendedGlobeCanvasProps {
   optimalLatitudes?: Array<{
     latitude: number
     score: number
-    dominantPlanet: string
+    dominantPlanet: PlanetId
   }>
   latitudeBands?: Array<{
     min: number
     max: number
-    dominantPlanet: string
+    dominantPlanet: PlanetId
   }>
   birthLocation?: {
     latitude: number
@@ -174,6 +197,7 @@ export const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
   heatmap: false,
   latitudeBands: true,
   birthLocation: true,
+  cityMarkers: true,
 }
 
 export const DEFAULT_ACG_FILTERS: ACGLineFilters = {

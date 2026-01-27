@@ -10,7 +10,6 @@ import {
   zeroWeights,
 } from '../translator'
 import { PLANET_IDS } from '../../core/types'
-import type { PlanetId } from '../../core/types'
 
 describe('Vibe Categories', () => {
   describe('Preset Vibes', () => {

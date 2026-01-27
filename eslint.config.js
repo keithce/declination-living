@@ -17,6 +17,7 @@ export default [
       '**/*.gen.ts',
       '*.config.js',
       '*.config.ts',
+      'scripts/**',
     ],
   },
 

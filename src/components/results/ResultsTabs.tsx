@@ -6,7 +6,7 @@
  */
 
 import { memo, useState } from 'react'
-import { BarChart3, Globe, MapPin, Sparkles, Target } from 'lucide-react'
+import { BarChart3, Globe, Loader2, MapPin, Sparkles, Target } from 'lucide-react'
 import { APPROX_OBLIQUITY } from '@convex/calculations/core/constants'
 import { OverviewTab } from './tabs/OverviewTab'
 import { ACGLinesTab } from './tabs/ACGLinesTab'
@@ -41,6 +41,14 @@ export interface ResultsTabsProps {
   globeState: GlobeState
   /** Compact mode for narrow panels (default: true) */
   compact?: boolean
+  /** Loading state for ACG lines (progressive loading) */
+  isACGLoading?: boolean
+  /** Loading state for zenith lines (progressive loading) */
+  isZenithLoading?: boolean
+  /** Loading state for parans (progressive loading) */
+  isParansLoading?: boolean
+  /** Loading state for scoring grid (progressive loading) */
+  isScoringGridLoading?: boolean
 }
 
 type TabValue = 'overview' | 'acg' | 'zenith' | 'scoring' | 'parans'
@@ -72,6 +80,10 @@ export const ResultsTabs = memo(function ResultsTabs({
   scoringGrid,
   globeState: _globeState, // Future: Sync with globe visualization
   compact = true,
+  isACGLoading = false,
+  isZenithLoading = false,
+  isParansLoading = false,
+  isScoringGridLoading = false,
 }: ResultsTabsProps) {
   const [activeTab, setActiveTab] = useState<TabValue>('overview')
 
@@ -83,36 +95,49 @@ export const ResultsTabs = memo(function ResultsTabs({
   // Count OOB zenith lines
   const oobCount = zenithLines.filter((z) => Math.abs(z.declination) > APPROX_OBLIQUITY).length
 
-  // Tab options with icons and counts
+  // Tab options with icons, counts, and loading states
   const tabOptions: Array<{
     value: TabValue
     label: string
     icon: React.ReactNode
     badge?: string
+    isLoading?: boolean
   }> = [
-    { value: 'overview', label: 'Overview', icon: <Target className="w-4 h-4" /> },
-    { value: 'acg', label: 'ACG Lines', icon: <Globe className="w-4 h-4" />, badge: `${acgCount}` },
+    {
+      value: 'overview',
+      label: 'Overview',
+      icon: <Target className="w-4 h-4" />,
+      isLoading: isScoringGridLoading,
+    },
+    {
+      value: 'acg',
+      label: 'ACG Lines',
+      icon: <Globe className="w-4 h-4" />,
+      badge: `${acgCount}`,
+      isLoading: isACGLoading,
+    },
     {
       value: 'zenith',
       label: 'Zenith',
       icon: <MapPin className="w-4 h-4" />,
       badge: oobCount > 0 ? `${oobCount} OOB` : undefined,
+      isLoading: isZenithLoading,
     },
     {
       value: 'scoring',
       label: 'Scoring',
       icon: <BarChart3 className="w-4 h-4" />,
       badge: `${gridCellCount}`,
+      isLoading: isScoringGridLoading,
     },
     {
       value: 'parans',
       label: 'Parans',
       icon: <Sparkles className="w-4 h-4" />,
       badge: `${paranCount}`,
+      isLoading: isParansLoading,
     },
   ]
-
-  const activeOption = tabOptions.find((t) => t.value === activeTab)
 
   return (
     <div className="w-full space-y-3">
@@ -124,11 +149,7 @@ export const ResultsTabs = memo(function ResultsTabs({
         }}
       >
         <SelectTrigger className="w-full bg-slate-800/50 border-slate-700/50 text-white">
-          <div className="flex items-center gap-2">
-            {activeOption?.icon}
-            <SelectValue placeholder="Select view" />
-            {/* Badge removed - displayed by SelectValue */}
-          </div>
+          <SelectValue placeholder="Select view" />
         </SelectTrigger>
         <SelectContent className="bg-slate-800 border-slate-700">
           {tabOptions.map((option) => (
@@ -140,7 +161,8 @@ export const ResultsTabs = memo(function ResultsTabs({
               <div className="flex items-center gap-2">
                 {option.icon}
                 <span>{option.label}</span>
-                {option.badge && (
+                {option.isLoading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
+                {option.badge && !option.isLoading && (
                   <span className="ml-auto px-1.5 py-0.5 text-xs bg-slate-700/50 rounded">
                     {option.badge}
                   </span>

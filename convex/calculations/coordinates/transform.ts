@@ -8,6 +8,9 @@
  */
 
 import { toDegrees as toDeg, toRadians as toRad } from '../core/math'
+import { MEAN_OBLIQUITY_J2000 } from '../core/constants'
+import { PLANET_IDS } from '../core/types'
+import type { EquatorialCoordinates, PlanetId } from '../core/types'
 
 /**
  * Convert Ecliptic coordinates to Equatorial
@@ -223,4 +226,35 @@ export function greatCircleDistanceKm(
 ): number {
   const EARTH_RADIUS_KM = 6371
   return greatCircleDistance(lat1, lon1, lat2, lon2) * EARTH_RADIUS_KM
+}
+
+/**
+ * Convert all planet positions from ecliptic to equatorial coordinates.
+ *
+ * Shared helper to eliminate duplication across ACG, paran, and geospatial actions.
+ *
+ * @param positions - Ecliptic positions for all planets (longitude/latitude in degrees)
+ * @returns Equatorial positions (RA/Dec) for all planets
+ */
+export function convertAllToEquatorial(
+  positions: Record<PlanetId, { longitude: number; latitude: number }>,
+): Record<PlanetId, EquatorialCoordinates> {
+  const result = {} as Record<PlanetId, EquatorialCoordinates>
+
+  for (const planet of PLANET_IDS) {
+    const pos = positions[planet]
+    if (!Number.isFinite(pos.longitude) || !Number.isFinite(pos.latitude)) {
+      throw new TypeError(
+        `convertAllToEquatorial: missing or invalid position for "${planet}". ` +
+          `Ensure calculateAllPositions returned valid data.`,
+      )
+    }
+    const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
+    result[planet] = {
+      ra: eq.rightAscension,
+      dec: eq.declination,
+    }
+  }
+
+  return result
 }

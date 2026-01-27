@@ -14,15 +14,16 @@
  */
 
 import { v } from 'convex/values'
-import { action } from '../_generated/server'
-import { internal } from '../_generated/api'
+import { ActionCache } from '@convex-dev/action-cache'
+import { action, internalAction } from '../_generated/server'
+import { components, internal } from '../_generated/api'
 
-import { generateCacheKey, hashWeights } from '../cache/analysisCache'
 import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from './ephemeris'
 import { findOptimalLatitudes, getOptimalLatitudeBands } from './optimizer'
 
 // Import new modules
 import { PLANET_IDS } from './core/types'
+import { CACHE_TTL_30_DAYS_MS } from './core/constants'
 
 // Import cache utilities
 import { checkAllOOBStatus, getMeanObliquity } from './ephemeris/oob'
@@ -193,16 +194,29 @@ export const calculateEnhancedPositions = action({
 // ACG Line Actions
 // =============================================================================
 
+/** ACG Lines result type for explicit return typing */
+interface ACGLinesResult {
+  lines: Array<{
+    planet: string
+    lineType: string
+    isCircumpolar: boolean
+    points: Array<{ lat: number; lon: number }>
+  }>
+  julianDay: number
+  totalLines: number
+}
+
 /**
- * Calculate all ACG lines for a chart.
+ * Calculate all ACG lines for a chart (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
  */
-export const calculateACGLinesAction = action({
+export const calculateACGLinesUncached = internalAction({
   args: {
     birthDate: v.string(),
     birthTime: v.string(),
     timezone: v.string(),
   },
-  handler: async (_ctx, { birthDate, birthTime }) => {
+  handler: async (_ctx, { birthDate, birthTime }): Promise<ACGLinesResult> => {
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
     const obliquity = getMeanObliquity(jd)
@@ -231,6 +245,28 @@ export const calculateACGLinesAction = action({
       julianDay: jd,
       totalLines: lines.length,
     }
+  },
+})
+
+/** Cache for ACG lines calculation */
+const acgLinesCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.enhanced_actions.calculateACGLinesUncached,
+  name: 'calculateACGLines:v1',
+  ttl: CACHE_TTL_30_DAYS_MS,
+})
+
+/**
+ * Calculate all ACG lines for a chart (cached, 30-day TTL).
+ * Anonymous shared cache - same birth data returns same cached result for any user.
+ */
+export const calculateACGLinesAction = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+  },
+  handler: async (ctx, args): Promise<ACGLinesResult> => {
+    return acgLinesCache.fetch(ctx, args)
   },
 })
 
@@ -293,17 +329,32 @@ export const calculateZenithLinesAction = action({
 // Paran Actions
 // =============================================================================
 
+/** Parans result type for explicit return typing */
+interface ParansActionResult {
+  parans: Array<{
+    planet1: string
+    event1: string
+    planet2: string
+    event2: string
+    latitude: number
+    strength: number
+  }>
+  summary: ParanSummary
+  julianDay: number
+}
+
 /**
- * Calculate all parans for a chart.
+ * Calculate all parans for a chart (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
  */
-export const calculateParansAction = action({
+export const calculateParansUncached = internalAction({
   args: {
     birthDate: v.string(),
     birthTime: v.string(),
     timezone: v.string(),
     topN: v.optional(v.number()),
   },
-  handler: async (_ctx, { birthDate, birthTime, topN }) => {
+  handler: async (_ctx, { birthDate, birthTime, topN }): Promise<ParansActionResult> => {
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
     const obliquity = getMeanObliquity(jd)
@@ -328,6 +379,29 @@ export const calculateParansAction = action({
       summary: result.summary,
       julianDay: jd,
     }
+  },
+})
+
+/** Cache for parans calculation */
+const paransCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.enhanced_actions.calculateParansUncached,
+  name: 'calculateParans:v1',
+  ttl: CACHE_TTL_30_DAYS_MS,
+})
+
+/**
+ * Calculate all parans for a chart (cached, 30-day TTL).
+ * Anonymous shared cache - same birth data returns same cached result for any user.
+ */
+export const calculateParansAction = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    topN: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<ParansActionResult> => {
+    return paransCache.fetch(ctx, args)
   },
 })
 
@@ -473,7 +547,8 @@ export const checkLocationSafetyAction = action({
 // =============================================================================
 
 /**
- * Complete enhanced analysis pipeline.
+ * Complete enhanced analysis pipeline (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
  *
  * Returns everything needed for the full visualization:
  * - Declinations with OOB status
@@ -483,32 +558,18 @@ export const checkLocationSafetyAction = action({
  * - Top parans
  * - Dignity scores
  */
-export const calculateCompleteEnhanced = action({
+export const calculateCompleteEnhancedUncached = internalAction({
   args: {
     birthDate: v.string(),
     birthTime: v.string(),
     timezone: v.string(),
     weights: planetWeightsValidator,
     ascendant: v.optional(v.number()),
-    anonymousUserId: v.optional(v.id('anonymousUsers')),
-    userId: v.optional(v.id('users')),
   },
   handler: async (
-    ctx,
-    { birthDate, birthTime, timezone, weights, ascendant, anonymousUserId, userId },
-  ) => {
-    // Generate cache key
-    const weightsHash = hashWeights(weights)
-    const cacheKey = generateCacheKey(birthDate, birthTime, timezone, weightsHash, ascendant)
-
-    // Check cache first
-    const cachedResult = (await ctx.runQuery(internal.cache.analysisCache.getCachedResultInternal, {
-      cacheKey,
-    })) as CompleteEnhancedResult | null
-    if (cachedResult !== null) {
-      return cachedResult
-    }
-
+    _ctx,
+    { birthDate, birthTime, weights, ascendant },
+  ): Promise<CompleteEnhancedResult> => {
     const jd = dateToJulianDay(birthDate, birthTime)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
@@ -564,9 +625,9 @@ export const calculateCompleteEnhanced = action({
                     : '-',
         },
       ]),
-    )
+    ) as Record<string, DignityScore>
 
-    const result = {
+    return {
       // Basic data
       julianDay: jd,
       obliquity,
@@ -581,7 +642,7 @@ export const calculateCompleteEnhanced = action({
             oobDegrees: oobStatus[planet].oobDegrees,
           },
         ]),
-      ),
+      ) as Record<string, EnhancedDeclination>,
 
       // Optimization results
       optimalLatitudes,
@@ -611,18 +672,38 @@ export const calculateCompleteEnhanced = action({
       // Metadata
       sect: isDay ? 'day' : 'night',
     }
+  },
+})
 
-    // Cache the result
-    await ctx.runMutation(internal.cache.analysisCache.setCachedResultInternal, {
-      cacheKey,
-      inputHash: weightsHash,
-      result,
-      calculationType: 'full' as const,
-      ...(userId ? { userId } : {}),
-      ...(anonymousUserId ? { anonymousUserId } : {}),
-    })
+/** Cache for complete enhanced analysis */
+const completeEnhancedCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.enhanced_actions.calculateCompleteEnhancedUncached,
+  name: 'calculateCompleteEnhanced:v1',
+  ttl: CACHE_TTL_30_DAYS_MS,
+})
 
-    return result
+/**
+ * Complete enhanced analysis pipeline (cached, 30-day TTL).
+ * Anonymous shared cache - same inputs return same cached result for any user.
+ *
+ * Returns everything needed for the full visualization:
+ * - Declinations with OOB status
+ * - Optimal latitudes
+ * - Latitude bands
+ * - Zenith lines
+ * - Top parans
+ * - Dignity scores
+ */
+export const calculateCompleteEnhanced = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    weights: planetWeightsValidator,
+    ascendant: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<CompleteEnhancedResult> => {
+    return completeEnhancedCache.fetch(ctx, args)
   },
 })
 

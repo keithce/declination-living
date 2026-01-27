@@ -26,6 +26,14 @@ export interface GlobeState {
   heatmapSpread: number
   /** Currently highlighted planet */
   highlightedPlanet: PlanetId | null
+  /** Currently highlighted city (by ID) */
+  highlightedCity: string | null
+  /** Whether to show city labels on the globe */
+  showCityLabels: boolean
+  /** Sun time of day in hours (0-24) */
+  sunTimeOfDay: number
+  /** Whether to force full daylight (no day/night cycle) */
+  sunAlwaysDay: boolean
 }
 
 export interface GlobeStateActions {
@@ -45,6 +53,14 @@ export interface GlobeStateActions {
   setHeatmapSpread: (spread: number) => void
   /** Set highlighted planet */
   setHighlightedPlanet: (planet: PlanetId | null) => void
+  /** Set highlighted city by ID */
+  setHighlightedCity: (cityId: string | null) => void
+  /** Toggle city labels visibility */
+  toggleCityLabels: () => void
+  /** Set sun time of day (0-24 hours) */
+  setSunTimeOfDay: (hour: number) => void
+  /** Toggle always-day mode */
+  toggleSunAlwaysDay: () => void
   /** Reset all state to defaults */
   resetState: () => void
 }
@@ -57,11 +73,12 @@ export type UseGlobeStateReturn = GlobeState & GlobeStateActions
 
 const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
   zenithBands: true,
-  acgLines: true,
-  paranPoints: true,
+  acgLines: false,
+  paranPoints: false,
   heatmap: false,
   latitudeBands: true,
   birthLocation: true,
+  cityMarkers: true,
 }
 
 const DEFAULT_PLANET_VISIBILITY: PlanetVisibility = PLANET_IDS.reduce(
@@ -83,6 +100,10 @@ const DEFAULT_STATE: GlobeState = {
   heatmapIntensity: 1.0,
   heatmapSpread: 3.0,
   highlightedPlanet: null,
+  highlightedCity: null,
+  showCityLabels: false,
+  sunTimeOfDay: 12,
+  sunAlwaysDay: false,
 }
 
 // =============================================================================
@@ -176,6 +197,38 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
     }))
   }, [])
 
+  // Highlighted city
+  const setHighlightedCity = useCallback((cityId: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      highlightedCity: cityId,
+    }))
+  }, [])
+
+  // Sun time of day
+  const setSunTimeOfDay = useCallback((hour: number) => {
+    setState((prev) => ({
+      ...prev,
+      sunTimeOfDay: Math.max(0, Math.min(24, hour)),
+    }))
+  }, [])
+
+  // Toggle always-day mode
+  const toggleSunAlwaysDay = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      sunAlwaysDay: !prev.sunAlwaysDay,
+    }))
+  }, [])
+
+  // Toggle city labels
+  const toggleCityLabels = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      showCityLabels: !prev.showCityLabels,
+    }))
+  }, [])
+
   // Reset state
   const resetState = useCallback(() => {
     setState(DEFAULT_STATE)
@@ -193,6 +246,10 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHeatmapIntensity,
       setHeatmapSpread,
       setHighlightedPlanet,
+      setHighlightedCity,
+      toggleCityLabels,
+      setSunTimeOfDay,
+      toggleSunAlwaysDay,
       resetState,
     }),
     [
@@ -205,6 +262,10 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHeatmapIntensity,
       setHeatmapSpread,
       setHighlightedPlanet,
+      setHighlightedCity,
+      toggleCityLabels,
+      setSunTimeOfDay,
+      toggleSunAlwaysDay,
       resetState,
     ],
   )

@@ -1,15 +1,20 @@
+'use node'
+
 /**
  * ACG and Zenith Calculation Actions
  *
  * Provides cached calculation of ACG lines and zenith lines.
- * Results are cached for 24 hours to optimize performance.
+ * Internal analysis cache uses 24-hour TTL; public ActionCache uses 30-day TTL.
  */
 
 import { v } from 'convex/values'
-import { internalAction } from '../../_generated/server'
-import { internal } from '../../_generated/api'
-import { DEFAULT_DECLINATION_ORB } from '../core/constants'
+import { ActionCache } from '@convex-dev/action-cache'
+import { action, internalAction } from '../../_generated/server'
+import { components, internal } from '../../_generated/api'
+import { CACHE_TTL_30_DAYS_MS, DEFAULT_DECLINATION_ORB } from '../core/constants'
 import { PLANET_IDS } from '../core/types'
+import { calculateAllPositions, dateToJulianDay } from '../ephemeris'
+import { convertAllToEquatorial } from '../coordinates/transform'
 import { calculateAllACGLines } from './line_solver'
 import { calculateAllZenithLines } from './zenith'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from '../core/types'
@@ -136,7 +141,7 @@ export const calculateACGAndZenith = internalAction({
       zenithLines,
     }
 
-    // 4. Cache result (24h TTL set by analysisCache)
+    // 4. Cache result (24h TTL via internal analysisCache table)
     // Generate input hash for cache
     const inputHash = `jd:${args.julianDay.toFixed(6)}_orb:${orb.toFixed(2)}`
 
@@ -148,5 +153,108 @@ export const calculateACGAndZenith = internalAction({
     })
 
     return result
+  },
+})
+
+// =============================================================================
+// Public ACG Calculation (Cached)
+// =============================================================================
+
+/** Result type for public ACG calculation */
+interface ACGPublicResult {
+  julianDay: number
+  acgLines: Array<ACGLine>
+  zenithLines: Array<ZenithLine>
+}
+
+/**
+ * Calculate ACG lines from birth data (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
+ */
+export const calculateACGAndZenithFromBirthDataUncached = internalAction({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    orb: v.optional(v.number()),
+  },
+  handler: async (_ctx, { birthDate, birthTime, timezone, orb }): Promise<ACGPublicResult> => {
+    // Validate input formats
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+      throw new Error(`Invalid birthDate format: "${birthDate}" (expected YYYY-MM-DD)`)
+    }
+    if (!/^\d{2}:\d{2}$/.test(birthTime)) {
+      throw new Error(`Invalid birthTime format: "${birthTime}" (expected HH:MM)`)
+    }
+    if (!timezone || timezone.trim().length === 0) {
+      throw new Error('timezone must be a non-empty string')
+    }
+
+    const effectiveOrb = orb ?? DEFAULT_DECLINATION_ORB
+
+    // 1. Calculate Julian Day and positions
+    let jd: number
+    try {
+      jd = dateToJulianDay(birthDate, birthTime, timezone)
+    } catch (e) {
+      throw new Error(
+        `Failed to compute Julian Day for birthDate="${birthDate}", birthTime="${birthTime}", timezone="${timezone}": ${e instanceof Error ? e.message : String(e)}`,
+      )
+    }
+    let positions: ReturnType<typeof calculateAllPositions>
+    try {
+      positions = calculateAllPositions(jd)
+    } catch (e) {
+      throw new Error(
+        `Failed to calculate positions for JD=${jd} (birthDate="${birthDate}", birthTime="${birthTime}"): ${e instanceof Error ? e.message : String(e)}`,
+      )
+    }
+
+    // 2. Convert from ecliptic to equatorial coordinates
+    const equatorialPositions = convertAllToEquatorial(positions)
+
+    // 3. Extract declinations for zenith calculation
+    const declinations = extractDeclinations(equatorialPositions)
+
+    // 4. Calculate ACG lines and zenith lines
+    const acgLines = calculateAllACGLines(jd, equatorialPositions)
+    const zenithLines = calculateAllZenithLines(declinations, effectiveOrb)
+
+    return {
+      julianDay: jd,
+      acgLines,
+      zenithLines,
+    }
+  },
+})
+
+/** Cache for public ACG calculations */
+const acgPublicCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.acg.actions.calculateACGAndZenithFromBirthDataUncached,
+  name: 'calculateACGFromBirthData:v1',
+  ttl: CACHE_TTL_30_DAYS_MS,
+})
+
+/**
+ * Calculate ACG lines from birth data (cached, 30-day TTL).
+ *
+ * Public action for frontend access. Computes planetary positions
+ * from birth data and calculates ACG lines.
+ *
+ * @param birthDate - Birth date in YYYY-MM-DD format
+ * @param birthTime - Birth time in HH:MM format
+ * @param timezone - IANA timezone string
+ * @param orb - Orb in degrees for zenith bands (default: 1.0)
+ * @returns ACG lines, zenith lines, and Julian Day
+ */
+export const calculateACGAndZenithPublic = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    orb: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<ACGPublicResult> => {
+    return acgPublicCache.fetch(ctx, args)
   },
 })

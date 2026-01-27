@@ -15,6 +15,7 @@ import type * as calculations_acg_index from "../calculations/acg/index.js";
 import type * as calculations_acg_line_solver from "../calculations/acg/line_solver.js";
 import type * as calculations_acg_zenith from "../calculations/acg/zenith.js";
 import type * as calculations_actions from "../calculations/actions.js";
+import type * as calculations_batch_actions from "../calculations/batch/actions.js";
 import type * as calculations_coordinates_geocentric from "../calculations/coordinates/geocentric.js";
 import type * as calculations_coordinates_hour_angle from "../calculations/coordinates/hour_angle.js";
 import type * as calculations_coordinates_index from "../calculations/coordinates/index.js";
@@ -39,6 +40,7 @@ import type * as calculations_ephemeris_oob from "../calculations/ephemeris/oob.
 import type * as calculations_ephemeris_oobCalculator from "../calculations/ephemeris/oobCalculator.js";
 import type * as calculations_ephemeris_speed from "../calculations/ephemeris/speed.js";
 import type * as calculations_ephemeris_swissephService from "../calculations/ephemeris/swissephService.js";
+import type * as calculations_geospatial_actions from "../calculations/geospatial/actions.js";
 import type * as calculations_geospatial_grid from "../calculations/geospatial/grid.js";
 import type * as calculations_geospatial_index from "../calculations/geospatial/index.js";
 import type * as calculations_geospatial_optimizer from "../calculations/geospatial/optimizer.js";
@@ -52,16 +54,18 @@ import type * as calculations_parans_catalog from "../calculations/parans/catalo
 import type * as calculations_parans_events from "../calculations/parans/events.js";
 import type * as calculations_parans_index from "../calculations/parans/index.js";
 import type * as calculations_parans_solver from "../calculations/parans/solver.js";
-import type * as calculations_phase2_actions from "../calculations/phase2_actions.js";
 import type * as calculations_safety_filter from "../calculations/safety/filter.js";
 import type * as calculations_safety_index from "../calculations/safety/index.js";
 import type * as calculations_validators from "../calculations/validators.js";
 import type * as calculations_vibes_index from "../calculations/vibes/index.js";
 import type * as calculations_vibes_queries from "../calculations/vibes/queries.js";
 import type * as calculations_vibes_translator from "../calculations/vibes/translator.js";
+import type * as calculations_zenith_actions from "../calculations/zenith/actions.js";
+import type * as calculations_zenith_index from "../calculations/zenith/index.js";
 import type * as charts_mutations from "../charts/mutations.js";
 import type * as charts_queries from "../charts/queries.js";
 import type * as cities_queries from "../cities/queries.js";
+import type * as cities_seed from "../cities/seed.js";
 import type * as http from "../http.js";
 import type * as presets_queries from "../presets/queries.js";
 import type * as presets_seed from "../presets/seed.js";
@@ -81,6 +85,7 @@ declare const fullApi: ApiFromModules<{
   "calculations/acg/line_solver": typeof calculations_acg_line_solver;
   "calculations/acg/zenith": typeof calculations_acg_zenith;
   "calculations/actions": typeof calculations_actions;
+  "calculations/batch/actions": typeof calculations_batch_actions;
   "calculations/coordinates/geocentric": typeof calculations_coordinates_geocentric;
   "calculations/coordinates/hour_angle": typeof calculations_coordinates_hour_angle;
   "calculations/coordinates/index": typeof calculations_coordinates_index;
@@ -105,6 +110,7 @@ declare const fullApi: ApiFromModules<{
   "calculations/ephemeris/oobCalculator": typeof calculations_ephemeris_oobCalculator;
   "calculations/ephemeris/speed": typeof calculations_ephemeris_speed;
   "calculations/ephemeris/swissephService": typeof calculations_ephemeris_swissephService;
+  "calculations/geospatial/actions": typeof calculations_geospatial_actions;
   "calculations/geospatial/grid": typeof calculations_geospatial_grid;
   "calculations/geospatial/index": typeof calculations_geospatial_index;
   "calculations/geospatial/optimizer": typeof calculations_geospatial_optimizer;
@@ -118,16 +124,18 @@ declare const fullApi: ApiFromModules<{
   "calculations/parans/events": typeof calculations_parans_events;
   "calculations/parans/index": typeof calculations_parans_index;
   "calculations/parans/solver": typeof calculations_parans_solver;
-  "calculations/phase2_actions": typeof calculations_phase2_actions;
   "calculations/safety/filter": typeof calculations_safety_filter;
   "calculations/safety/index": typeof calculations_safety_index;
   "calculations/validators": typeof calculations_validators;
   "calculations/vibes/index": typeof calculations_vibes_index;
   "calculations/vibes/queries": typeof calculations_vibes_queries;
   "calculations/vibes/translator": typeof calculations_vibes_translator;
+  "calculations/zenith/actions": typeof calculations_zenith_actions;
+  "calculations/zenith/index": typeof calculations_zenith_index;
   "charts/mutations": typeof charts_mutations;
   "charts/queries": typeof charts_queries;
   "cities/queries": typeof cities_queries;
+  "cities/seed": typeof cities_seed;
   http: typeof http;
   "presets/queries": typeof presets_queries;
   "presets/seed": typeof presets_seed;
@@ -160,4 +168,47 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  actionCache: {
+    crons: {
+      purge: FunctionReference<
+        "mutation",
+        "internal",
+        { expiresAt?: number },
+        null
+      >;
+    };
+    lib: {
+      get: FunctionReference<
+        "query",
+        "internal",
+        { args: any; name: string; ttl: number | null },
+        { kind: "hit"; value: any } | { expiredEntry?: string; kind: "miss" }
+      >;
+      put: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          args: any;
+          expiredEntry?: string;
+          name: string;
+          ttl: number | null;
+          value: any;
+        },
+        { cacheHit: boolean; deletedExpiredEntry: boolean }
+      >;
+      remove: FunctionReference<
+        "mutation",
+        "internal",
+        { args: any; name: string },
+        null
+      >;
+      removeAll: FunctionReference<
+        "mutation",
+        "internal",
+        { batchSize?: number; before?: number; name?: string },
+        null
+      >;
+    };
+  };
+};

@@ -20,8 +20,9 @@ import {
 import type { BirthData } from '@/components/calculator/BirthDataForm'
 import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState'
-import type { Declinations } from '@/components/calculator/DeclinationTable'
-import type { Phase2Data } from '@/components/results/FullPageGlobeLayout'
+import type { Declinations, EnhancedDeclination } from '@/components/calculator/DeclinationTable'
+import type { PlanetId } from '@/lib/planet-constants'
+import type { ProgressiveVisualization } from '@/hooks/useProgressiveVisualization'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { ResultsTabs } from '@/components/results/ResultsTabs'
 import { debounce } from '@/lib/utils'
@@ -48,15 +49,17 @@ interface CalculationResult {
   declinations: Declinations
   optimalLatitudes: Array<LatitudeScore>
   latitudeBands: Array<LatitudeBand>
+  /** Enhanced declinations with OOB status */
+  enhancedDeclinations?: Record<PlanetId, EnhancedDeclination>
 }
 
 interface FloatingDataPanelProps {
+  /** Progressive visualization state from TanStack Query */
+  viz: ProgressiveVisualization
   /** Birth data for summary */
   birthData: BirthData | null
   /** Calculation result */
   result: CalculationResult
-  /** Phase 2 enhanced data */
-  phase2Data: Phase2Data | null
   /** Current weights */
   weights: PlanetWeights
   /** Globe state for ResultsTabs */
@@ -118,7 +121,13 @@ function BirthSummary({ birthData, onEdit }: { birthData: BirthData; onEdit: () 
   )
 }
 
-function CompactDeclinations({ declinations }: { declinations: Declinations }) {
+function CompactDeclinations({
+  declinations,
+  enhancedDeclinations,
+}: {
+  declinations: Declinations
+  enhancedDeclinations?: Record<PlanetId, EnhancedDeclination>
+}) {
   return (
     <div className="p-4 border-b border-slate-700/50">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
@@ -127,15 +136,31 @@ function CompactDeclinations({ declinations }: { declinations: Declinations }) {
       <div className="grid grid-cols-5 gap-2">
         {PLANETS.map((planet) => {
           const value = declinations[planet.key as keyof Declinations]
+          const enhanced = enhancedDeclinations?.[planet.key]
+          const isOOB = enhanced?.isOOB ?? false
+
           return (
             <div
               key={planet.key}
-              className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg"
-              title={planet.name}
+              className="flex flex-col items-center p-2 bg-slate-800/30 rounded-lg relative"
+              title={
+                isOOB
+                  ? `${planet.name} - Out of Bounds by ${enhanced?.oobDegrees?.toFixed(2) ?? '?'}°`
+                  : planet.name
+              }
             >
               <span className="text-lg" style={{ color: planet.color }}>
                 {planet.symbol}
               </span>
+              {isOOB && (
+                <>
+                  <span
+                    className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Out of bounds</span>
+                </>
+              )}
               <span className="text-xs text-slate-400 mt-1">{formatDeclination(value)}</span>
             </div>
           )
@@ -150,9 +175,9 @@ function CompactDeclinations({ declinations }: { declinations: Declinations }) {
 // =============================================================================
 
 export function FloatingDataPanel({
+  viz,
   birthData,
   result,
-  phase2Data,
   weights,
   globeState,
   onEditBirthData,
@@ -167,6 +192,28 @@ export function FloatingDataPanel({
   const isResizing = useRef(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
+
+  // Get visualization data from TanStack Query
+  const combinedACGLines = useMemo(() => viz.acg.data?.acgLines ?? [], [viz.acg.data?.acgLines])
+  const combinedZenithLines = useMemo(
+    () => viz.zenith.data?.zenithLines ?? [],
+    [viz.zenith.data?.zenithLines],
+  )
+  const combinedParans = useMemo(() => viz.parans.data?.points ?? [], [viz.parans.data?.points])
+  const combinedScoringGrid = useMemo(
+    () => viz.scoringGrid.data?.grid ?? [],
+    [viz.scoringGrid.data?.grid],
+  )
+
+  // Check if we have any visualization data to show
+  const hasAnyVisualizationData = useMemo(
+    () =>
+      combinedACGLines.length > 0 ||
+      combinedZenithLines.length > 0 ||
+      combinedParans.length > 0 ||
+      combinedScoringGrid.length > 0,
+    [combinedACGLines, combinedZenithLines, combinedParans, combinedScoringGrid],
+  )
 
   // Debounce recalculate to prevent excessive API calls during slider dragging
   const debouncedRecalculate = useMemo(() => debounce(onRecalculate, 400), [onRecalculate])
@@ -331,7 +378,10 @@ export function FloatingDataPanel({
           {birthData && <BirthSummary birthData={birthData} onEdit={onEditBirthData} />}
 
           {/* Compact Declinations */}
-          <CompactDeclinations declinations={result.declinations} />
+          <CompactDeclinations
+            declinations={result.declinations}
+            enhancedDeclinations={result.enhancedDeclinations}
+          />
 
           {/* Top Latitudes (compact version) */}
           <div className="p-4 border-b border-slate-700/50">
@@ -382,23 +432,41 @@ export function FloatingDataPanel({
             </div>
           </div>
 
-          {/* Enhanced Analysis (Phase 2) */}
-          {phase2Data && (
+          {/* Enhanced Analysis (Progressive Loading) */}
+          {(hasAnyVisualizationData || viz.isAnyLoading) && (
             <div className="px-4 py-3 border-b border-slate-700/50">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                   Enhanced Analysis
                 </h3>
+                {viz.isAnyLoading && (
+                  <Loader2 className="w-3 h-3 animate-spin text-amber-400 ml-auto" />
+                )}
               </div>
-              <ResultsTabs
-                acgLines={phase2Data.acgLines}
-                zenithLines={phase2Data.zenithLines}
-                parans={phase2Data.parans}
-                scoringGrid={phase2Data.scoringGrid}
-                globeState={globeState}
-                compact
-              />
+              {/* Loading state indicators */}
+              {viz.isAnyLoading && !hasAnyVisualizationData && (
+                <div className="flex items-center gap-2 py-4 text-slate-400 text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Loading visualization data...</span>
+                </div>
+              )}
+              {/* Show ResultsTabs when we have any data */}
+              {hasAnyVisualizationData && (
+                <ResultsTabs
+                  acgLines={combinedACGLines}
+                  zenithLines={combinedZenithLines}
+                  parans={combinedParans}
+                  scoringGrid={combinedScoringGrid}
+                  globeState={globeState}
+                  compact
+                  // Pass loading states for individual tabs
+                  isACGLoading={viz.isAnyLoading}
+                  isZenithLoading={viz.isAnyLoading}
+                  isParansLoading={viz.isAnyLoading}
+                  isScoringGridLoading={viz.isAnyLoading}
+                />
+              )}
             </div>
           )}
 

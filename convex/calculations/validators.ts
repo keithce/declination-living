@@ -243,3 +243,72 @@ export const simplifiedDignityValidator = v.object({
  * Validator for term system selection.
  */
 export const termSystemValidator = v.union(v.literal('egyptian'), v.literal('ptolemaic'))
+
+// =============================================================================
+// Grid Options Validator
+// =============================================================================
+
+/**
+ * Validator for grid calculation options.
+ * Used in Phase 2 actions for scoring grid generation.
+ */
+export const gridOptionsValidator = v.optional(
+  v.object({
+    latStep: v.optional(v.number()),
+    lonStep: v.optional(v.number()),
+    latMin: v.optional(v.number()),
+    latMax: v.optional(v.number()),
+    lonMin: v.optional(v.number()),
+    lonMax: v.optional(v.number()),
+    acgOrb: v.optional(v.number()),
+    paranOrb: v.optional(v.number()),
+  }),
+)
+
+/**
+ * Validate grid options are within reasonable ranges at runtime.
+ * @throws Error if values are out of range
+ */
+export function validateGridOptions(options: {
+  latStep?: number
+  lonStep?: number
+  latMin?: number
+  latMax?: number
+  lonMin?: number
+  lonMax?: number
+  acgOrb?: number
+  paranOrb?: number
+}): void {
+  const { latStep, lonStep, latMin, latMax, lonMin, lonMax, acgOrb, paranOrb } = options
+
+  if (latMin !== undefined && (latMin < -90 || latMin > 90)) {
+    throw new Error(`latMin must be between -90 and 90, got ${latMin}`)
+  }
+  if (latMax !== undefined && (latMax < -90 || latMax > 90)) {
+    throw new Error(`latMax must be between -90 and 90, got ${latMax}`)
+  }
+  if (latMin !== undefined && latMax !== undefined && latMin >= latMax) {
+    throw new Error(`latMin (${latMin}) must be less than latMax (${latMax})`)
+  }
+  if (lonMin !== undefined && (lonMin < -180 || lonMin > 180)) {
+    throw new Error(`lonMin must be between -180 and 180, got ${lonMin}`)
+  }
+  if (lonMax !== undefined && (lonMax < -180 || lonMax > 180)) {
+    throw new Error(`lonMax must be between -180 and 180, got ${lonMax}`)
+  }
+  if (lonMin !== undefined && lonMax !== undefined && lonMin >= lonMax) {
+    throw new Error(`lonMin (${lonMin}) must be less than lonMax (${lonMax})`)
+  }
+  if (latStep !== undefined && (latStep <= 0 || latStep > 90)) {
+    throw new Error(`latStep must be between 0 (exclusive) and 90, got ${latStep}`)
+  }
+  if (lonStep !== undefined && (lonStep <= 0 || lonStep > 180)) {
+    throw new Error(`lonStep must be between 0 (exclusive) and 180, got ${lonStep}`)
+  }
+  if (acgOrb !== undefined && (acgOrb <= 0 || acgOrb > 10)) {
+    throw new Error(`acgOrb must be between 0 (exclusive) and 10, got ${acgOrb}`)
+  }
+  if (paranOrb !== undefined && (paranOrb <= 0 || paranOrb > 10)) {
+    throw new Error(`paranOrb must be between 0 (exclusive) and 10, got ${paranOrb}`)
+  }
+}

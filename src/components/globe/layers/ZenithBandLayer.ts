@@ -153,9 +153,7 @@ export function createZenithBandLayer(
   const meshes: Array<THREE.Mesh> = []
 
   for (const line of zenithLines) {
-    // Skip if planet is not visible
-    if (!planetVisibility[line.planet]) continue
-
+    // Create ALL meshes regardless of visibility - visibility applied after
     const color = PLANET_COLORS_HEX[line.planet]
 
     // Create the band geometry
@@ -198,6 +196,9 @@ export function createZenithBandLayer(
     centerMesh.userData = { planet: line.planet, type: 'center' }
     group.add(centerMesh)
   }
+
+  // Apply initial visibility after all meshes are created
+  updateZenithBandVisibility(group, planetVisibility)
 
   // Optional: Add glow animation
   const update = (time: number) => {

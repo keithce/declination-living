@@ -8,13 +8,14 @@ import { useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
-  Circle,
   Eye,
   EyeOff,
   Flame,
+  Globe,
   Layers,
   Minus,
   RotateCcw,
+  Sun,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PLANET_COLORS_HEX, PLANET_IDS } from '../layers/types'
@@ -121,14 +122,15 @@ interface SliderControlProps {
   max: number
   step: number
   onChange: (value: number) => void
+  formatFn?: (value: number) => string
 }
 
-function SliderControl({ label, value, min, max, step, onChange }: SliderControlProps) {
+function SliderControl({ label, value, min, max, step, onChange, formatFn }: SliderControlProps) {
   return (
     <div className="px-1">
       <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
         <span>{label}</span>
-        <span>{value.toFixed(1)}</span>
+        <span>{formatFn ? formatFn(value) : value.toFixed(1)}</span>
       </div>
       <input
         type="range"
@@ -273,11 +275,41 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
         </CollapsibleSection>
       )}
 
+      {/* Time of Day */}
+      <CollapsibleSection
+        key="time-of-day"
+        title="Time of Day"
+        icon={<Sun className="w-4 h-4" />}
+        defaultOpen={true}
+      >
+        <div className={state.sunAlwaysDay ? 'opacity-40 pointer-events-none' : ''}>
+          <SliderControl
+            label="Hour"
+            value={state.sunTimeOfDay}
+            min={0}
+            max={24}
+            step={0.5}
+            onChange={state.setSunTimeOfDay}
+            formatFn={(v) => {
+              const totalMinutes = Math.round(v * 60)
+              const hours = Math.floor((totalMinutes / 60) % 24)
+              const minutes = totalMinutes % 60
+              return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+            }}
+          />
+        </div>
+        <ToggleButton
+          enabled={state.sunAlwaysDay}
+          onClick={state.toggleSunAlwaysDay}
+          label="Always Day"
+        />
+      </CollapsibleSection>
+
       {/* Planet Filters */}
       <CollapsibleSection
         key="planets"
         title="Planets"
-        icon={<Circle className="w-4 h-4" />}
+        icon={<Globe className="w-4 h-4" />}
         badge={`${visiblePlanetCount}/${PLANET_IDS.length}`}
       >
         <div className="flex gap-2 mb-2">

@@ -104,7 +104,19 @@ calculations/
 
 ### Caching
 
-Results are cached in `calculationCache` table for 24 hours to optimize performance. Cache keys include birth data + weights hash.
+Results are cached at multiple levels:
+
+| Cache                   | TTL | Purpose                                         |
+| ----------------------- | --- | ----------------------------------------------- |
+| `calculationCache`      | 24h | Internal analysis results (analysisCache table) |
+| `acgLinesCache`         | 30d | ACG line calculations (ActionCache)             |
+| `paransCache`           | 30d | Paran calculations (ActionCache)                |
+| `completeEnhancedCache` | 30d | Complete enhanced analysis (ActionCache)        |
+| `scoringGridCache`      | 30d | Geospatial scoring grids (ActionCache)          |
+| `cityRankingCache`      | 30d | City ranking results (ActionCache)              |
+| `acgPublicCache`        | 30d | Public ACG results (ActionCache)                |
+
+Cache keys include birth data + weights hash.
 
 ## Data Flow
 

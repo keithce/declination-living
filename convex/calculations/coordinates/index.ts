@@ -14,5 +14,6 @@ export {
   equatorialToHorizontal,
   greatCircleDistance,
   greatCircleDistanceKm,
+  convertAllToEquatorial,
 } from './transform'
 export * from './topocentric'

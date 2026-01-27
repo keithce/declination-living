@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { toast } from 'sonner'
@@ -10,9 +10,10 @@ import type { PlanetWeights } from '@/components/calculator/PlanetWeights'
 import { BirthDataForm } from '@/components/calculator/BirthDataForm'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { SaveChartModal } from '@/components/calculator/SaveChartModal'
-import { useCalculatorState } from '@/hooks/use-calculator-state'
+import { useCalculatorHydration, useCalculatorStore } from '@/stores/calculator-store'
 import { FullPageGlobeLayout } from '@/components/results/FullPageGlobeLayout'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
+import { useProgressiveVisualization } from '@/hooks/useProgressiveVisualization'
 
 export const Route = createFileRoute('/calculator')({
   component: CalculatorPage,
@@ -29,22 +30,17 @@ function CalculatorLoading() {
 
 // Main page wrapper - handles SSR by only rendering content on client
 function CalculatorPage() {
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const hasHydrated = useCalculatorHydration()
 
   // During SSR and initial hydration, show loading state
-  // This prevents useLiveQuery from being called on the server
-  if (!isClient) {
+  if (!hasHydrated) {
     return <CalculatorLoading />
   }
 
   return <CalculatorContent />
 }
 
-// Client-only content that uses useCalculatorState (which uses useLiveQuery)
+// Client-only content that uses the Zustand calculator store
 function CalculatorContent() {
   const navigate = useNavigate()
   const { isAuthenticated } = useConvexAuth()
@@ -53,26 +49,24 @@ function CalculatorContent() {
     birthData,
     weights,
     result,
-    isLoading: isStateLoading,
     setStep,
     setBirthData,
     setWeights,
     setResult,
     updateResult,
     resetState,
-  } = useCalculatorState()
+  } = useCalculatorStore()
   const [isCalculating, setIsCalculating] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [chartName, setChartName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [phase2Data, setPhase2Data] = useState<any | null>(null)
 
   const calculateComplete = useAction(api.calculations.actions.calculateComplete)
-  const calculatePhase2 = useAction(api.calculations.phase2_actions.calculatePhase2Complete)
   const recalculateWithWeights = useAction(api.calculations.actions.recalculateWithWeights)
   const createChart = useMutation(api.charts.mutations.create)
   const globeState = useGlobeState()
+  const viz = useProgressiveVisualization(birthData, weights, step === 'results' && !!result)
 
   const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
@@ -88,7 +82,6 @@ function CalculatorContent() {
 
     setIsCalculating(true)
     try {
-      // Phase 1: Core calculation (must succeed)
       const calcResult = await calculateComplete({
         birthDate: birthData.birthDate,
         birthTime: birthData.birthTime,
@@ -96,23 +89,7 @@ function CalculatorContent() {
         weights,
       })
       setResult(calcResult)
-
-      // Phase 2: Enhanced calculation (optional - don't block Phase 1 results)
-      try {
-        const phase2Result = await calculatePhase2({
-          birthDate: birthData.birthDate,
-          birthTime: birthData.birthTime,
-          timezone: birthData.birthTimezone,
-          weights,
-        })
-        setPhase2Data(phase2Result)
-      } catch (phase2Err) {
-        console.error('Phase 2 calculation failed:', phase2Err)
-        toast.warning('Enhanced features unavailable', {
-          description: 'Core results are displayed. ACG lines and parans could not be loaded.',
-        })
-        setPhase2Data(null)
-      }
+      // TanStack Query auto-fetches: step transitions to 'results' → enabled becomes true
     } catch (err) {
       console.error('Calculation failed:', err)
       setError('Calculation failed. Please try again.')
@@ -125,19 +102,9 @@ function CalculatorContent() {
     if (!result || !birthData) return
 
     setIsCalculating(true)
-
     try {
-      // Recalculate Phase 1 results (lightweight)
       const recalcResult = await recalculateWithWeights({
         declinations: result.declinations,
-        weights: newWeights,
-      })
-
-      // Recalculate Phase 2 results with new weights
-      const phase2Result = await calculatePhase2({
-        birthDate: birthData.birthDate,
-        birthTime: birthData.birthTime,
-        timezone: birthData.birthTimezone,
         weights: newWeights,
       })
 
@@ -149,7 +116,8 @@ function CalculatorContent() {
         },
         newWeights,
       )
-      setPhase2Data(phase2Result)
+      // TanStack Query auto-refetches scoringGrid + rankedCities
+      // (weights changed in query key). Zenith/ACG/parans stay cached.
     } catch (err) {
       console.error('Recalculation failed:', err)
     } finally {
@@ -197,19 +165,14 @@ function CalculatorContent() {
     setShowSaveModal(true)
   }
 
-  // Show loading state while reading from localStorage
-  if (isStateLoading) {
-    return <CalculatorLoading />
-  }
-
   // Full-page layout for results step
   if (step === 'results' && result) {
     return (
       <>
         <FullPageGlobeLayout
+          viz={viz}
           birthData={birthData}
           result={result}
-          phase2Data={phase2Data}
           weights={weights}
           globeState={globeState}
           onEditBirthData={() => setStep('birth-data')}
