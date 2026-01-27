@@ -18,6 +18,7 @@ const atmosphereVertexShader = /* glsl */ `
 
 const atmosphereFragmentShader = /* glsl */ `
   uniform vec3 uSunDirection;
+  uniform float uAlwaysDay;
 
   varying vec3 vNormal;
   varying vec3 vPosition;
@@ -39,8 +40,9 @@ const atmosphereFragmentShader = /* glsl */ `
     vec3 nightGlow = vec3(0.05, 0.05, 0.15);
 
     // Blend between day and twilight near terminator
-    float twilightFactor = 1.0 - smoothstep(-0.1, 0.3, abs(sunDot));
+    float twilightFactor = (1.0 - uAlwaysDay) * (1.0 - smoothstep(-0.1, 0.3, abs(sunDot)));
     float dayFactor = smoothstep(-0.1, 0.5, sunDot);
+    dayFactor = mix(dayFactor, 1.0, uAlwaysDay);
 
     vec3 glowColor = mix(nightGlow, dayGlow, dayFactor);
     glowColor = mix(glowColor, twilightGlow, twilightFactor * 0.6);
@@ -56,6 +58,7 @@ export function createAtmosphereMaterial(): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     uniforms: {
       uSunDirection: { value: new THREE.Vector3(5, 3, 5).normalize() },
+      uAlwaysDay: { value: 0.0 },
     },
     vertexShader: atmosphereVertexShader,
     fragmentShader: atmosphereFragmentShader,

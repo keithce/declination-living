@@ -39,6 +39,7 @@ const earthFragmentShader = /* glsl */ `
   uniform sampler2D uSpecularMap;
   uniform vec3 uSunDirection;
   uniform float uNormalScale;
+  uniform float uAlwaysDay;
 
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -63,7 +64,9 @@ const earthFragmentShader = /* glsl */ `
 
     // Diffuse lighting
     float diffuse = dot(N, sunDirView);
+    diffuse = mix(diffuse, max(diffuse, 0.5), uAlwaysDay);
     float dayFactor = smoothstep(-0.25, 0.5, diffuse);
+    dayFactor = mix(dayFactor, 1.0, uAlwaysDay);
 
     // Blinn-Phong specular (water only)
     vec3 viewDir = normalize(-vPosition);
@@ -98,6 +101,7 @@ export interface EarthMaterialUniforms {
   uSpecularMap: THREE.IUniform<THREE.Texture>
   uSunDirection: THREE.IUniform<THREE.Vector3>
   uNormalScale: THREE.IUniform<number>
+  uAlwaysDay: THREE.IUniform<number>
 }
 
 export function createEarthMaterial(): THREE.ShaderMaterial {
@@ -112,6 +116,7 @@ export function createEarthMaterial(): THREE.ShaderMaterial {
     uSpecularMap: { value: blackPlaceholder },
     uSunDirection: { value: new THREE.Vector3(5, 3, 5).normalize() },
     uNormalScale: { value: 1.0 },
+    uAlwaysDay: { value: 0.0 },
   }
 
   const material = new THREE.ShaderMaterial({

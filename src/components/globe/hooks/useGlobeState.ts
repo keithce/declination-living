@@ -32,6 +32,8 @@ export interface GlobeState {
   showCityLabels: boolean
   /** Sun time of day in hours (0-24) */
   sunTimeOfDay: number
+  /** Whether to force full daylight (no day/night cycle) */
+  sunAlwaysDay: boolean
 }
 
 export interface GlobeStateActions {
@@ -57,6 +59,8 @@ export interface GlobeStateActions {
   toggleCityLabels: () => void
   /** Set sun time of day (0-24 hours) */
   setSunTimeOfDay: (hour: number) => void
+  /** Toggle always-day mode */
+  toggleSunAlwaysDay: () => void
   /** Reset all state to defaults */
   resetState: () => void
 }
@@ -99,6 +103,7 @@ const DEFAULT_STATE: GlobeState = {
   highlightedCity: null,
   showCityLabels: false,
   sunTimeOfDay: 12,
+  sunAlwaysDay: false,
 }
 
 // =============================================================================
@@ -208,6 +213,14 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
     }))
   }, [])
 
+  // Toggle always-day mode
+  const toggleSunAlwaysDay = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      sunAlwaysDay: !prev.sunAlwaysDay,
+    }))
+  }, [])
+
   // Toggle city labels
   const toggleCityLabels = useCallback(() => {
     setState((prev) => ({
@@ -236,6 +249,7 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHighlightedCity,
       toggleCityLabels,
       setSunTimeOfDay,
+      toggleSunAlwaysDay,
       resetState,
     }),
     [
@@ -251,6 +265,7 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHighlightedCity,
       toggleCityLabels,
       setSunTimeOfDay,
+      toggleSunAlwaysDay,
       resetState,
     ],
   )

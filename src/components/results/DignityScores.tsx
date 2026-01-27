@@ -126,7 +126,7 @@ function IndicatorBadge({
     )
 
     return (
-      <Tooltip>
+      <Tooltip standalone>
         <TooltipTrigger asChild>{interactiveBadge}</TooltipTrigger>
         <TooltipContent className="max-w-xs">
           <ul className="text-xs space-y-0.5">

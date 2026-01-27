@@ -96,7 +96,15 @@ const STORAGE_KEY = 'declination-calculator-state'
 const createValidatedStorage = (): StateStorage => ({
   getItem: (name) => {
     if (typeof window === 'undefined') return null
-    const str = localStorage.getItem(name)
+
+    let str: string | null
+    try {
+      str = localStorage.getItem(name)
+    } catch {
+      // localStorage unavailable (private browsing, SecurityError, etc.)
+      return null
+    }
+
     if (!str) {
       if (DEBUG_STORAGE) console.log('[Calculator Store] No persisted state found')
       return null
@@ -107,7 +115,11 @@ const createValidatedStorage = (): StateStorage => ({
       const validation = PersistedStateSchema.safeParse(parsed.state)
       if (!validation.success) {
         console.warn('[Calculator Store] Invalid state schema, resetting:', validation.error.issues)
-        localStorage.removeItem(name)
+        try {
+          localStorage.removeItem(name)
+        } catch {
+          /* noop */
+        }
         return null
       }
 
@@ -115,12 +127,20 @@ const createValidatedStorage = (): StateStorage => ({
       const state = validation.data
       if (state.step === 'weights' && !state.birthData) {
         console.warn('[Calculator Store] Invalid state: weights step without birthData, resetting')
-        localStorage.removeItem(name)
+        try {
+          localStorage.removeItem(name)
+        } catch {
+          /* noop */
+        }
         return null
       }
       if (state.step === 'results' && (!state.birthData || !state.result)) {
         console.warn('[Calculator Store] Invalid state: results step without data, resetting')
-        localStorage.removeItem(name)
+        try {
+          localStorage.removeItem(name)
+        } catch {
+          /* noop */
+        }
         return null
       }
 
@@ -135,7 +155,11 @@ const createValidatedStorage = (): StateStorage => ({
       return str
     } catch (e) {
       console.warn('[Calculator Store] Failed to parse localStorage:', e)
-      localStorage.removeItem(name)
+      try {
+        localStorage.removeItem(name)
+      } catch {
+        /* noop */
+      }
       return null
     }
   },
@@ -153,11 +177,19 @@ const createValidatedStorage = (): StateStorage => ({
         // Ignore parse errors in debug logging
       }
     }
-    localStorage.setItem(name, value)
+    try {
+      localStorage.setItem(name, value)
+    } catch {
+      // localStorage unavailable (QuotaExceededError, SecurityError, etc.)
+    }
   },
   removeItem: (name) => {
     if (typeof window === 'undefined') return
-    localStorage.removeItem(name)
+    try {
+      localStorage.removeItem(name)
+    } catch {
+      // localStorage unavailable
+    }
   },
 })
 

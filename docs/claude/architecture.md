@@ -104,7 +104,7 @@ calculations/
 
 ### Caching
 
-Results are cached in `calculationCache` table for 24 hours to optimize performance. Cache keys include birth data + weights hash.
+Results are cached at two levels: the internal `calculationCache` table uses a 24-hour TTL, and the public ACG ActionCache uses a 30-day TTL. Cache keys include birth data + weights hash.
 
 ## Data Flow
 

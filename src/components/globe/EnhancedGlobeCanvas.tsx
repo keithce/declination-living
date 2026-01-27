@@ -151,6 +151,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     const showCityLabelsRef = useRef(globeState.showCityLabels)
     const highlightedCityRef = useRef(globeState.highlightedCity)
     const sunTimeOfDayRef = useRef(globeState.sunTimeOfDay)
+    const sunAlwaysDayRef = useRef(globeState.sunAlwaysDay)
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -162,6 +163,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       showCityLabelsRef.current = globeState.showCityLabels
       highlightedCityRef.current = globeState.highlightedCity
       sunTimeOfDayRef.current = globeState.sunTimeOfDay
+      sunAlwaysDayRef.current = globeState.sunAlwaysDay
     }, [
       globeState.planets,
       globeState.acgLineTypes,
@@ -171,6 +173,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       globeState.showCityLabels,
       globeState.highlightedCity,
       globeState.sunTimeOfDay,
+      globeState.sunAlwaysDay,
     ])
 
     // ==========================================================================
@@ -402,6 +405,11 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         ;(atmosphereMaterial.uniforms.uSunDirection as THREE.IUniform<THREE.Vector3>).value.copy(
           sunDirection,
         )
+
+        // Sync always-day uniform
+        const alwaysDay = sunAlwaysDayRef.current ? 1.0 : 0.0
+        earthMaterial.uniforms.uAlwaysDay.value = alwaysDay
+        ;(atmosphereMaterial.uniforms.uAlwaysDay as THREE.IUniform<number>).value = alwaysDay
 
         // Update layer animations
         const layers = sceneRef.current?.layers

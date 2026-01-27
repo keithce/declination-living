@@ -4,7 +4,7 @@
  * ACG and Zenith Calculation Actions
  *
  * Provides cached calculation of ACG lines and zenith lines.
- * Results are cached for 24 hours to optimize performance.
+ * Internal analysis cache uses 24-hour TTL; public ActionCache uses 30-day TTL.
  */
 
 import { v } from 'convex/values'
@@ -141,7 +141,7 @@ export const calculateACGAndZenith = internalAction({
       zenithLines,
     }
 
-    // 4. Cache result (24h TTL set by analysisCache)
+    // 4. Cache result (24h TTL via internal analysisCache table)
     // Generate input hash for cache
     const inputHash = `jd:${args.julianDay.toFixed(6)}_orb:${orb.toFixed(2)}`
 

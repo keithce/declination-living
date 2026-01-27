@@ -153,7 +153,13 @@ function CompactDeclinations({
                 {planet.symbol}
               </span>
               {isOOB && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                <>
+                  <span
+                    className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Out of bounds</span>
+                </>
               )}
               <span className="text-xs text-slate-400 mt-1">{formatDeclination(value)}</span>
             </div>
@@ -455,10 +461,10 @@ export function FloatingDataPanel({
                   globeState={globeState}
                   compact
                   // Pass loading states for individual tabs
-                  isACGLoading={viz.acg.isFetching}
-                  isZenithLoading={viz.zenith.isFetching}
-                  isParansLoading={viz.parans.isFetching}
-                  isScoringGridLoading={viz.scoringGrid.isFetching}
+                  isACGLoading={viz.isAnyLoading}
+                  isZenithLoading={viz.isAnyLoading}
+                  isParansLoading={viz.isAnyLoading}
+                  isScoringGridLoading={viz.isAnyLoading}
                 />
               )}
             </div>

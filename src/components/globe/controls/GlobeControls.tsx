@@ -282,19 +282,26 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
         icon={<Sun className="w-4 h-4" />}
         defaultOpen={true}
       >
-        <SliderControl
-          label="Hour"
-          value={state.sunTimeOfDay}
-          min={0}
-          max={24}
-          step={0.5}
-          onChange={state.setSunTimeOfDay}
-          formatFn={(v) => {
-            const totalMinutes = Math.round(v * 60)
-            const hours = Math.floor((totalMinutes / 60) % 24)
-            const minutes = totalMinutes % 60
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
-          }}
+        <div className={state.sunAlwaysDay ? 'opacity-40 pointer-events-none' : ''}>
+          <SliderControl
+            label="Hour"
+            value={state.sunTimeOfDay}
+            min={0}
+            max={24}
+            step={0.5}
+            onChange={state.setSunTimeOfDay}
+            formatFn={(v) => {
+              const totalMinutes = Math.round(v * 60)
+              const hours = Math.floor((totalMinutes / 60) % 24)
+              const minutes = totalMinutes % 60
+              return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+            }}
+          />
+        </div>
+        <ToggleButton
+          enabled={state.sunAlwaysDay}
+          onClick={state.toggleSunAlwaysDay}
+          label="Always Day"
         />
       </CollapsibleSection>
 
