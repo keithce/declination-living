@@ -267,7 +267,11 @@ export const ParansTab = memo(function ParansTab({
               <div className="mt-2 flex items-center gap-2">
                 <div className="flex-1 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all"
+                    role="progressbar"
+                    aria-valuenow={Math.round(paran.strength * 100)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-[width]"
                     style={{ width: `${paran.strength * 100}%` }}
                   />
                 </div>

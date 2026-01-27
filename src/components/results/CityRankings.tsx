@@ -158,7 +158,19 @@ function CityCard({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+      aria-label={
+        onClick ? `${city.city.name}, rank ${rank}, score ${city.score.toFixed(1)}` : undefined
+      }
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick()
+              }
+            }
+          : undefined
+      }
     >
       {/* Top Row: Rank, City, Score */}
       <div className="flex items-center gap-2 mb-2">
@@ -288,7 +300,7 @@ export const CityRankings = memo(function CityRankings({
           <div className="space-y-2 pr-4">
             {filteredCities.map((city, index) => (
               <CityCard
-                key={`${city.city.name}-${city.city.country}`}
+                key={`${city.city.latitude}-${city.city.longitude}`}
                 city={city}
                 rank={index + 1}
                 onClick={onCityClick ? () => onCityClick(city) : undefined}

@@ -16,12 +16,12 @@ function TooltipProvider({
   )
 }
 
-function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  )
+function Tooltip({
+  noProvider = false,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Root> & { noProvider?: boolean }) {
+  const content = <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+  return noProvider ? content : <TooltipProvider>{content}</TooltipProvider>
 }
 
 function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {

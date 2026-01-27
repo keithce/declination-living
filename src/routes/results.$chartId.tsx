@@ -107,7 +107,9 @@ function ResultsPage() {
   }
 
   // Find dominant planet for accent color
-  const dominantPlanet = Object.entries(chart.weights).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+  const weightEntries = Object.entries(chart.weights) as Array<[PlanetId, number]>
+  const dominantPlanet: PlanetId =
+    weightEntries.length > 0 ? weightEntries.reduce((a, b) => (a[1] > b[1] ? a : b))[0] : 'sun'
 
   // Extract data for components
   const declinations = chart.declinations as Declinations
@@ -122,10 +124,10 @@ function ResultsPage() {
   const zenithLines = analysisCache?.zenithLines as Array<ZenithLine> | undefined
   const parans = analysisCache?.topParans as Array<ParanPoint> | undefined
 
-  // Create mock ACG lines (would need to be computed/cached)
+  // TODO: Compute ACG lines from chart data — see Phase 7 implementation
   const acgLines: Array<ACGLine> = []
 
-  // Create mock ranked cities (would need city scoring data)
+  // TODO: Fetch ranked cities from geospatial optimizer — see Phase 7 implementation
   const rankedCities: Array<RankedCity> = []
 
   return (
@@ -188,6 +190,7 @@ function ResultsPage() {
               </div>
               <div className="aspect-square md:aspect-video">
                 <EnhancedGlobeCanvas
+                  ref={globeRef}
                   birthLocation={{
                     latitude: chart.birthLatitude,
                     longitude: chart.birthLongitude,
@@ -201,16 +204,18 @@ function ResultsPage() {
             </motion.div>
 
             {/* City Rankings */}
-            {rankedCities.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-4"
-              >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="rounded-xl bg-slate-800/30 border border-slate-700/50 p-4"
+            >
+              {rankedCities.length > 0 ? (
                 <CityRankings cities={rankedCities} onCityClick={handleCityClick} />
-              </motion.div>
-            )}
+              ) : (
+                <div className="text-center py-8 text-slate-500">City rankings coming soon</div>
+              )}
+            </motion.div>
           </div>
 
           {/* Right Column: Tabbed Data */}

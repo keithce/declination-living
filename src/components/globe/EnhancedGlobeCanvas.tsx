@@ -110,6 +110,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
   ) {
     const containerRef = useRef<HTMLDivElement>(null)
     const sceneRef = useRef<SceneRefs | null>(null)
+    const raycasterRef = useRef<THREE.Raycaster | null>(null)
 
     // ==========================================================================
     // Imperative Handle
@@ -147,15 +148,17 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
           -((event.clientY - rect.top) / rect.height) * 2 + 1,
         )
 
-        // Raycast to find intersection with globe
-        const raycaster = new THREE.Raycaster()
-        raycaster.setFromCamera(mouse, camera)
+        // Raycast to find intersection with globe (reuse raycaster)
+        if (!raycasterRef.current) {
+          raycasterRef.current = new THREE.Raycaster()
+        }
+        raycasterRef.current.setFromCamera(mouse, camera)
 
         // Check intersection with a sphere at origin with radius 1
         const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
         const sphereMaterial = new THREE.MeshBasicMaterial()
         const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-        const intersects = raycaster.intersectObject(sphere)
+        const intersects = raycasterRef.current.intersectObject(sphere)
 
         if (intersects.length > 0) {
           const point = intersects[0].point
@@ -311,17 +314,9 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
       window.addEventListener('resize', handleResize)
 
-      // Add click listener for location selection
-      if (onLocationSelect) {
-        renderer.domElement.addEventListener('click', handleClick)
-      }
-
       // Cleanup
       return () => {
         window.removeEventListener('resize', handleResize)
-        if (onLocationSelect) {
-          renderer.domElement.removeEventListener('click', handleClick)
-        }
         if (sceneRef.current) {
           cancelAnimationFrame(sceneRef.current.animationId)
 
@@ -333,7 +328,22 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         renderer.dispose()
         container.removeChild(renderer.domElement)
       }
-    }, [birthLocation, onLocationSelect, handleClick])
+    }, [birthLocation])
+
+    // ==========================================================================
+    // Click Handler Effect (separate to avoid scene recreation on callback change)
+    // ==========================================================================
+
+    useEffect(() => {
+      if (!sceneRef.current || !onLocationSelect) return
+
+      const renderer = sceneRef.current.renderer
+      renderer.domElement.addEventListener('click', handleClick)
+
+      return () => {
+        renderer.domElement.removeEventListener('click', handleClick)
+      }
+    }, [handleClick, onLocationSelect])
 
     // ==========================================================================
     // Layer Management

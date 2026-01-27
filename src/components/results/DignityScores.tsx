@@ -11,7 +11,6 @@ import { Moon, Sun } from 'lucide-react'
 import type { DignityIndicator, Sect } from '@convex/calculations/core/types'
 import type { PlanetId } from '@/lib/planet-constants'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Progress } from '@/components/ui/progress'
 import { PLANETS } from '@/lib/planet-constants'
 
 // =============================================================================
@@ -154,8 +153,8 @@ export const DignityScores = memo(function DignityScores({
   // Sort planets by total score descending
   const sortedPlanets = useMemo(() => {
     return [...PLANETS].sort((a, b) => {
-      const scoreA = dignities[a.key].total
-      const scoreB = dignities[b.key].total
+      const scoreA = dignities[a.key]?.total ?? 0
+      const scoreB = dignities[b.key]?.total ?? 0
       return scoreB - scoreA
     })
   }, [dignities])
@@ -173,6 +172,7 @@ export const DignityScores = memo(function DignityScores({
         <div className="space-y-2">
           {sortedPlanets.map((planet, index) => {
             const dignity = dignities[planet.key]
+            if (!dignity) return null
 
             const normalizedScore = normalizeScore(dignity.total)
             const progressColor = getProgressColor(dignity.total)
@@ -199,11 +199,9 @@ export const DignityScores = memo(function DignityScores({
 
                 {/* Progress Bar */}
                 <div className="flex-1">
-                  <div className="relative">
-                    <Progress value={normalizedScore} className="h-2 bg-slate-700/50" />
-                    {/* Custom colored indicator */}
+                  <div className="relative h-2 bg-slate-700/50 rounded-full overflow-hidden">
                     <div
-                      className={`absolute inset-y-0 left-0 rounded-full ${progressColor} transition-all`}
+                      className={`absolute inset-y-0 left-0 rounded-full ${progressColor}`}
                       style={{ width: `${normalizedScore}%` }}
                     />
                     {/* Zero line marker */}
