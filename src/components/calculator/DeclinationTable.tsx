@@ -49,7 +49,6 @@ export const DeclinationTable = memo(function DeclinationTable({
   const getOOBInfo = (planetKey: PlanetId): EnhancedDeclination | null => {
     if (!enhancedDeclinations) return null
     const enhanced = enhancedDeclinations[planetKey]
-    if (!enhanced) return null
     return enhanced.isOOB ? enhanced : null
   }
 

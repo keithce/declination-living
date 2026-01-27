@@ -112,8 +112,6 @@ export const ResultsTabs = memo(function ResultsTabs({
     },
   ]
 
-  const activeOption = tabOptions.find((t) => t.value === activeTab)
-
   return (
     <div className="w-full space-y-3">
       {/* Dropdown Selector */}
@@ -124,11 +122,7 @@ export const ResultsTabs = memo(function ResultsTabs({
         }}
       >
         <SelectTrigger className="w-full bg-slate-800/50 border-slate-700/50 text-white">
-          <div className="flex items-center gap-2">
-            {activeOption?.icon}
-            <SelectValue placeholder="Select view" />
-            {/* Badge removed - displayed by SelectValue */}
-          </div>
+          <SelectValue placeholder="Select view" />
         </SelectTrigger>
         <SelectContent className="bg-slate-800 border-slate-700">
           {tabOptions.map((option) => (

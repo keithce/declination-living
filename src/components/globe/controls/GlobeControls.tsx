@@ -8,10 +8,10 @@ import { useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
-  Circle,
   Eye,
   EyeOff,
   Flame,
+  Globe,
   Layers,
   Minus,
   RotateCcw,
@@ -277,7 +277,7 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
       <CollapsibleSection
         key="planets"
         title="Planets"
-        icon={<Circle className="w-4 h-4" />}
+        icon={<Globe className="w-4 h-4" />}
         badge={`${visiblePlanetCount}/${PLANET_IDS.length}`}
       >
         <div className="flex gap-2 mb-2">

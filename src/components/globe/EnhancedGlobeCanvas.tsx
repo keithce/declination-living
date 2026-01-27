@@ -14,7 +14,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { createZenithBandLayer, updateZenithBandVisibility } from './layers/ZenithBandLayer'
 import { createACGLineLayer, updateACGLineVisibility } from './layers/ACGLineLayer'
 import { createParanPointLayer, updateParanPointVisibility } from './layers/ParanPointLayer'
-import { createHeatmapLayer } from './layers/HeatmapLayer'
+import { createHeatmapLayer, updateHeatmap } from './layers/HeatmapLayer'
 import { PLANET_IDS } from './layers/types'
 import type { UseGlobeStateReturn } from './hooks/useGlobeState'
 import type { ExtendedGlobeCanvasProps, LayerGroup } from './layers/types'
@@ -111,6 +111,35 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     const containerRef = useRef<HTMLDivElement>(null)
     const sceneRef = useRef<SceneRefs | null>(null)
     const raycasterRef = useRef<THREE.Raycaster | null>(null)
+    const hitTestSphereRef = useRef<THREE.Mesh | null>(null)
+
+    // Refs for visibility state to avoid recreation when visibility changes
+    const planetsRef = useRef(globeState.planets)
+    const acgLineTypesRef = useRef(globeState.acgLineTypes)
+    const heatmapIntensityRef = useRef(globeState.heatmapIntensity)
+    const heatmapSpreadRef = useRef(globeState.heatmapSpread)
+    const layersVisibilityRef = useRef(globeState.layers)
+
+    // Keep refs in sync with state
+    useEffect(() => {
+      planetsRef.current = globeState.planets
+    }, [globeState.planets])
+
+    useEffect(() => {
+      acgLineTypesRef.current = globeState.acgLineTypes
+    }, [globeState.acgLineTypes])
+
+    useEffect(() => {
+      heatmapIntensityRef.current = globeState.heatmapIntensity
+    }, [globeState.heatmapIntensity])
+
+    useEffect(() => {
+      heatmapSpreadRef.current = globeState.heatmapSpread
+    }, [globeState.heatmapSpread])
+
+    useEffect(() => {
+      layersVisibilityRef.current = globeState.layers
+    }, [globeState.layers])
 
     // ==========================================================================
     // Imperative Handle
@@ -154,11 +183,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         }
         raycasterRef.current.setFromCamera(mouse, camera)
 
-        // Check intersection with a sphere at origin with radius 1
-        const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
-        const sphereMaterial = new THREE.MeshBasicMaterial()
-        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-        const intersects = raycasterRef.current.intersectObject(sphere)
+        // Lazy-initialize hit test sphere (reused across clicks)
+        if (!hitTestSphereRef.current) {
+          const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
+          const sphereMaterial = new THREE.MeshBasicMaterial({ visible: false })
+          hitTestSphereRef.current = new THREE.Mesh(sphereGeometry, sphereMaterial)
+        }
+
+        const intersects = raycasterRef.current.intersectObject(hitTestSphereRef.current)
 
         if (intersects.length > 0) {
           const point = intersects[0].point
@@ -173,10 +205,6 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
           onLocationSelect(lat, lon)
         }
-
-        // Cleanup
-        sphereGeometry.dispose()
-        sphereMaterial.dispose()
       },
       [onLocationSelect],
     )
@@ -321,47 +349,66 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       // Cleanup
       return () => {
         window.removeEventListener('resize', handleResize)
-        if (sceneRef.current) {
-          cancelAnimationFrame(sceneRef.current.animationId)
 
-          // Dispose layers
-          Object.values(sceneRef.current.layers).forEach((layer) => {
-            layer.dispose()
-          })
+        // Capture ref value at cleanup time to avoid stale closure issues
+        const currentRef = sceneRef.current
+        if (!currentRef) return
 
-          // Dispose all scene objects (meshes, geometries, materials, textures)
-          scene.traverse((object) => {
-            if (
-              object instanceof THREE.Mesh ||
-              object instanceof THREE.Line ||
-              object instanceof THREE.Points
-            ) {
-              object.removeFromParent()
-              if (object.geometry) {
-                object.geometry.dispose()
-              }
-              if (object.material) {
-                const materials = Array.isArray(object.material)
-                  ? object.material
-                  : [object.material]
-                materials.forEach((material) => {
-                  // Dispose textures attached to material
-                  Object.values(material).forEach((value) => {
-                    if (value instanceof THREE.Texture) {
-                      value.dispose()
-                    }
-                  })
-                  material.dispose()
-                })
-              }
-            }
-          })
+        const { scene: sceneToDispose, renderer: rendererToDispose } = currentRef
 
-          // Clear scene
-          scene.clear()
+        // Stop animation loop first
+        cancelAnimationFrame(currentRef.animationId)
+
+        // Dispose OrbitControls
+        currentRef.controls.dispose()
+
+        // Remove and dispose layers (remove from scene BEFORE disposing)
+        Object.values(currentRef.layers).forEach((layer) => {
+          sceneToDispose.remove(layer.group)
+          layer.dispose()
+        })
+
+        // Dispose hit test sphere
+        if (hitTestSphereRef.current) {
+          hitTestSphereRef.current.geometry.dispose()
+          if (hitTestSphereRef.current.material instanceof THREE.Material) {
+            hitTestSphereRef.current.material.dispose()
+          }
+          hitTestSphereRef.current = null
         }
-        renderer.dispose()
-        container.removeChild(renderer.domElement)
+
+        // Dispose all remaining scene objects safely
+        // Make a copy of children array since we'll be modifying it
+        const children = [...sceneToDispose.children]
+        children.forEach((object) => {
+          sceneToDispose.remove(object)
+          if (
+            object instanceof THREE.Mesh ||
+            object instanceof THREE.Line ||
+            object instanceof THREE.Points
+          ) {
+            object.geometry?.dispose()
+            const materials = Array.isArray(object.material) ? object.material : [object.material]
+            materials.forEach((mat) => {
+              if (mat) {
+                Object.values(mat).forEach((value) => {
+                  if (value instanceof THREE.Texture) value.dispose()
+                })
+                mat.dispose()
+              }
+            })
+          }
+        })
+
+        // Dispose renderer and remove from DOM
+        rendererToDispose.dispose()
+        const domElement = rendererToDispose.domElement
+        if (domElement.parentNode) {
+          domElement.parentNode.removeChild(domElement)
+        }
+
+        // Prevent double-cleanup
+        sceneRef.current = null
       }
     }, [birthLocation])
 
@@ -384,7 +431,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     // Layer Management
     // ==========================================================================
 
-    // Create/update zenith bands when data changes
+    // Create/update zenith bands when DATA changes (not visibility)
     useEffect(() => {
       if (!sceneRef.current || !declinations) return
 
@@ -409,13 +456,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         },
       )
 
-      // Create new layer
-      const layer = createZenithBandLayer(zenithLines, globeState.planets)
+      // Create new layer with current visibility from ref (avoids stale closure)
+      const layer = createZenithBandLayer(zenithLines, planetsRef.current)
+      layer.group.visible = layersVisibilityRef.current.zenithBands // Sync visibility on creation
       scene.add(layer.group)
       layers.zenithBands = layer
-    }, [declinations, globeState.planets])
+    }, [declinations]) // Only DATA dependency - visibility handled by separate effect
 
-    // Create/update ACG lines when data changes
+    // Create/update ACG lines when DATA changes (not visibility)
     useEffect(() => {
       if (!sceneRef.current || !acgLines) return
 
@@ -427,13 +475,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         layers.acgLines.dispose()
       }
 
-      // Create new layer
-      const layer = createACGLineLayer(acgLines, globeState.planets, globeState.acgLineTypes)
+      // Create new layer with current visibility from refs (avoids stale closure)
+      const layer = createACGLineLayer(acgLines, planetsRef.current, acgLineTypesRef.current)
+      layer.group.visible = layersVisibilityRef.current.acgLines // Sync visibility on creation
       scene.add(layer.group)
       layers.acgLines = layer
-    }, [acgLines, globeState.planets, globeState.acgLineTypes])
+    }, [acgLines]) // Only DATA dependency - visibility handled by separate effect
 
-    // Create/update paran points when data changes
+    // Create/update paran points when DATA changes (not visibility)
     useEffect(() => {
       if (!sceneRef.current || !parans) return
 
@@ -445,13 +494,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         layers.paranPoints.dispose()
       }
 
-      // Create new layer
-      const layer = createParanPointLayer(parans, globeState.planets)
+      // Create new layer with current visibility from ref (avoids stale closure)
+      const layer = createParanPointLayer(parans, planetsRef.current)
+      layer.group.visible = layersVisibilityRef.current.paranPoints // Sync visibility on creation
       scene.add(layer.group)
       layers.paranPoints = layer
-    }, [parans, globeState.planets])
+    }, [parans]) // Only DATA dependency - visibility handled by separate effect
 
-    // Update heatmap when data or settings change
+    // Create heatmap when DATA changes or layer is toggled on/off
     useEffect(() => {
       if (!sceneRef.current || !declinations) return
 
@@ -461,11 +511,36 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       if (layers.heatmap) {
         scene.remove(layers.heatmap.group)
         layers.heatmap.dispose()
+        layers.heatmap = undefined
       }
 
+      // Only create if layer is enabled
       if (!globeState.layers.heatmap) return
 
-      // Create weights from planet visibility
+      // Create weights from planet visibility using ref
+      const weights = PLANET_IDS.reduce(
+        (acc, planet) => ({
+          ...acc,
+          [planet]: planetsRef.current[planet] ? 5 : 0,
+        }),
+        {} as Record<string, number>,
+      )
+
+      // Create new heatmap layer with current settings from refs
+      const layer = createHeatmapLayer({
+        declinations,
+        weights,
+        intensity: heatmapIntensityRef.current,
+        sigma: heatmapSpreadRef.current,
+      })
+      scene.add(layer.group)
+      layers.heatmap = layer
+    }, [declinations, globeState.layers.heatmap]) // DATA + heatmap toggle dependency
+
+    // Update heatmap when visibility or settings change (without recreation)
+    useEffect(() => {
+      if (!sceneRef.current?.layers.heatmap || !declinations) return
+
       const weights = PLANET_IDS.reduce(
         (acc, planet) => ({
           ...acc,
@@ -474,25 +549,16 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         {} as Record<string, number>,
       )
 
-      // Create new heatmap layer
-      const layer = createHeatmapLayer({
+      updateHeatmap(sceneRef.current.layers.heatmap.group, {
         declinations,
         weights,
         intensity: globeState.heatmapIntensity,
         sigma: globeState.heatmapSpread,
       })
-      scene.add(layer.group)
-      layers.heatmap = layer
-    }, [
-      declinations,
-      globeState.planets,
-      globeState.layers.heatmap,
-      globeState.heatmapIntensity,
-      globeState.heatmapSpread,
-    ])
+    }, [declinations, globeState.planets, globeState.heatmapIntensity, globeState.heatmapSpread])
 
     // ==========================================================================
-    // Layer Visibility (separate effects to avoid race conditions)
+    // Layer Visibility (using group.visible)
     // ==========================================================================
 
     // Zenith bands visibility
@@ -516,12 +582,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       }
     }, [globeState.layers.paranPoints])
 
-    // Heatmap visibility
-    useEffect(() => {
-      if (sceneRef.current?.layers.heatmap) {
-        sceneRef.current.layers.heatmap.group.visible = globeState.layers.heatmap
-      }
-    }, [globeState.layers.heatmap])
+    // Heatmap visibility (handled by creation/destruction in the heatmap effect above)
 
     // Planet/ACG type filters - updates individual mesh visibility within layers
     useEffect(() => {

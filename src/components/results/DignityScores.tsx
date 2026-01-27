@@ -19,7 +19,7 @@ import { PLANETS } from '@/lib/planet-constants'
 
 export interface DignityScoreData {
   total: number
-  indicator: DignityIndicator | string
+  indicator: DignityIndicator
   breakdown?: Array<string>
 }
 
@@ -153,8 +153,8 @@ export const DignityScores = memo(function DignityScores({
   // Sort planets by total score descending
   const sortedPlanets = useMemo(() => {
     return [...PLANETS].sort((a, b) => {
-      const scoreA = dignities[a.key]?.total ?? 0
-      const scoreB = dignities[b.key]?.total ?? 0
+      const scoreA = dignities[a.key].total
+      const scoreB = dignities[b.key].total
       return scoreB - scoreA
     })
   }, [dignities])
@@ -172,8 +172,6 @@ export const DignityScores = memo(function DignityScores({
         <div className="space-y-2">
           {sortedPlanets.map((planet, index) => {
             const dignity = dignities[planet.key]
-            if (!dignity) return null
-
             const normalizedScore = normalizeScore(dignity.total)
             const progressColor = getProgressColor(dignity.total)
 

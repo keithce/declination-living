@@ -47,7 +47,7 @@ interface CityRankingsProps {
   maxDisplay?: number
 }
 
-type TierFilter = 'all' | 'major' | 'medium' | 'minor'
+type TierFilter = 'all' | 'major' | 'medium' | 'minor' | 'small'
 type SortOption = 'score' | 'safety' | 'population'
 
 // =============================================================================
@@ -59,6 +59,7 @@ const TIER_LABELS: Record<TierFilter, string> = {
   major: 'Major',
   medium: 'Medium',
   minor: 'Minor',
+  small: 'Small',
 }
 
 const SORT_LABELS: Record<SortOption, string> = {

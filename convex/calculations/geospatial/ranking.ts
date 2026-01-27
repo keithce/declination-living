@@ -8,13 +8,7 @@
 import { PLANET_NAMES } from '../core/types'
 import { getSafetyLevel, meetsMinimumSafety } from '../safety/filter'
 import { scoreLocation } from './optimizer'
-import type {
-  ACGLine,
-  ParanPoint,
-  PlanetDeclinations,
-  PlanetId,
-  PlanetWeights,
-} from '../core/types'
+import type { ParanPoint, PlanetId } from '../core/types'
 import type { Id } from '../../_generated/dataModel'
 import type { OptimizationInput } from './optimizer'
 

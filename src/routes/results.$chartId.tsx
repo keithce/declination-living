@@ -8,12 +8,13 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import { motion } from 'framer-motion'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AlertCircle, ArrowLeft, Calendar, Globe, Loader2, MapPin, Sparkles } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
 import type { Declinations, EnhancedDeclination } from '@/components/calculator/DeclinationTable'
-import type { ACGLine, ParanPoint, Sect, ZenithLine } from '@convex/calculations/core/types'
+import type { ParanPoint, Sect } from '@convex/calculations/core/types'
+import type { ACGLineData } from '@/components/globe/layers/types'
 import type { RankedCity } from '@/components/results/CityRankings'
 import type { PlanetId } from '@/lib/planet-constants'
 import type { DignityScoreData } from '@/components/results/DignityScores'
@@ -44,6 +45,14 @@ interface GlobeRef {
 }
 
 // =============================================================================
+// Helpers
+// =============================================================================
+
+function isValidChartId(id: string): boolean {
+  return typeof id === 'string' && id.length > 0 && /^[a-z0-9]+$/i.test(id)
+}
+
+// =============================================================================
 // Main Component
 // =============================================================================
 
@@ -52,15 +61,36 @@ function ResultsPage() {
   const globeRef = useRef<GlobeRef>(null)
   const [activeTab, setActiveTab] = useState('overview')
 
-  // Load chart data
-  const chart = useQuery(api.charts.queries.getById, {
-    id: chartId as Id<'charts'>,
-  })
+  // Validate chartId before querying
+  const validId = isValidChartId(chartId)
 
-  // Load analysis cache
-  const analysisCache = useQuery(api.cache.analysisCache.getByChart, {
-    chartId: chartId as Id<'charts'>,
-  })
+  // Load chart data (skip if invalid ID)
+  const chart = useQuery(
+    api.charts.queries.getById,
+    validId ? { id: chartId as Id<'charts'> } : 'skip',
+  )
+
+  // Load analysis cache (skip if invalid ID)
+  const analysisCache = useQuery(
+    api.cache.analysisCache.getByChart,
+    validId ? { chartId: chartId as Id<'charts'> } : 'skip',
+  )
+
+  // Extract data early so we can reference it in tab reset effect
+  const dignities = (analysisCache?.dignities ?? chart?.dignities) as
+    | Record<PlanetId, DignityScoreData>
+    | undefined
+  const parans = analysisCache?.topParans as Array<ParanPoint> | undefined
+
+  // Reset tab to overview if current tab's data becomes unavailable
+  useEffect(() => {
+    if (activeTab === 'dignities' && !dignities) {
+      setActiveTab('overview')
+    }
+    if (activeTab === 'parans' && (!parans || parans.length === 0)) {
+      setActiveTab('overview')
+    }
+  }, [activeTab, dignities, parans])
 
   // Globe state
   const globeState = useGlobeState()
@@ -69,6 +99,28 @@ function ResultsPage() {
   const handleCityClick = useCallback((city: RankedCity) => {
     globeRef.current?.focusLocation(city.city.latitude, city.city.longitude, 3)
   }, [])
+
+  // Invalid chart ID
+  if (!validId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#050714] via-[#0a0f1f] to-[#0f172a] py-20 px-6">
+        <div className="max-w-lg mx-auto text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 flex items-center justify-center">
+            <AlertCircle className="w-10 h-10 text-red-400" />
+          </div>
+          <h1 className="font-display text-2xl font-semibold text-white mb-4">Invalid Chart ID</h1>
+          <p className="text-slate-400 mb-8">The chart ID provided is not valid.</p>
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   // Loading state
   if (chart === undefined || analysisCache === undefined) {
@@ -118,14 +170,9 @@ function ResultsPage() {
     | undefined
   const obliquity = analysisCache?.obliquity
   const sect = (analysisCache?.sect ?? chart.sect ?? 'day') as Sect
-  const dignities = (analysisCache?.dignities ?? chart.dignities) as
-    | Record<PlanetId, DignityScoreData>
-    | undefined
-  const zenithLines = analysisCache?.zenithLines as Array<ZenithLine> | undefined
-  const parans = analysisCache?.topParans as Array<ParanPoint> | undefined
 
   // TODO: Compute ACG lines from chart data — see Phase 7 implementation
-  const acgLines: Array<ACGLine> = []
+  const acgLines: Array<ACGLineData> = []
 
   // TODO: Fetch ranked cities from geospatial optimizer — see Phase 7 implementation
   const rankedCities: Array<RankedCity> = []
@@ -194,6 +241,7 @@ function ResultsPage() {
                   birthLocation={{
                     latitude: chart.birthLatitude,
                     longitude: chart.birthLongitude,
+                    city: chart.birthCity,
                   }}
                   declinations={declinations}
                   acgLines={acgLines}

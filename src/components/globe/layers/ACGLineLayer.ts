@@ -159,10 +159,7 @@ export function createACGLineLayer(
   group.name = 'acgLines'
 
   for (const line of acgLines) {
-    // Skip if planet or type is not visible
-    if (!planetVisibility[line.planet]) continue
-    if (!typeFilters[line.lineType]) continue
-
+    // Create ALL lines regardless of visibility - visibility applied after
     const color = PLANET_COLORS_HEX[line.planet]
     const isDashed = line.lineType === 'MC' || line.lineType === 'IC'
 
@@ -175,6 +172,9 @@ export function createACGLineLayer(
 
     group.add(lineGroup)
   }
+
+  // Apply initial visibility after all lines are created
+  updateACGLineVisibility(group, planetVisibility, typeFilters)
 
   const dispose = () => {
     group.traverse((child) => {

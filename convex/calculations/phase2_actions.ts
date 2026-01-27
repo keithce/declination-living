@@ -7,8 +7,9 @@
  */
 
 import { v } from 'convex/values'
-import { action } from '../_generated/server'
-import { internal } from '../_generated/api'
+import { ActionCache } from '@convex-dev/action-cache'
+import { action, internalAction } from '../_generated/server'
+import { components, internal } from '../_generated/api'
 import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from './ephemeris'
 import { PLANET_IDS } from './core/types'
 import { calculateAllParans } from './parans/solver'
@@ -30,35 +31,56 @@ function throwWithContext(error: unknown, context: string): never {
 }
 
 // =============================================================================
+// Phase 2 Result Type
+// =============================================================================
+
+/** Phase 2 complete calculation result type */
+interface Phase2CompleteResult {
+  julianDay: number
+  acgLines: Array<ACGLine>
+  zenithLines: Array<ZenithLine>
+  parans: ReturnType<typeof calculateAllParans>['points']
+  paranSummary: ReturnType<typeof calculateAllParans>['summary']
+  scoringGrid: ReturnType<typeof generateScoringGrid>
+  declinations: ReturnType<typeof calculateDeclinations>
+}
+
+// Grid options validator for reuse
+const gridOptionsValidator = v.optional(
+  v.object({
+    latStep: v.optional(v.number()),
+    lonStep: v.optional(v.number()),
+    latMin: v.optional(v.number()),
+    latMax: v.optional(v.number()),
+    lonMin: v.optional(v.number()),
+    lonMax: v.optional(v.number()),
+    acgOrb: v.optional(v.number()),
+    paranOrb: v.optional(v.number()),
+  }),
+)
+
+// =============================================================================
 // Phase 2 Complete Calculation
 // =============================================================================
 
 /**
- * Calculate complete Phase 2 dataset: ACG lines, zenith lines, parans, and scoring grid.
+ * Calculate complete Phase 2 dataset (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
  *
- * This action integrates all Phase 2 calculations and returns data ready for
- * the enhanced results interface and globe visualization.
+ * Returns: ACG lines, zenith lines, parans, and scoring grid.
  */
-export const calculatePhase2Complete = action({
+export const calculatePhase2CompleteUncached = internalAction({
   args: {
     birthDate: v.string(),
     birthTime: v.string(),
     timezone: v.string(),
     weights: planetWeightsValidator,
-    gridOptions: v.optional(
-      v.object({
-        latStep: v.optional(v.number()),
-        lonStep: v.optional(v.number()),
-        latMin: v.optional(v.number()),
-        latMax: v.optional(v.number()),
-        lonMin: v.optional(v.number()),
-        lonMax: v.optional(v.number()),
-        acgOrb: v.optional(v.number()),
-        paranOrb: v.optional(v.number()),
-      }),
-    ),
+    gridOptions: gridOptionsValidator,
   },
-  handler: async (ctx, { birthDate, birthTime, timezone, weights, gridOptions }) => {
+  handler: async (
+    ctx,
+    { birthDate, birthTime, timezone, weights, gridOptions },
+  ): Promise<Phase2CompleteResult> => {
     // Validate planet weights are non-negative
     for (const [planet, weight] of Object.entries(weights)) {
       if (weight < 0) {
@@ -143,5 +165,34 @@ export const calculatePhase2Complete = action({
       // For backward compatibility
       declinations,
     }
+  },
+})
+
+// 30-day TTL in milliseconds
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+
+/** Cache for Phase 2 complete calculations */
+const phase2CompleteCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.phase2_actions.calculatePhase2CompleteUncached,
+  name: 'calculatePhase2Complete:v1',
+  ttl: THIRTY_DAYS_MS,
+})
+
+/**
+ * Calculate complete Phase 2 dataset (cached, 30-day TTL).
+ * Anonymous shared cache - same inputs return same cached result for any user.
+ *
+ * Returns: ACG lines, zenith lines, parans, and scoring grid.
+ */
+export const calculatePhase2Complete = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    weights: planetWeightsValidator,
+    gridOptions: gridOptionsValidator,
+  },
+  handler: async (ctx, args): Promise<Phase2CompleteResult> => {
+    return phase2CompleteCache.fetch(ctx, args)
   },
 })
