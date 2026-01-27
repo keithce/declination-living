@@ -163,11 +163,15 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         if (intersects.length > 0) {
           const point = intersects[0].point
 
-          // Convert 3D point to lat/lon
+          // Convert 3D point to lat/lon (inverse of latLonToVector3)
           const lat = (Math.asin(point.y) * 180) / Math.PI
-          const lon = (Math.atan2(-point.z, -point.x) * 180) / Math.PI + 180
+          let lon = (Math.atan2(point.z, -point.x) * 180) / Math.PI - 180
 
-          onLocationSelect(lat, lon > 180 ? lon - 360 : lon)
+          // Normalize to -180 to 180
+          if (lon < -180) lon += 360
+          if (lon > 180) lon -= 360
+
+          onLocationSelect(lat, lon)
         }
 
         // Cleanup
@@ -324,6 +328,37 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
           Object.values(sceneRef.current.layers).forEach((layer) => {
             layer.dispose()
           })
+
+          // Dispose all scene objects (meshes, geometries, materials, textures)
+          scene.traverse((object) => {
+            if (
+              object instanceof THREE.Mesh ||
+              object instanceof THREE.Line ||
+              object instanceof THREE.Points
+            ) {
+              object.removeFromParent()
+              if (object.geometry) {
+                object.geometry.dispose()
+              }
+              if (object.material) {
+                const materials = Array.isArray(object.material)
+                  ? object.material
+                  : [object.material]
+                materials.forEach((material) => {
+                  // Dispose textures attached to material
+                  Object.values(material).forEach((value) => {
+                    if (value instanceof THREE.Texture) {
+                      value.dispose()
+                    }
+                  })
+                  material.dispose()
+                })
+              }
+            }
+          })
+
+          // Clear scene
+          scene.clear()
         }
         renderer.dispose()
         container.removeChild(renderer.domElement)
