@@ -114,9 +114,13 @@ export function createEarthMaterial(): THREE.ShaderMaterial {
     uNormalScale: { value: 1.0 },
   }
 
-  return new THREE.ShaderMaterial({
+  const material = new THREE.ShaderMaterial({
     uniforms,
     vertexShader: earthVertexShader,
     fragmentShader: earthFragmentShader,
   })
+
+  material.userData.placeholders = { placeholder, blackPlaceholder, flatNormal }
+
+  return material
 }

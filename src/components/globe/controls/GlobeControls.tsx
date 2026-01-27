@@ -290,8 +290,9 @@ export function GlobeControls({ state, className = '' }: GlobeControlsProps) {
           step={0.5}
           onChange={state.setSunTimeOfDay}
           formatFn={(v) => {
-            const hours = Math.floor(v)
-            const minutes = Math.round((v - hours) * 60)
+            const totalMinutes = Math.round(v * 60)
+            const hours = Math.floor((totalMinutes / 60) % 24)
+            const minutes = totalMinutes % 60
             return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
           }}
         />

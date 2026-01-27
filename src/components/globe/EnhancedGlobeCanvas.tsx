@@ -309,13 +309,23 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
       // Load textures asynchronously
       let isMounted = true
-      loadEarthTextures()
+      loadEarthTextures(renderer.capabilities.getMaxAnisotropy())
         .then((textures) => {
           if (!isMounted) {
             disposeEarthTextures(textures)
             return
           }
           earthTexturesRef.current = textures
+
+          // Dispose placeholder textures before replacing with real ones
+          const placeholders = earthMaterial.userData.placeholders
+          if (placeholders) {
+            placeholders.placeholder?.dispose()
+            placeholders.blackPlaceholder?.dispose()
+            placeholders.flatNormal?.dispose()
+            earthMaterial.userData.placeholders = null
+          }
+
           const u = earthMaterial.uniforms
           u.uDayMap.value = textures.day
           u.uNightMap.value = textures.night

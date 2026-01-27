@@ -12,8 +12,8 @@ import type { CityMarkerData, LayerGroup } from './types'
 // Constants
 // =============================================================================
 
-/** Radius offset for city markers (above globe surface) */
-const MARKER_OFFSET = 0.03
+/** Radius offset for pin tip (near globe surface) */
+const MARKER_OFFSET = 0.02
 
 /** Base size of city markers */
 const BASE_MARKER_SIZE = 0.018
@@ -23,6 +23,18 @@ const TOP_RANK_SIZE_MULTIPLIER = 1.5
 
 /** Glow sprite size multiplier */
 const GLOW_SIZE_MULTIPLIER = 2.5
+
+/** Pin head radius relative to base size */
+const PIN_HEAD_SCALE = 0.7
+
+/** Pin shaft length relative to base size */
+const PIN_SHAFT_LENGTH_SCALE = 2.5
+
+/** Pin shaft radius relative to base size */
+const PIN_SHAFT_RADIUS_SCALE = 0.15
+
+/** Shaft color (dark metallic gray) */
+const PIN_SHAFT_COLOR = 0x666666
 
 /** Score thresholds for coloring */
 const SCORE_COLORS = {
@@ -161,18 +173,42 @@ function createCityMarker(city: CityMarkerData, showLabel: boolean): THREE.Group
   const isTopRank = city.rank <= 3
   const size = BASE_MARKER_SIZE * (isTopRank ? TOP_RANK_SIZE_MULTIPLIER : 1)
 
-  // Octahedron geometry (diamond shape) to differentiate from paran spheres
-  const geometry = new THREE.OctahedronGeometry(size, 0)
-  const material = new THREE.MeshBasicMaterial({
+  const headRadius = size * PIN_HEAD_SCALE
+  const shaftLength = size * PIN_SHAFT_LENGTH_SCALE
+  const shaftRadius = size * PIN_SHAFT_RADIUS_SCALE
+
+  // Pin sub-group holds head + shaft, oriented so shaft points along -Y (local)
+  const pinGroup = new THREE.Group()
+  pinGroup.name = 'pinGroup'
+
+  // Pin head (sphere at top)
+  const headGeometry = new THREE.SphereGeometry(headRadius, 12, 8)
+  const headMaterial = new THREE.MeshBasicMaterial({
     color,
     transparent: true,
     opacity: 0.9,
   })
-  const marker = new THREE.Mesh(geometry, material)
-  marker.name = 'cityMarker'
-  markerGroup.add(marker)
+  const head = new THREE.Mesh(headGeometry, headMaterial)
+  head.name = 'cityMarker'
+  head.position.y = shaftLength + headRadius // sit above shaft
+  pinGroup.add(head)
 
-  // Glow sprite
+  // Pin shaft (cone tapering to a point downward)
+  const shaftGeometry = new THREE.ConeGeometry(shaftRadius, shaftLength, 8)
+  const shaftMaterial = new THREE.MeshBasicMaterial({
+    color: PIN_SHAFT_COLOR,
+    transparent: true,
+    opacity: 0.85,
+  })
+  const shaft = new THREE.Mesh(shaftGeometry, shaftMaterial)
+  shaft.name = 'cityShaft'
+  // ConeGeometry is centered; move so tip is at y=0 and base at y=shaftLength
+  shaft.position.y = shaftLength / 2
+  pinGroup.add(shaft)
+
+  markerGroup.add(pinGroup)
+
+  // Glow sprite (around pin head)
   const glowMaterial = new THREE.SpriteMaterial({
     map: getGlowTexture(),
     color,
@@ -183,11 +219,13 @@ function createCityMarker(city: CityMarkerData, showLabel: boolean): THREE.Group
   })
   const glow = new THREE.Sprite(glowMaterial)
   glow.scale.setScalar(size * GLOW_SIZE_MULTIPLIER)
+  glow.position.y = shaftLength + headRadius // align with head
   glow.name = 'cityGlow'
   markerGroup.add(glow)
 
-  // Label sprite (billboard) - always create, toggle visibility
-  const labelTexture = createLabelTexture(city.name)
+  // Label sprite (billboard) — "City, Country"
+  const labelText = `${city.name}, ${city.country}`
+  const labelTexture = createLabelTexture(labelText)
   const labelMaterial = new THREE.SpriteMaterial({
     map: labelTexture,
     transparent: true,
@@ -195,14 +233,21 @@ function createCityMarker(city: CityMarkerData, showLabel: boolean): THREE.Group
   })
   const label = new THREE.Sprite(labelMaterial)
   label.scale.set(0.15, 0.04, 1)
-  label.position.y = size * 3 // Position above marker
+  label.position.y = shaftLength + headRadius * 2 + size * 2 // above pin head
   label.name = 'cityLabel'
   label.visible = showLabel
   markerGroup.add(label)
 
-  // Position on globe
-  const position = latLonToVector3(city.latitude, city.longitude, 1 + MARKER_OFFSET)
-  markerGroup.position.copy(position)
+  // Position on globe surface and orient pin radially outward
+  const surfacePos = latLonToVector3(city.latitude, city.longitude, 1 + MARKER_OFFSET)
+  markerGroup.position.copy(surfacePos)
+
+  // Orient so local +Y points away from globe center (along surface normal)
+  const up = surfacePos.clone().normalize()
+  const target = surfacePos.clone().add(up)
+  markerGroup.lookAt(target)
+  // lookAt aligns -Z toward target; we need +Y toward target instead
+  markerGroup.rotateX(Math.PI / 2)
 
   // Store city data for interaction
   markerGroup.userData = {
@@ -321,21 +366,26 @@ export function highlightCityMarker(group: THREE.Group, cityId: string | null): 
 
       // Find the marker mesh and glow within this group
       child.traverse((subChild) => {
-        if (subChild instanceof THREE.Mesh && subChild.name === 'cityMarker') {
+        if (
+          subChild instanceof THREE.Mesh &&
+          (subChild.name === 'cityMarker' || subChild.name === 'cityShaft')
+        ) {
           const material = subChild.material as THREE.MeshBasicMaterial
           if (isHighlighted) {
-            // Store original color if not already stored
             if (subChild.userData.originalColor === undefined) {
               subChild.userData.originalColor = material.color.getHex()
             }
             material.color.setHex(HIGHLIGHT_COLOR)
-            subChild.scale.setScalar(1.3)
+            if (subChild.name === 'cityMarker') {
+              subChild.scale.setScalar(1.3)
+            }
           } else {
-            // Restore original color
             if (subChild.userData.originalColor !== undefined) {
               material.color.setHex(subChild.userData.originalColor)
             }
-            subChild.scale.setScalar(1)
+            if (subChild.name === 'cityMarker') {
+              subChild.scale.setScalar(1)
+            }
           }
         }
 

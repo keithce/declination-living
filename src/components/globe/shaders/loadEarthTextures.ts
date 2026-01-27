@@ -22,13 +22,14 @@ function loadTexture(
   loader: THREE.TextureLoader,
   path: string,
   colorSpace: THREE.ColorSpace,
+  maxAnisotropy: number,
 ): Promise<THREE.Texture> {
   return new Promise((resolve, reject) => {
     loader.load(
       path,
       (texture) => {
         texture.colorSpace = colorSpace
-        texture.anisotropy = 8
+        texture.anisotropy = Math.min(8, maxAnisotropy)
         resolve(texture)
       },
       undefined,
@@ -37,14 +38,14 @@ function loadTexture(
   })
 }
 
-export async function loadEarthTextures(): Promise<EarthTextures> {
+export async function loadEarthTextures(maxAnisotropy = 8): Promise<EarthTextures> {
   const loader = new THREE.TextureLoader()
 
   const [day, night, normal, specular] = await Promise.all([
-    loadTexture(loader, TEXTURE_PATHS.day, THREE.SRGBColorSpace),
-    loadTexture(loader, TEXTURE_PATHS.night, THREE.SRGBColorSpace),
-    loadTexture(loader, TEXTURE_PATHS.normal, THREE.LinearSRGBColorSpace),
-    loadTexture(loader, TEXTURE_PATHS.specular, THREE.LinearSRGBColorSpace),
+    loadTexture(loader, TEXTURE_PATHS.day, THREE.SRGBColorSpace, maxAnisotropy),
+    loadTexture(loader, TEXTURE_PATHS.night, THREE.SRGBColorSpace, maxAnisotropy),
+    loadTexture(loader, TEXTURE_PATHS.normal, THREE.LinearSRGBColorSpace, maxAnisotropy),
+    loadTexture(loader, TEXTURE_PATHS.specular, THREE.LinearSRGBColorSpace, maxAnisotropy),
   ])
 
   return { day, night, normal, specular }

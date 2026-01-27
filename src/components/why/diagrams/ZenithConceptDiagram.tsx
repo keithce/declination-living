@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion'
 import { useId } from 'react'
 
-/** Y position for the 23° latitude line: y = 200 - lat * 1.8 */
-const ZENITH_BAND_Y = 200 - 23 * 1.8
+/** Latitude (in degrees) at which the zenith band is drawn */
+const ZENITH_LATITUDE = 23
+/** Y position for the zenith latitude line: y = 200 - lat * 1.8 */
+const ZENITH_BAND_Y = 200 - ZENITH_LATITUDE * 1.8
 
 interface ZenithConceptDiagramProps {
   className?: string
@@ -80,8 +82,8 @@ export function ZenithConceptDiagram({ className = '' }: ZenithConceptDiagramPro
         <ellipse
           cx="200"
           cy={ZENITH_BAND_Y}
-          rx={Math.cos((23 * Math.PI) / 180) * 150}
-          ry={Math.cos((23 * Math.PI) / 180) * 150 * 0.3}
+          rx={Math.cos((ZENITH_LATITUDE * Math.PI) / 180) * 150}
+          ry={Math.cos((ZENITH_LATITUDE * Math.PI) / 180) * 150 * 0.3}
           fill="none"
           stroke="#fbbf24"
           strokeWidth="3"
@@ -165,7 +167,7 @@ export function ZenithConceptDiagram({ className = '' }: ZenithConceptDiagramPro
       <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}>
         {/* Zenith band label */}
         <text x="50" y={ZENITH_BAND_Y + 5} fill="#fbbf24" fontSize="11" fontWeight="500">
-          23°N Zenith Band
+          {ZENITH_LATITUDE}°N Zenith Band
         </text>
 
         {/* Equator label */}

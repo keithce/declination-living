@@ -201,7 +201,7 @@ export const rankTopCitiesUncached = internalAction({
         acgLines,
         parans: paranResult.points,
       },
-      { limit: limit ?? 10, tiers: ['major', 'medium'] },
+      { limit: Math.max(1, Math.floor(limit || 10)), tiers: ['major', 'medium'] },
     )
 
     // 4. Return serializable result (strip Convex Id types)
