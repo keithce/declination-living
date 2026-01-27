@@ -179,11 +179,36 @@ export const calculateACGAndZenithFromBirthDataUncached = internalAction({
     orb: v.optional(v.number()),
   },
   handler: async (_ctx, { birthDate, birthTime, timezone, orb }): Promise<ACGPublicResult> => {
+    // Validate input formats
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
+      throw new Error(`Invalid birthDate format: "${birthDate}" (expected YYYY-MM-DD)`)
+    }
+    if (!/^\d{2}:\d{2}$/.test(birthTime)) {
+      throw new Error(`Invalid birthTime format: "${birthTime}" (expected HH:MM)`)
+    }
+    if (!timezone || timezone.trim().length === 0) {
+      throw new Error('timezone must be a non-empty string')
+    }
+
     const effectiveOrb = orb ?? DEFAULT_DECLINATION_ORB
 
     // 1. Calculate Julian Day and positions
-    const jd = dateToJulianDay(birthDate, birthTime, timezone)
-    const positions = calculateAllPositions(jd)
+    let jd: number
+    try {
+      jd = dateToJulianDay(birthDate, birthTime, timezone)
+    } catch (e) {
+      throw new Error(
+        `Failed to compute Julian Day for birthDate="${birthDate}", birthTime="${birthTime}", timezone="${timezone}": ${e instanceof Error ? e.message : String(e)}`,
+      )
+    }
+    let positions: ReturnType<typeof calculateAllPositions>
+    try {
+      positions = calculateAllPositions(jd)
+    } catch (e) {
+      throw new Error(
+        `Failed to calculate positions for JD=${jd} (birthDate="${birthDate}", birthTime="${birthTime}"): ${e instanceof Error ? e.message : String(e)}`,
+      )
+    }
 
     // 2. Convert from ecliptic to equatorial coordinates
     const equatorialPositions = convertAllToEquatorial(positions)

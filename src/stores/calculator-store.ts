@@ -48,14 +48,14 @@ const PersistedStateSchema = z.object({
         z.object({
           latitude: z.number(),
           score: z.number(),
-          dominantPlanet: z.string(),
+          dominantPlanet: z.enum(PLANET_KEYS),
         }),
       ),
       latitudeBands: z.array(
         z.object({
           min: z.number(),
           max: z.number(),
-          dominantPlanet: z.string(),
+          dominantPlanet: z.enum(PLANET_KEYS),
         }),
       ),
     })
@@ -219,7 +219,7 @@ export const useCalculatorStore = create<CalculatorStore>()(
     }),
     {
       name: STORAGE_KEY,
-      version: 6, // Bump: visualization state removed (now managed by TanStack Query)
+      version: 7, // Bump: dominantPlanet now uses z.enum(PLANET_KEYS) instead of z.string()
       storage: createJSONStorage(() => createValidatedStorage()),
       partialize: (state) => ({
         step: state.step,

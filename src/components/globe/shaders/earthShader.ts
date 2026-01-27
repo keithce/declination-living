@@ -64,9 +64,7 @@ const earthFragmentShader = /* glsl */ `
 
     // Diffuse lighting
     float diffuse = dot(N, sunDirView);
-    diffuse = mix(diffuse, max(diffuse, 0.5), uAlwaysDay);
     float dayFactor = smoothstep(-0.25, 0.5, diffuse);
-    dayFactor = mix(dayFactor, 1.0, uAlwaysDay);
 
     // Blinn-Phong specular (water only)
     vec3 viewDir = normalize(-vPosition);
@@ -82,7 +80,13 @@ const earthFragmentShader = /* glsl */ `
     // Add specular highlights
     finalColor += vec3(0.4) * spec;
 
+    // Always Day: show raw day texture at full brightness, skip all lighting
+    finalColor = mix(finalColor, dayColor, uAlwaysDay);
+
     gl_FragColor = vec4(finalColor, 1.0);
+
+    // Convert linear working space → output color space (sRGB)
+    #include <colorspace_fragment>
   }
 `
 

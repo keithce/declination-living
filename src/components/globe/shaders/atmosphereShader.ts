@@ -65,6 +65,6 @@ export function createAtmosphereMaterial(): THREE.ShaderMaterial {
     side: THREE.BackSide,
     transparent: true,
     depthWrite: false,
-    blending: THREE.NormalBlending,
+    blending: THREE.AdditiveBlending,
   })
 }

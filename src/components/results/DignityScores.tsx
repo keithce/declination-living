@@ -119,6 +119,7 @@ function IndicatorBadge({
     const interactiveBadge = (
       <button
         type="button"
+        aria-label={config.label}
         className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded ${config.bgColor} text-white cursor-help`}
       >
         {indicator}
