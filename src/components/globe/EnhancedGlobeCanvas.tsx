@@ -561,26 +561,21 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     // Layer Visibility (using group.visible)
     // ==========================================================================
 
-    // Zenith bands visibility
+    // Layer visibility (using group.visible) - consolidated for atomicity
     useEffect(() => {
-      if (sceneRef.current?.layers.zenithBands) {
-        sceneRef.current.layers.zenithBands.group.visible = globeState.layers.zenithBands
-      }
-    }, [globeState.layers.zenithBands])
+      if (!sceneRef.current) return
+      const { layers } = sceneRef.current
 
-    // ACG lines visibility
-    useEffect(() => {
-      if (sceneRef.current?.layers.acgLines) {
-        sceneRef.current.layers.acgLines.group.visible = globeState.layers.acgLines
+      if (layers.zenithBands) {
+        layers.zenithBands.group.visible = globeState.layers.zenithBands
       }
-    }, [globeState.layers.acgLines])
-
-    // Paran points visibility
-    useEffect(() => {
-      if (sceneRef.current?.layers.paranPoints) {
-        sceneRef.current.layers.paranPoints.group.visible = globeState.layers.paranPoints
+      if (layers.acgLines) {
+        layers.acgLines.group.visible = globeState.layers.acgLines
       }
-    }, [globeState.layers.paranPoints])
+      if (layers.paranPoints) {
+        layers.paranPoints.group.visible = globeState.layers.paranPoints
+      }
+    }, [globeState.layers.zenithBands, globeState.layers.acgLines, globeState.layers.paranPoints])
 
     // Heatmap visibility (handled by creation/destruction in the heatmap effect above)
 

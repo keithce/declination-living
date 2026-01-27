@@ -57,8 +57,8 @@ export type UseGlobeStateReturn = GlobeState & GlobeStateActions
 
 const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
   zenithBands: true,
-  acgLines: true,
-  paranPoints: true,
+  acgLines: false,
+  paranPoints: false,
   heatmap: false,
   latitudeBands: true,
   birthLocation: true,

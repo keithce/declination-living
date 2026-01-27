@@ -126,14 +126,18 @@ export function FullPageGlobeLayout({
     [phase2Data?.parans],
   )
 
-  // Birth location for marker
-  const birthLocation = birthData
-    ? {
-        latitude: birthData.birthLatitude,
-        longitude: birthData.birthLongitude,
-        city: birthData.birthCity,
-      }
-    : undefined
+  // Birth location for marker (memoized to prevent scene recreation)
+  const birthLocation = useMemo(
+    () =>
+      birthData
+        ? {
+            latitude: birthData.birthLatitude,
+            longitude: birthData.birthLongitude,
+            city: birthData.birthCity,
+          }
+        : undefined,
+    [birthData?.birthLatitude, birthData?.birthLongitude, birthData?.birthCity],
+  )
 
   return (
     <div className="fixed inset-0 overflow-hidden">
