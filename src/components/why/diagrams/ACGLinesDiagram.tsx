@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { motion } from 'framer-motion'
 
 interface ACGLinesDiagramProps {
@@ -5,6 +6,8 @@ interface ACGLinesDiagramProps {
 }
 
 export function ACGLinesDiagram({ className = '' }: ACGLinesDiagramProps) {
+  const id = useId()
+  const gradientId = `${id}-horizon`
   return (
     <svg
       viewBox="0 0 500 350"
@@ -19,7 +22,7 @@ export function ACGLinesDiagram({ className = '' }: ACGLinesDiagramProps) {
       </desc>
 
       <defs>
-        <linearGradient id="horizonGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#1e1b4b" />
           <stop offset="100%" stopColor="#0a0f1f" />
         </linearGradient>
@@ -35,7 +38,7 @@ export function ACGLinesDiagram({ className = '' }: ACGLinesDiagramProps) {
         cx="175"
         cy="190"
         r="120"
-        fill="url(#horizonGradient)"
+        fill={`url(#${gradientId})`}
         stroke="#334155"
         strokeWidth="2"
         initial={{ scale: 0 }}

@@ -200,11 +200,14 @@ export function FloatingDataPanel({
   )
 
   // Check if we have any visualization data to show
-  const hasAnyVisualizationData =
-    combinedACGLines.length > 0 ||
-    combinedZenithLines.length > 0 ||
-    combinedParans.length > 0 ||
-    combinedScoringGrid.length > 0
+  const hasAnyVisualizationData = useMemo(
+    () =>
+      combinedACGLines.length > 0 ||
+      combinedZenithLines.length > 0 ||
+      combinedParans.length > 0 ||
+      combinedScoringGrid.length > 0,
+    [combinedACGLines, combinedZenithLines, combinedParans, combinedScoringGrid],
+  )
 
   // Debounce recalculate to prevent excessive API calls during slider dragging
   const debouncedRecalculate = useMemo(() => debounce(onRecalculate, 400), [onRecalculate])

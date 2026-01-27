@@ -189,10 +189,7 @@ export const calculateACGAndZenithFromBirthDataUncached = internalAction({
     const equatorialPositions = convertAllToEquatorial(positions)
 
     // 3. Extract declinations for zenith calculation
-    const declinations: Record<PlanetId, number> = {} as Record<PlanetId, number>
-    for (const planet of PLANET_IDS) {
-      declinations[planet] = equatorialPositions[planet].dec
-    }
+    const declinations = extractDeclinations(equatorialPositions)
 
     // 4. Calculate ACG lines and zenith lines
     const acgLines = calculateAllACGLines(jd, equatorialPositions)

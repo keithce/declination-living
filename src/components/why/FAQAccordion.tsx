@@ -1,14 +1,10 @@
+import type { FAQItem } from '@/components/why/data/faq-items'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-
-interface FAQItem {
-  question: string
-  answer: string
-}
 
 interface FAQAccordionProps {
   items: Array<FAQItem>

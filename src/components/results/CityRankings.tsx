@@ -255,7 +255,7 @@ export const CityRankings = memo(function CityRankings({
   const [sortOption, setSortOption] = useState<SortOption>('score')
 
   // Filter and sort cities
-  const filteredCities = useMemo(() => {
+  const { filteredCities, filteredCount } = useMemo(() => {
     let filtered = cities
 
     // Filter by tier
@@ -282,7 +282,7 @@ export const CityRankings = memo(function CityRankings({
       }
     })
 
-    return sorted.slice(0, maxDisplay)
+    return { filteredCities: sorted.slice(0, maxDisplay), filteredCount: sorted.length }
   }, [cities, tierFilter, sortOption, maxDisplay])
 
   return (
@@ -291,7 +291,7 @@ export const CityRankings = memo(function CityRankings({
       <div className="flex items-center gap-2">
         <MapPin className="w-5 h-5 text-amber-400" />
         <h3 className="font-display text-lg font-semibold text-white">Top Locations</h3>
-        <span className="text-xs text-slate-500">({filteredCities.length})</span>
+        <span className="text-xs text-slate-500">({filteredCount})</span>
       </div>
 
       {/* Filter Controls */}
@@ -324,9 +324,9 @@ export const CityRankings = memo(function CityRankings({
       )}
 
       {/* Footer */}
-      {filteredCities.length < cities.length && (
+      {filteredCities.length < filteredCount && (
         <div className="text-xs text-slate-500 text-center">
-          Showing {filteredCities.length} of {cities.length} cities
+          Showing {filteredCities.length} of {filteredCount} cities
         </div>
       )}
     </div>

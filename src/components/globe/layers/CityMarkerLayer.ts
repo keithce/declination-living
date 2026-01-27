@@ -246,8 +246,9 @@ export function createCityMarkerLayer(
   const group = new THREE.Group()
   group.name = 'cityMarkers'
 
-  // Limit to max markers
-  const displayCities = cities.slice(0, maxMarkers)
+  // Limit to max markers (clamp to non-negative)
+  const safeMax = Math.max(0, maxMarkers)
+  const displayCities = cities.slice(0, safeMax)
 
   for (const city of displayCities) {
     const marker = createCityMarker(city, showLabels)

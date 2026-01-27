@@ -25,7 +25,7 @@ export interface DignityScoreData {
 
 interface DignityScoresProps {
   /** Dignity scores for each planet */
-  dignities: Record<PlanetId, DignityScoreData>
+  dignities: Partial<Record<PlanetId, DignityScoreData>>
   /** Chart sect (day or night) */
   sect: Sect
   /** Compact mode for narrow panels */
@@ -115,18 +115,19 @@ function IndicatorBadge({
 }) {
   const config = INDICATOR_CONFIG[indicator] ?? INDICATOR_CONFIG['-']
 
-  const badge = (
-    <span
-      className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded ${config.bgColor} text-white${breakdown && breakdown.length > 0 ? ' cursor-help' : ''}`}
-    >
-      {indicator}
-    </span>
-  )
-
   if (breakdown && breakdown.length > 0) {
+    const interactiveBadge = (
+      <button
+        type="button"
+        className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded ${config.bgColor} text-white cursor-help`}
+      >
+        {indicator}
+      </button>
+    )
+
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{badge}</TooltipTrigger>
+        <TooltipTrigger asChild>{interactiveBadge}</TooltipTrigger>
         <TooltipContent className="max-w-xs">
           <ul className="text-xs space-y-0.5">
             {breakdown.map((item, i) => (
@@ -138,7 +139,13 @@ function IndicatorBadge({
     )
   }
 
-  return badge
+  return (
+    <span
+      className={`inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded ${config.bgColor} text-white`}
+    >
+      {indicator}
+    </span>
+  )
 }
 
 // =============================================================================
@@ -153,8 +160,8 @@ export const DignityScores = memo(function DignityScores({
   // Sort planets by total score descending
   const sortedPlanets = useMemo(() => {
     return [...PLANETS].sort((a, b) => {
-      const dignityA = dignities[a.key] as DignityScoreData | undefined
-      const dignityB = dignities[b.key] as DignityScoreData | undefined
+      const dignityA = dignities[a.key]
+      const dignityB = dignities[b.key]
       const scoreA = dignityA?.total ?? 0
       const scoreB = dignityB?.total ?? 0
       return scoreB - scoreA
@@ -173,7 +180,7 @@ export const DignityScores = memo(function DignityScores({
         {/* Planet List */}
         <div className="space-y-2">
           {sortedPlanets.map((planet, index) => {
-            const dignity = dignities[planet.key] as DignityScoreData | undefined
+            const dignity = dignities[planet.key]
             if (!dignity) return null
             const normalizedScore = normalizeScore(dignity.total)
             const progressColor = getProgressColor(dignity.total)

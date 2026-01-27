@@ -140,6 +140,7 @@ const createValidatedStorage = (): StateStorage => ({
     }
   },
   setItem: (name, value) => {
+    if (typeof window === 'undefined') return
     if (DEBUG_STORAGE) {
       try {
         const parsed = JSON.parse(value)
@@ -154,7 +155,10 @@ const createValidatedStorage = (): StateStorage => ({
     }
     localStorage.setItem(name, value)
   },
-  removeItem: (name) => localStorage.removeItem(name),
+  removeItem: (name) => {
+    if (typeof window === 'undefined') return
+    localStorage.removeItem(name)
+  },
 })
 
 // Store

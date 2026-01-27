@@ -174,7 +174,10 @@ export const rankTopCitiesUncached = internalAction({
     weights: planetWeightsValidator,
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { birthDate, birthTime, timezone, weights, limit }) => {
+  handler: async (
+    ctx,
+    { birthDate, birthTime, timezone, weights, limit },
+  ): Promise<RankTopCitiesReturn> => {
     // 1. Calculate ephemeris
     const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
@@ -216,6 +219,9 @@ export const rankTopCitiesUncached = internalAction({
   },
 })
 
+/** Return type for city ranking */
+type RankTopCitiesReturn = Array<RankedCityResultDTO>
+
 /** Cache for city ranking calculations */
 const cityRankingCache = new ActionCache(components.actionCache, {
   action: internal.calculations.geospatial.actions.rankTopCitiesUncached,
@@ -244,9 +250,7 @@ export const rankTopCities = action({
     weights: planetWeightsValidator,
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, args): Promise<Array<RankedCityResultDTO>> => {
-    // Safe cast: rankTopCitiesUncached returns Array<RankedCityResultDTO> but
-    // ActionCache.fetch types it as the generic cache return type.
-    return cityRankingCache.fetch(ctx, args) as Promise<Array<RankedCityResultDTO>>
+  handler: async (ctx, args): Promise<RankTopCitiesReturn> => {
+    return cityRankingCache.fetch(ctx, args)
   },
 })

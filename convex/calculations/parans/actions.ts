@@ -181,6 +181,10 @@ export const calculateParansFromBirthDataUncached = internalAction({
     birthTime: v.string(),
     timezone: v.string(),
   },
+  returns: v.object({
+    points: v.array(paranPointValidator),
+    summary: paranSummaryValidator,
+  }),
   handler: async (_ctx, { birthDate, birthTime, timezone }): Promise<ParanCalculationResult> => {
     // 1. Calculate Julian Day and positions
     const jd = dateToJulianDay(birthDate, birthTime, timezone)
@@ -230,6 +234,10 @@ export const calculateParansFromBirthData = action({
     birthTime: v.string(),
     timezone: v.string(),
   },
+  returns: v.object({
+    points: v.array(paranPointValidator),
+    summary: paranSummaryValidator,
+  }),
   handler: async (ctx, args): Promise<ParanCalculationResult> => {
     return paranCalculationCache.fetch(ctx, args)
   },
