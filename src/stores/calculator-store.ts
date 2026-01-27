@@ -65,11 +65,12 @@ const PersistedStateSchema = z.object({
 // Types
 export type Step = 'birth-data' | 'weights' | 'results'
 export type BirthDataState = z.infer<typeof BirthDataSchema>
+export type PlanetKey = (typeof PLANET_KEYS)[number]
 
 export interface CalculationResultState {
   declinations: Declinations
-  optimalLatitudes: Array<{ latitude: number; score: number; dominantPlanet: string }>
-  latitudeBands: Array<{ min: number; max: number; dominantPlanet: string }>
+  optimalLatitudes: Array<{ latitude: number; score: number; dominantPlanet: PlanetKey }>
+  latitudeBands: Array<{ min: number; max: number; dominantPlanet: PlanetKey }>
 }
 
 interface CalculatorState {

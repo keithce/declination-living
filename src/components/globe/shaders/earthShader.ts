@@ -18,11 +18,12 @@ const earthVertexShader = /* glsl */ `
     vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
 
     // Approximate tangent from sphere UV mapping
-    vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), normal));
+    vec3 temp = cross(vec3(0.0, 1.0, 0.0), normal);
     // Handle poles where cross product degenerates
-    if (length(tangent) < 0.001) {
-      tangent = normalize(cross(vec3(0.0, 0.0, 1.0), normal));
+    if (length(temp) < 0.001) {
+      temp = cross(vec3(0.0, 0.0, 1.0), normal);
     }
+    vec3 tangent = normalize(temp);
     vec3 bitangent = normalize(cross(normal, tangent));
 
     vTangent = normalize(normalMatrix * tangent);

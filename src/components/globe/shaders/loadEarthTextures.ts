@@ -25,10 +25,15 @@ const TEXTURE_ENTRIES = [
   { key: 'specular', path: TEXTURE_PATHS.specular, colorSpace: THREE.LinearSRGBColorSpace },
 ] as const
 
-function createFallbackTexture(colorSpace: THREE.ColorSpace, maxAnisotropy: number): THREE.Texture {
-  const texture = new THREE.Texture()
+function createFallbackTexture(
+  colorSpace: THREE.ColorSpace,
+  maxAnisotropy: number,
+): THREE.DataTexture {
+  const data = new Uint8Array([128, 128, 128, 255])
+  const texture = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat)
   texture.colorSpace = colorSpace
   texture.anisotropy = Math.min(8, maxAnisotropy)
+  texture.needsUpdate = true
   return texture
 }
 

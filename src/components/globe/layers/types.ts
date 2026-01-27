@@ -161,12 +161,12 @@ export interface ExtendedGlobeCanvasProps {
   optimalLatitudes?: Array<{
     latitude: number
     score: number
-    dominantPlanet: string
+    dominantPlanet: PlanetId
   }>
   latitudeBands?: Array<{
     min: number
     max: number
-    dominantPlanet: string
+    dominantPlanet: PlanetId
   }>
   birthLocation?: {
     latitude: number
