@@ -23,6 +23,14 @@ import { PLANET_IDS } from '@/components/globe/layers/types'
 import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { transformACGLines, transformParans } from '@/components/globe/utils'
 import { useHeaderVisibility } from '@/contexts/HeaderContext'
+import {
+  useACGData,
+  useAnyVisualizationLoading,
+  useParansData,
+  useScoringGridData,
+  useVisualizationProgress,
+  useZenithData,
+} from '@/stores/selectors'
 
 // =============================================================================
 // Types
@@ -96,14 +104,25 @@ export function FullPageGlobeLayout({
   // Hide the root header when this layout is mounted
   const { setHideHeader } = useHeaderVisibility()
 
+  // Progressive visualization data from store selectors
+  const zenithState = useZenithData()
+  const acgState = useACGData()
+  const paransState = useParansData()
+  const scoringGridState = useScoringGridData()
+  const isAnyVisualizationLoading = useAnyVisualizationLoading()
+  const visualizationProgress = useVisualizationProgress()
+
   useEffect(() => {
     setHideHeader(true)
     return () => setHideHeader(false)
   }, [setHideHeader])
 
   // Convert Phase 1 declinations to globe format (Partial<Record<PlanetId, number>>)
-  // Phase 2 data has this already, but Phase 1 uses a different type
+  // Use progressive zenith data if available, otherwise fall back to phase2Data or Phase 1
   const declinationsForGlobe = useMemo((): Partial<Record<PlanetId, number>> => {
+    // Prefer progressive zenith data (includes declinations)
+    if (zenithState.data?.declinations) return zenithState.data.declinations
+    // Fall back to legacy phase2Data
     if (phase2Data?.declinations) return phase2Data.declinations
     // Convert from Phase 1 Declinations type to Partial<Record<PlanetId, number>>
     const converted: Partial<Record<PlanetId, number>> = {}
@@ -114,17 +133,24 @@ export function FullPageGlobeLayout({
       }
     }
     return converted
-  }, [phase2Data?.declinations, result.declinations])
+  }, [zenithState.data?.declinations, phase2Data?.declinations, result.declinations])
 
-  // Transform data for globe (memoized) - empty arrays when phase2 not ready
-  const transformedACGLines = useMemo(
-    () => (phase2Data?.acgLines ? transformACGLines(phase2Data.acgLines) : []),
-    [phase2Data?.acgLines],
-  )
-  const transformedParans = useMemo(
-    () => (phase2Data?.parans ? transformParans(phase2Data.parans) : []),
-    [phase2Data?.parans],
-  )
+  // Transform data for globe (memoized) - use progressive data first, then fall back to phase2Data
+  const transformedACGLines = useMemo(() => {
+    // Prefer progressive ACG data
+    if (acgState.data?.acgLines) return transformACGLines(acgState.data.acgLines)
+    // Fall back to legacy phase2Data
+    if (phase2Data?.acgLines) return transformACGLines(phase2Data.acgLines)
+    return []
+  }, [acgState.data?.acgLines, phase2Data?.acgLines])
+
+  const transformedParans = useMemo(() => {
+    // Prefer progressive paran data
+    if (paransState.data?.points) return transformParans(paransState.data.points)
+    // Fall back to legacy phase2Data
+    if (phase2Data?.parans) return transformParans(phase2Data.parans)
+    return []
+  }, [paransState.data?.points, phase2Data?.parans])
 
   // Birth location for marker (memoized to prevent scene recreation)
   const birthLocation = useMemo(
@@ -168,15 +194,51 @@ export function FullPageGlobeLayout({
         />
       </motion.div>
 
-      {/* Loading indicator when Phase 2 is calculating */}
-      {isCalculating && !phase2Data && (
+      {/* Progressive loading indicator */}
+      {isAnyVisualizationLoading && (
         <motion.div
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-lg flex items-center gap-2"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-lg flex items-center gap-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
         >
           <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-          <span className="text-sm text-slate-300">Loading enhanced data...</span>
+          <div className="flex flex-col">
+            <span className="text-sm text-slate-300">Loading visualizations...</span>
+            <div className="flex items-center gap-2 mt-1">
+              {/* Progress bar */}
+              <div className="w-24 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-amber-400 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${visualizationProgress * 100}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <span className="text-xs text-slate-400">
+                {Math.round(visualizationProgress * 100)}%
+              </span>
+            </div>
+          </div>
+          {/* Individual layer status indicators */}
+          <div className="flex items-center gap-1.5 ml-2 border-l border-slate-700 pl-3">
+            <div
+              className={`w-2 h-2 rounded-full ${zenithState.data ? 'bg-green-400' : zenithState.loading ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'}`}
+              title={`Zenith: ${zenithState.data ? 'loaded' : zenithState.loading ? 'loading' : 'pending'}`}
+            />
+            <div
+              className={`w-2 h-2 rounded-full ${acgState.data ? 'bg-green-400' : acgState.loading ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'}`}
+              title={`ACG: ${acgState.data ? 'loaded' : acgState.loading ? 'loading' : 'pending'}`}
+            />
+            <div
+              className={`w-2 h-2 rounded-full ${paransState.data ? 'bg-green-400' : paransState.loading ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'}`}
+              title={`Parans: ${paransState.data ? 'loaded' : paransState.loading ? 'loading' : 'pending'}`}
+            />
+            <div
+              className={`w-2 h-2 rounded-full ${scoringGridState.data ? 'bg-green-400' : scoringGridState.loading ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'}`}
+              title={`Grid: ${scoringGridState.data ? 'loaded' : scoringGridState.loading ? 'loading' : 'pending'}`}
+            />
+          </div>
         </motion.div>
       )}
 
@@ -212,23 +274,29 @@ export function FullPageGlobeLayout({
         transition={{ delay: 0.5, duration: 0.3 }}
       >
         {globeState.layers.zenithBands && (
-          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300">
+          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300 flex items-center gap-1.5">
             Zenith Bands
+            {zenithState.loading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
           </div>
         )}
-        {globeState.layers.acgLines && phase2Data && (
-          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300">
+        {globeState.layers.acgLines && (acgState.data || phase2Data) && (
+          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300 flex items-center gap-1.5">
             ACG Lines ({transformedACGLines.length})
+            {acgState.loading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
           </div>
         )}
-        {globeState.layers.paranPoints && phase2Data && (
-          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300">
+        {globeState.layers.paranPoints && (paransState.data || phase2Data) && (
+          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300 flex items-center gap-1.5">
             Parans ({transformedParans.length})
+            {paransState.loading && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
           </div>
         )}
         {globeState.layers.heatmap && (
-          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300">
+          <div className="px-2 py-1 bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded text-xs text-slate-300 flex items-center gap-1.5">
             Heatmap
+            {scoringGridState.loading && (
+              <Loader2 className="w-3 h-3 animate-spin text-amber-400" />
+            )}
           </div>
         )}
       </motion.div>

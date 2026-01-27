@@ -23,6 +23,7 @@ import { findOptimalLatitudes, getOptimalLatitudeBands } from './optimizer'
 
 // Import new modules
 import { PLANET_IDS } from './core/types'
+import { CACHE_TTL_30_DAYS_MS } from './core/constants'
 
 // Import cache utilities
 import { checkAllOOBStatus, getMeanObliquity } from './ephemeris/oob'
@@ -247,14 +248,11 @@ export const calculateACGLinesUncached = internalAction({
   },
 })
 
-// 30-day TTL in milliseconds
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
-
 /** Cache for ACG lines calculation */
 const acgLinesCache = new ActionCache(components.actionCache, {
   action: internal.calculations.enhanced_actions.calculateACGLinesUncached,
   name: 'calculateACGLines:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**
@@ -388,7 +386,7 @@ export const calculateParansUncached = internalAction({
 const paransCache = new ActionCache(components.actionCache, {
   action: internal.calculations.enhanced_actions.calculateParansUncached,
   name: 'calculateParans:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**
@@ -681,7 +679,7 @@ export const calculateCompleteEnhancedUncached = internalAction({
 const completeEnhancedCache = new ActionCache(components.actionCache, {
   action: internal.calculations.enhanced_actions.calculateCompleteEnhancedUncached,
   name: 'calculateCompleteEnhanced:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**

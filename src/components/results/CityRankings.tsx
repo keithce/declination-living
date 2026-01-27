@@ -264,8 +264,14 @@ export const CityRankings = memo(function CityRankings({
     // Sort
     const sorted = [...filtered].sort((a, b) => {
       switch (sortOption) {
-        case 'safety':
-          return (b.safetyScore?.overall ?? 0) - (a.safetyScore?.overall ?? 0)
+        case 'safety': {
+          const aScore = a.safetyScore?.overall
+          const bScore = b.safetyScore?.overall
+          if (aScore == null && bScore == null) return 0
+          if (aScore == null) return 1 // a to end
+          if (bScore == null) return -1 // b to end
+          return bScore - aScore
+        }
         case 'population':
           return b.city.population - a.city.population
         case 'score':
@@ -301,7 +307,7 @@ export const CityRankings = memo(function CityRankings({
           <div className="space-y-2 pr-4">
             {filteredCities.map((city, index) => (
               <CityCard
-                key={`${city.city.latitude}-${city.city.longitude}`}
+                key={`${city.city.name}-${city.city.latitude}-${city.city.longitude}`}
                 city={city}
                 rank={index + 1}
                 onClick={onCityClick ? () => onCityClick(city) : undefined}

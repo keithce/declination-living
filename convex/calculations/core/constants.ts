@@ -286,3 +286,10 @@ export const SIGN_MODALITIES = [
   'fixed',
   'mutable',
 ] as const
+
+// =============================================================================
+// Cache Constants
+// =============================================================================
+
+/** 30-day cache TTL in milliseconds */
+export const CACHE_TTL_30_DAYS_MS = 30 * 24 * 60 * 60 * 1000

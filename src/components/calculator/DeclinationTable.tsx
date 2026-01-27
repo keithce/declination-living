@@ -48,8 +48,9 @@ export const DeclinationTable = memo(function DeclinationTable({
   // Get OOB info for a planet
   const getOOBInfo = (planetKey: PlanetId): EnhancedDeclination | null => {
     if (!enhancedDeclinations) return null
-    const enhanced = enhancedDeclinations[planetKey]
-    return enhanced.isOOB ? enhanced : null
+    const enhanced = enhancedDeclinations[planetKey] as EnhancedDeclination | undefined
+    if (!enhanced || !enhanced.isOOB) return null
+    return enhanced
   }
 
   return (
@@ -69,7 +70,7 @@ export const DeclinationTable = memo(function DeclinationTable({
                 North/South celestial position at your birth
               </p>
             </div>
-            {obliquity && (
+            {obliquity != null && (
               <div className="text-xs text-slate-500 text-right">
                 <div>Current obliquity: {obliquity.toFixed(2)}°</div>
                 <div className="text-amber-400/70">OOB limit: ±{obliquity.toFixed(2)}°</div>

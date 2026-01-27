@@ -30,3 +30,10 @@ export {
   setHeatmapIntensity,
   setHeatmapSpread,
 } from './HeatmapLayer'
+export {
+  createCityMarkerLayer,
+  updateCityLabels,
+  highlightCityMarker,
+  findCityAtPosition,
+  getCityTooltip,
+} from './CityMarkerLayer'

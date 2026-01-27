@@ -110,7 +110,7 @@ function IndicatorBadge({
   indicator,
   breakdown,
 }: {
-  indicator: string
+  indicator: DignityIndicator
   breakdown?: Array<string>
 }) {
   const config = INDICATOR_CONFIG[indicator] ?? INDICATOR_CONFIG['-']
@@ -153,8 +153,10 @@ export const DignityScores = memo(function DignityScores({
   // Sort planets by total score descending
   const sortedPlanets = useMemo(() => {
     return [...PLANETS].sort((a, b) => {
-      const scoreA = dignities[a.key].total
-      const scoreB = dignities[b.key].total
+      const dignityA = dignities[a.key] as DignityScoreData | undefined
+      const dignityB = dignities[b.key] as DignityScoreData | undefined
+      const scoreA = dignityA?.total ?? 0
+      const scoreB = dignityB?.total ?? 0
       return scoreB - scoreA
     })
   }, [dignities])

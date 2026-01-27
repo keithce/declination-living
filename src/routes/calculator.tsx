@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { toast } from 'sonner'
@@ -12,6 +12,7 @@ import { BirthDataForm } from '@/components/calculator/BirthDataForm'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { SaveChartModal } from '@/components/calculator/SaveChartModal'
 import { useCalculatorHydration, useCalculatorStore } from '@/stores/calculator-store'
+import { useVisualizationActions } from '@/stores/selectors'
 import { FullPageGlobeLayout } from '@/components/results/FullPageGlobeLayout'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
 
@@ -70,9 +71,110 @@ function CalculatorContent() {
   const createChart = useMutation(api.charts.mutations.create)
   const globeState = useGlobeState()
 
+  // Progressive loading actions
+  const calculateZenithLines = useAction(api.calculations.zenith.actions.calculateZenithLines)
+  const calculateACGLines = useAction(api.calculations.acg.actions.calculateACGAndZenithPublic)
+  const calculateParans = useAction(api.calculations.parans.actions.calculateParansFromBirthData)
+  const calculateScoringGrid = useAction(api.calculations.geospatial.actions.calculateScoringGrid)
+  const vizActions = useVisualizationActions()
+
   const handleBirthDataSubmit = (data: BirthData) => {
     setBirthData(data)
   }
+
+  /**
+   * Trigger progressive visualization loading.
+   * Loads data in order: zenith (fastest) -> ACG + parans (parallel) -> scoring grid (depends on others)
+   */
+  const triggerProgressiveLoading = useCallback(
+    (bd: BirthData, w: PlanetWeights) => {
+      // Reset visualization state
+      vizActions.resetVisualization()
+
+      // 1. Zenith (fastest - render immediately)
+      vizActions.setZenithLoading(true)
+      calculateZenithLines({
+        birthDate: bd.birthDate,
+        birthTime: bd.birthTime,
+        timezone: bd.birthTimezone,
+      })
+        .then((zenithResult) => {
+          vizActions.setZenithData({
+            julianDay: zenithResult.julianDay,
+            zenithLines: zenithResult.zenithLines,
+            declinations: zenithResult.declinations,
+          })
+        })
+        .catch((err) => {
+          console.error('Zenith calculation failed:', err)
+          vizActions.setZenithError('Failed to load zenith lines')
+        })
+
+      // 2. ACG + Parans (parallel)
+      vizActions.setACGLoading(true)
+      vizActions.setParansLoading(true)
+
+      const acgPromise = calculateACGLines({
+        birthDate: bd.birthDate,
+        birthTime: bd.birthTime,
+        timezone: bd.birthTimezone,
+      })
+        .then((acgResult) => {
+          vizActions.setACGData({
+            julianDay: acgResult.julianDay,
+            acgLines: acgResult.acgLines,
+            zenithLines: acgResult.zenithLines,
+          })
+          return acgResult
+        })
+        .catch((err) => {
+          console.error('ACG calculation failed:', err)
+          vizActions.setACGError('Failed to load ACG lines')
+          throw err
+        })
+
+      const paranPromise = calculateParans({
+        birthDate: bd.birthDate,
+        birthTime: bd.birthTime,
+        timezone: bd.birthTimezone,
+      })
+        .then((paranResult) => {
+          vizActions.setParansData({
+            points: paranResult.points,
+            summary: paranResult.summary,
+          })
+          return paranResult
+        })
+        .catch((err) => {
+          console.error('Paran calculation failed:', err)
+          vizActions.setParansError('Failed to load parans')
+          throw err
+        })
+
+      // 3. Scoring grid (after ACG + Parans complete)
+      Promise.all([acgPromise, paranPromise])
+        .then(() => {
+          vizActions.setScoringGridLoading(true)
+          return calculateScoringGrid({
+            birthDate: bd.birthDate,
+            birthTime: bd.birthTime,
+            timezone: bd.birthTimezone,
+            weights: w,
+          })
+        })
+        .then((gridResult) => {
+          vizActions.setScoringGridData({
+            grid: gridResult.grid,
+            gridStats: gridResult.gridStats,
+          })
+        })
+        .catch((err) => {
+          console.error('Scoring grid calculation failed:', err)
+          vizActions.setScoringGridError('Failed to load scoring grid')
+        })
+    },
+    [calculateZenithLines, calculateACGLines, calculateParans, calculateScoringGrid, vizActions],
+  )
 
   const handleCalculate = async () => {
     setError(null)
@@ -93,7 +195,12 @@ function CalculatorContent() {
       })
       setResult(calcResult)
 
-      // Phase 2: Enhanced calculation (optional - don't block Phase 1 results)
+      // Phase 2: Progressive visualization loading (non-blocking)
+      // Trigger progressive loading but don't await - let UI update as data arrives
+      triggerProgressiveLoading(birthData, weights)
+
+      // Also load via legacy Phase 2 for backward compatibility with components
+      // that still use phase2Data prop
       try {
         const phase2Result = await calculatePhase2({
           birthDate: birthData.birthDate,
@@ -129,14 +236,6 @@ function CalculatorContent() {
         weights: newWeights,
       })
 
-      // Recalculate Phase 2 results with new weights
-      const phase2Result = await calculatePhase2({
-        birthDate: birthData.birthDate,
-        birthTime: birthData.birthTime,
-        timezone: birthData.birthTimezone,
-        weights: newWeights,
-      })
-
       updateResult(
         {
           ...result,
@@ -145,6 +244,17 @@ function CalculatorContent() {
         },
         newWeights,
       )
+
+      // Trigger progressive visualization loading with new weights
+      triggerProgressiveLoading(birthData, newWeights)
+
+      // Also load via legacy Phase 2 for backward compatibility
+      const phase2Result = await calculatePhase2({
+        birthDate: birthData.birthDate,
+        birthTime: birthData.birthTime,
+        timezone: birthData.birthTimezone,
+        weights: newWeights,
+      })
       setPhase2Data(phase2Result)
     } catch (err) {
       console.error('Recalculation failed:', err)

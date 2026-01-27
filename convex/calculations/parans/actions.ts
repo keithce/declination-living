@@ -1,11 +1,17 @@
+'use node'
+
 /**
  * Paran Convex Actions
  *
- * Internal actions for paran calculations that can be called from other Convex functions.
+ * Domain-specific actions for paran calculations.
+ * Includes both internal actions for other Convex functions and
+ * public cached actions for direct frontend access.
  */
 
 import { v } from 'convex/values'
-import { internalAction } from '../../_generated/server'
+import { ActionCache } from '@convex-dev/action-cache'
+import { action, internalAction } from '../../_generated/server'
+import { components, internal } from '../../_generated/api'
 import {
   equatorialPositionValidator,
   paranPointValidator,
@@ -13,8 +19,30 @@ import {
   paranStatisticsValidator,
   paranSummaryValidator,
 } from '../validators'
+import { calculateAllPositions, dateToJulianDay } from '../ephemeris'
+import { eclipticToEquatorial } from '../coordinates/transform'
+import { MEAN_OBLIQUITY_J2000 } from '../core/constants'
+import { PLANET_IDS } from '../core/types'
 import { findAllParans, getParanStatistics, getParansAtLatitude, getTopParans } from './catalog'
+import type { EquatorialCoordinates, ParanPoint, ParanResult, PlanetId } from '../core/types'
 import type { PlanetPosition } from './catalog'
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/** Public paran calculation result */
+interface ParanCalculationResult {
+  points: Array<ParanPoint>
+  summary: ParanResult['summary']
+}
+
+// =============================================================================
+// Cache Configuration
+// =============================================================================
+
+// 30-day TTL in milliseconds
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 // =============================================================================
 // Calculate Parans Action
@@ -143,5 +171,85 @@ export const getParanSummary = internalAction({
       statistics,
       sampleParans: result.points.slice(0, 5), // Just top 5 for preview
     }
+  },
+})
+
+// =============================================================================
+// Public Paran Calculation (Cached)
+// =============================================================================
+
+/**
+ * Calculate parans from birth data (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
+ */
+export const calculateParansFromBirthDataUncached = internalAction({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+  },
+  handler: async (_ctx, { birthDate, birthTime, timezone }): Promise<ParanCalculationResult> => {
+    // 1. Calculate Julian Day and positions
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
+    const positions = calculateAllPositions(jd)
+
+    // 2. Convert from ecliptic to equatorial coordinates
+    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
+      PlanetId,
+      EquatorialCoordinates
+    >
+
+    for (const planet of PLANET_IDS) {
+      const pos = positions[planet]
+      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
+      equatorialPositions[planet] = {
+        ra: eq.rightAscension,
+        dec: eq.declination,
+      }
+    }
+
+    // 3. Convert to PlanetPosition array for paran calculation
+    const planetPositions: Array<PlanetPosition> = PLANET_IDS.map((planetId) => ({
+      planetId,
+      ra: equatorialPositions[planetId].ra,
+      dec: equatorialPositions[planetId].dec,
+    }))
+
+    // 4. Calculate parans
+    const result = findAllParans(planetPositions)
+
+    return {
+      points: result.points,
+      summary: result.summary,
+    }
+  },
+})
+
+/** Cache for paran calculations */
+const paranCalculationCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.parans.actions.calculateParansFromBirthDataUncached,
+  name: 'calculateParansFromBirthData:v1',
+  ttl: THIRTY_DAYS_MS,
+})
+
+/**
+ * Calculate parans from birth data (cached, 30-day TTL).
+ *
+ * Public action for frontend access. Computes planetary positions
+ * from birth data and calculates all parans.
+ *
+ * @param birthDate - Birth date in YYYY-MM-DD format
+ * @param birthTime - Birth time in HH:MM format
+ * @param timezone - IANA timezone string
+ * @returns Paran points and summary
+ */
+export const calculateParansFromBirthData = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+  },
+  handler: async (ctx, args): Promise<ParanCalculationResult> => {
+    return paranCalculationCache.fetch(ctx, args)
   },
 })

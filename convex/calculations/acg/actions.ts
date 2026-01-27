@@ -1,3 +1,5 @@
+'use node'
+
 /**
  * ACG and Zenith Calculation Actions
  *
@@ -6,10 +8,13 @@
  */
 
 import { v } from 'convex/values'
-import { internalAction } from '../../_generated/server'
-import { internal } from '../../_generated/api'
-import { DEFAULT_DECLINATION_ORB } from '../core/constants'
+import { ActionCache } from '@convex-dev/action-cache'
+import { action, internalAction } from '../../_generated/server'
+import { components, internal } from '../../_generated/api'
+import { DEFAULT_DECLINATION_ORB, MEAN_OBLIQUITY_J2000 } from '../core/constants'
 import { PLANET_IDS } from '../core/types'
+import { calculateAllPositions, dateToJulianDay } from '../ephemeris'
+import { eclipticToEquatorial } from '../coordinates/transform'
 import { calculateAllACGLines } from './line_solver'
 import { calculateAllZenithLines } from './zenith'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from '../core/types'
@@ -148,5 +153,101 @@ export const calculateACGAndZenith = internalAction({
     })
 
     return result
+  },
+})
+
+// =============================================================================
+// Public ACG Calculation (Cached)
+// =============================================================================
+
+// 30-day TTL in milliseconds
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+
+/** Result type for public ACG calculation */
+interface ACGPublicResult {
+  julianDay: number
+  acgLines: Array<ACGLine>
+  zenithLines: Array<ZenithLine>
+}
+
+/**
+ * Calculate ACG lines from birth data (uncached internal action).
+ * @internal Used by ActionCache - do not call directly.
+ */
+export const calculateACGAndZenithFromBirthDataUncached = internalAction({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    orb: v.optional(v.number()),
+  },
+  handler: async (_ctx, { birthDate, birthTime, timezone, orb }): Promise<ACGPublicResult> => {
+    const effectiveOrb = orb ?? DEFAULT_DECLINATION_ORB
+
+    // 1. Calculate Julian Day and positions
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
+    const positions = calculateAllPositions(jd)
+
+    // 2. Convert from ecliptic to equatorial coordinates
+    const equatorialPositions: Record<PlanetId, EquatorialCoordinates> = {} as Record<
+      PlanetId,
+      EquatorialCoordinates
+    >
+
+    for (const planet of PLANET_IDS) {
+      const pos = positions[planet]
+      const eq = eclipticToEquatorial(pos.longitude, pos.latitude, MEAN_OBLIQUITY_J2000)
+      equatorialPositions[planet] = {
+        ra: eq.rightAscension,
+        dec: eq.declination,
+      }
+    }
+
+    // 3. Extract declinations for zenith calculation
+    const declinations: Record<PlanetId, number> = {} as Record<PlanetId, number>
+    for (const planet of PLANET_IDS) {
+      declinations[planet] = equatorialPositions[planet].dec
+    }
+
+    // 4. Calculate ACG lines and zenith lines
+    const acgLines = calculateAllACGLines(jd, equatorialPositions)
+    const zenithLines = calculateAllZenithLines(declinations, effectiveOrb)
+
+    return {
+      julianDay: jd,
+      acgLines,
+      zenithLines,
+    }
+  },
+})
+
+/** Cache for public ACG calculations */
+const acgPublicCache = new ActionCache(components.actionCache, {
+  action: internal.calculations.acg.actions.calculateACGAndZenithFromBirthDataUncached,
+  name: 'calculateACGFromBirthData:v1',
+  ttl: THIRTY_DAYS_MS,
+})
+
+/**
+ * Calculate ACG lines from birth data (cached, 30-day TTL).
+ *
+ * Public action for frontend access. Computes planetary positions
+ * from birth data and calculates ACG lines.
+ *
+ * @param birthDate - Birth date in YYYY-MM-DD format
+ * @param birthTime - Birth time in HH:MM format
+ * @param timezone - IANA timezone string
+ * @param orb - Orb in degrees for zenith bands (default: 1.0)
+ * @returns ACG lines, zenith lines, and Julian Day
+ */
+export const calculateACGAndZenithPublic = action({
+  args: {
+    birthDate: v.string(),
+    birthTime: v.string(),
+    timezone: v.string(),
+    orb: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<ACGPublicResult> => {
+    return acgPublicCache.fetch(ctx, args)
   },
 })

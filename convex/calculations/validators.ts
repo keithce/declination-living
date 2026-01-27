@@ -243,3 +243,24 @@ export const simplifiedDignityValidator = v.object({
  * Validator for term system selection.
  */
 export const termSystemValidator = v.union(v.literal('egyptian'), v.literal('ptolemaic'))
+
+// =============================================================================
+// Grid Options Validator
+// =============================================================================
+
+/**
+ * Validator for grid calculation options.
+ * Used in Phase 2 actions for scoring grid generation.
+ */
+export const gridOptionsValidator = v.optional(
+  v.object({
+    latStep: v.optional(v.number()),
+    lonStep: v.optional(v.number()),
+    latMin: v.optional(v.number()),
+    latMax: v.optional(v.number()),
+    lonMin: v.optional(v.number()),
+    lonMax: v.optional(v.number()),
+    acgOrb: v.optional(v.number()),
+    paranOrb: v.optional(v.number()),
+  }),
+)

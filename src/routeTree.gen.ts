@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhyRouteImport } from './routes/why'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as IndexRouteImport } from './routes/index'
@@ -16,6 +17,11 @@ import { Route as ResultsChartIdRouteImport } from './routes/results.$chartId'
 import { Route as ChartSlugRouteImport } from './routes/chart.$slug'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 
+const WhyRoute = WhyRouteImport.update({
+  id: '/why',
+  path: '/why',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/dashboard': typeof DashboardRoute
+  '/why': typeof WhyRoute
   '/auth/signin': typeof AuthSigninRoute
   '/chart/$slug': typeof ChartSlugRoute
   '/results/$chartId': typeof ResultsChartIdRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/dashboard': typeof DashboardRoute
+  '/why': typeof WhyRoute
   '/auth/signin': typeof AuthSigninRoute
   '/chart/$slug': typeof ChartSlugRoute
   '/results/$chartId': typeof ResultsChartIdRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/dashboard': typeof DashboardRoute
+  '/why': typeof WhyRoute
   '/auth/signin': typeof AuthSigninRoute
   '/chart/$slug': typeof ChartSlugRoute
   '/results/$chartId': typeof ResultsChartIdRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculator'
     | '/dashboard'
+    | '/why'
     | '/auth/signin'
     | '/chart/$slug'
     | '/results/$chartId'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculator'
     | '/dashboard'
+    | '/why'
     | '/auth/signin'
     | '/chart/$slug'
     | '/results/$chartId'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculator'
     | '/dashboard'
+    | '/why'
     | '/auth/signin'
     | '/chart/$slug'
     | '/results/$chartId'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
   DashboardRoute: typeof DashboardRoute
+  WhyRoute: typeof WhyRoute
   AuthSigninRoute: typeof AuthSigninRoute
   ChartSlugRoute: typeof ChartSlugRoute
   ResultsChartIdRoute: typeof ResultsChartIdRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/why': {
+      id: '/why'
+      path: '/why'
+      fullPath: '/why'
+      preLoaderRoute: typeof WhyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
   DashboardRoute: DashboardRoute,
+  WhyRoute: WhyRoute,
   AuthSigninRoute: AuthSigninRoute,
   ChartSlugRoute: ChartSlugRoute,
   ResultsChartIdRoute: ResultsChartIdRoute,

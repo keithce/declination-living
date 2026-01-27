@@ -28,6 +28,13 @@ import { ResultsTabs } from '@/components/results/ResultsTabs'
 import { debounce } from '@/lib/utils'
 import { formatDeclination } from '@/components/results/shared/constants'
 import { PLANETS } from '@/lib/planet-constants'
+import {
+  useACGData,
+  useAnyVisualizationLoading,
+  useParansData,
+  useScoringGridData,
+  useZenithData,
+} from '@/stores/selectors'
 
 // =============================================================================
 // Types
@@ -186,6 +193,38 @@ export function FloatingDataPanel({
   const isResizing = useRef(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
+
+  // Progressive visualization data from store selectors
+  const zenithState = useZenithData()
+  const acgState = useACGData()
+  const paransState = useParansData()
+  const scoringGridState = useScoringGridData()
+  const isAnyVisualizationLoading = useAnyVisualizationLoading()
+
+  // Combine progressive data with legacy phase2Data for backward compatibility
+  const combinedACGLines = useMemo(
+    () => acgState.data?.acgLines ?? phase2Data?.acgLines ?? [],
+    [acgState.data?.acgLines, phase2Data?.acgLines],
+  )
+  const combinedZenithLines = useMemo(
+    () => zenithState.data?.zenithLines ?? phase2Data?.zenithLines ?? [],
+    [zenithState.data?.zenithLines, phase2Data?.zenithLines],
+  )
+  const combinedParans = useMemo(
+    () => paransState.data?.points ?? phase2Data?.parans ?? [],
+    [paransState.data?.points, phase2Data?.parans],
+  )
+  const combinedScoringGrid = useMemo(
+    () => scoringGridState.data?.grid ?? phase2Data?.scoringGrid ?? [],
+    [scoringGridState.data?.grid, phase2Data?.scoringGrid],
+  )
+
+  // Check if we have any visualization data to show
+  const hasAnyVisualizationData =
+    combinedACGLines.length > 0 ||
+    combinedZenithLines.length > 0 ||
+    combinedParans.length > 0 ||
+    combinedScoringGrid.length > 0
 
   // Debounce recalculate to prevent excessive API calls during slider dragging
   const debouncedRecalculate = useMemo(() => debounce(onRecalculate, 400), [onRecalculate])
@@ -404,23 +443,41 @@ export function FloatingDataPanel({
             </div>
           </div>
 
-          {/* Enhanced Analysis (Phase 2) */}
-          {phase2Data && (
+          {/* Enhanced Analysis (Progressive Loading) */}
+          {(hasAnyVisualizationData || isAnyVisualizationLoading) && (
             <div className="px-4 py-3 border-b border-slate-700/50">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-amber-400" />
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
                   Enhanced Analysis
                 </h3>
+                {isAnyVisualizationLoading && (
+                  <Loader2 className="w-3 h-3 animate-spin text-amber-400 ml-auto" />
+                )}
               </div>
-              <ResultsTabs
-                acgLines={phase2Data.acgLines}
-                zenithLines={phase2Data.zenithLines}
-                parans={phase2Data.parans}
-                scoringGrid={phase2Data.scoringGrid}
-                globeState={globeState}
-                compact
-              />
+              {/* Loading state indicators */}
+              {isAnyVisualizationLoading && !hasAnyVisualizationData && (
+                <div className="flex items-center gap-2 py-4 text-slate-400 text-sm">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Loading visualization data...</span>
+                </div>
+              )}
+              {/* Show ResultsTabs when we have any data */}
+              {hasAnyVisualizationData && (
+                <ResultsTabs
+                  acgLines={combinedACGLines}
+                  zenithLines={combinedZenithLines}
+                  parans={combinedParans}
+                  scoringGrid={combinedScoringGrid}
+                  globeState={globeState}
+                  compact
+                  // Pass loading states for individual tabs
+                  isACGLoading={acgState.loading}
+                  isZenithLoading={zenithState.loading}
+                  isParansLoading={paransState.loading}
+                  isScoringGridLoading={scoringGridState.loading}
+                />
+              )}
             </div>
           )}
 

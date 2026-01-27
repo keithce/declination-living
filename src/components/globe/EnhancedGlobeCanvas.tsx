@@ -15,9 +15,15 @@ import { createZenithBandLayer, updateZenithBandVisibility } from './layers/Zeni
 import { createACGLineLayer, updateACGLineVisibility } from './layers/ACGLineLayer'
 import { createParanPointLayer, updateParanPointVisibility } from './layers/ParanPointLayer'
 import { createHeatmapLayer, updateHeatmap } from './layers/HeatmapLayer'
+import {
+  createCityMarkerLayer,
+  findCityAtPosition,
+  highlightCityMarker,
+  updateCityLabels,
+} from './layers/CityMarkerLayer'
 import { PLANET_IDS } from './layers/types'
 import type { UseGlobeStateReturn } from './hooks/useGlobeState'
-import type { ExtendedGlobeCanvasProps, LayerGroup } from './layers/types'
+import type { CityMarkerData, ExtendedGlobeCanvasProps, LayerGroup } from './layers/types'
 
 // =============================================================================
 // Types
@@ -30,6 +36,10 @@ interface EnhancedGlobeCanvasProps extends ExtendedGlobeCanvasProps {
   className?: string
   /** Callback when user clicks on globe surface */
   onLocationSelect?: (lat: number, lon: number) => void
+  /** Ranked cities to display as markers */
+  rankedCities?: Array<CityMarkerData>
+  /** Callback when user clicks on a city marker */
+  onCityMarkerClick?: (city: CityMarkerData) => void
 }
 
 /** Imperative handle for controlling the globe */
@@ -49,6 +59,7 @@ interface SceneRefs {
     acgLines?: LayerGroup
     paranPoints?: LayerGroup
     heatmap?: LayerGroup
+    cityMarkers?: LayerGroup
   }
 }
 
@@ -105,7 +116,17 @@ function createStars(): THREE.Points {
 
 export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGlobeCanvasProps>(
   function EnhancedGlobeCanvas(
-    { birthLocation, declinations, acgLines, parans, globeState, className = '', onLocationSelect },
+    {
+      birthLocation,
+      declinations,
+      acgLines,
+      parans,
+      globeState,
+      className = '',
+      onLocationSelect,
+      rankedCities,
+      onCityMarkerClick,
+    },
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement>(null)
@@ -119,6 +140,8 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     const heatmapIntensityRef = useRef(globeState.heatmapIntensity)
     const heatmapSpreadRef = useRef(globeState.heatmapSpread)
     const layersVisibilityRef = useRef(globeState.layers)
+    const showCityLabelsRef = useRef(globeState.showCityLabels)
+    const highlightedCityRef = useRef(globeState.highlightedCity)
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -140,6 +163,14 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     useEffect(() => {
       layersVisibilityRef.current = globeState.layers
     }, [globeState.layers])
+
+    useEffect(() => {
+      showCityLabelsRef.current = globeState.showCityLabels
+    }, [globeState.showCityLabels])
+
+    useEffect(() => {
+      highlightedCityRef.current = globeState.highlightedCity
+    }, [globeState.highlightedCity])
 
     // ==========================================================================
     // Imperative Handle
@@ -165,9 +196,9 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
     const handleClick = useCallback(
       (event: MouseEvent) => {
-        if (!sceneRef.current || !containerRef.current || !onLocationSelect) return
+        if (!sceneRef.current || !containerRef.current) return
 
-        const { camera } = sceneRef.current
+        const { camera, layers } = sceneRef.current
         const container = containerRef.current
 
         // Calculate mouse position in normalized device coordinates
@@ -177,10 +208,28 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
           -((event.clientY - rect.top) / rect.height) * 2 + 1,
         )
 
-        // Raycast to find intersection with globe (reuse raycaster)
+        // Raycast to find intersection (reuse raycaster)
         if (!raycasterRef.current) {
           raycasterRef.current = new THREE.Raycaster()
         }
+
+        // Check city markers first (they're above the globe surface)
+        if (layers.cityMarkers && layersVisibilityRef.current.cityMarkers && onCityMarkerClick) {
+          const city = findCityAtPosition(
+            layers.cityMarkers.group,
+            raycasterRef.current,
+            camera,
+            mouse,
+          )
+          if (city) {
+            onCityMarkerClick(city)
+            return // Don't also trigger location select
+          }
+        }
+
+        // If no city marker hit and we have a location select handler, check globe
+        if (!onLocationSelect) return
+
         raycasterRef.current.setFromCamera(mouse, camera)
 
         // Lazy-initialize hit test sphere (reused across clicks)
@@ -206,7 +255,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
           onLocationSelect(lat, lon)
         }
       },
-      [onLocationSelect],
+      [onLocationSelect, onCityMarkerClick],
     )
 
     // ==========================================================================
@@ -327,6 +376,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
           layers.zenithBands?.update?.(time)
           layers.paranPoints?.update?.(time)
           layers.heatmap?.update?.(time)
+          layers.cityMarkers?.update?.(time)
         }
 
         renderer.render(scene, camera)
@@ -417,7 +467,9 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     // ==========================================================================
 
     useEffect(() => {
-      if (!sceneRef.current || !onLocationSelect) return
+      if (!sceneRef.current) return
+      // Only attach if we have either callback
+      if (!onLocationSelect && !onCityMarkerClick) return
 
       const renderer = sceneRef.current.renderer
       renderer.domElement.addEventListener('click', handleClick)
@@ -425,7 +477,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       return () => {
         renderer.domElement.removeEventListener('click', handleClick)
       }
-    }, [handleClick, onLocationSelect])
+    }, [handleClick, onLocationSelect, onCityMarkerClick])
 
     // ==========================================================================
     // Layer Management
@@ -557,6 +609,33 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       })
     }, [declinations, globeState.planets, globeState.heatmapIntensity, globeState.heatmapSpread])
 
+    // Create/update city markers when DATA changes
+    useEffect(() => {
+      if (!sceneRef.current || !rankedCities || rankedCities.length === 0) return
+
+      const { scene, layers } = sceneRef.current
+
+      // Remove existing layer
+      if (layers.cityMarkers) {
+        scene.remove(layers.cityMarkers.group)
+        layers.cityMarkers.dispose()
+      }
+
+      // Create new layer with current settings
+      const layer = createCityMarkerLayer(rankedCities, {
+        showLabels: showCityLabelsRef.current,
+        maxMarkers: 50,
+      })
+      layer.group.visible = layersVisibilityRef.current.cityMarkers
+      scene.add(layer.group)
+      layers.cityMarkers = layer
+
+      // Apply current highlight if any
+      if (highlightedCityRef.current) {
+        highlightCityMarker(layer.group, highlightedCityRef.current)
+      }
+    }, [rankedCities])
+
     // ==========================================================================
     // Layer Visibility (using group.visible)
     // ==========================================================================
@@ -575,7 +654,15 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       if (layers.paranPoints) {
         layers.paranPoints.group.visible = globeState.layers.paranPoints
       }
-    }, [globeState.layers.zenithBands, globeState.layers.acgLines, globeState.layers.paranPoints])
+      if (layers.cityMarkers) {
+        layers.cityMarkers.group.visible = globeState.layers.cityMarkers
+      }
+    }, [
+      globeState.layers.zenithBands,
+      globeState.layers.acgLines,
+      globeState.layers.paranPoints,
+      globeState.layers.cityMarkers,
+    ])
 
     // Heatmap visibility (handled by creation/destruction in the heatmap effect above)
 
@@ -594,6 +681,18 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
         updateParanPointVisibility(layers.paranPoints.group, globeState.planets)
       }
     }, [globeState.planets, globeState.acgLineTypes])
+
+    // City label visibility
+    useEffect(() => {
+      if (!sceneRef.current?.layers.cityMarkers) return
+      updateCityLabels(sceneRef.current.layers.cityMarkers.group, globeState.showCityLabels)
+    }, [globeState.showCityLabels])
+
+    // City marker highlighting
+    useEffect(() => {
+      if (!sceneRef.current?.layers.cityMarkers) return
+      highlightCityMarker(sceneRef.current.layers.cityMarkers.group, globeState.highlightedCity)
+    }, [globeState.highlightedCity])
 
     return <div ref={containerRef} className={`w-full h-full ${className}`} />
   },

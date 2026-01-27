@@ -26,6 +26,10 @@ export interface GlobeState {
   heatmapSpread: number
   /** Currently highlighted planet */
   highlightedPlanet: PlanetId | null
+  /** Currently highlighted city (by ID) */
+  highlightedCity: string | null
+  /** Whether to show city labels on the globe */
+  showCityLabels: boolean
 }
 
 export interface GlobeStateActions {
@@ -45,6 +49,10 @@ export interface GlobeStateActions {
   setHeatmapSpread: (spread: number) => void
   /** Set highlighted planet */
   setHighlightedPlanet: (planet: PlanetId | null) => void
+  /** Set highlighted city by ID */
+  setHighlightedCity: (cityId: string | null) => void
+  /** Toggle city labels visibility */
+  toggleCityLabels: () => void
   /** Reset all state to defaults */
   resetState: () => void
 }
@@ -62,6 +70,7 @@ const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
   heatmap: false,
   latitudeBands: true,
   birthLocation: true,
+  cityMarkers: true,
 }
 
 const DEFAULT_PLANET_VISIBILITY: PlanetVisibility = PLANET_IDS.reduce(
@@ -83,6 +92,8 @@ const DEFAULT_STATE: GlobeState = {
   heatmapIntensity: 1.0,
   heatmapSpread: 3.0,
   highlightedPlanet: null,
+  highlightedCity: null,
+  showCityLabels: false,
 }
 
 // =============================================================================
@@ -176,6 +187,22 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
     }))
   }, [])
 
+  // Highlighted city
+  const setHighlightedCity = useCallback((cityId: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      highlightedCity: cityId,
+    }))
+  }, [])
+
+  // Toggle city labels
+  const toggleCityLabels = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      showCityLabels: !prev.showCityLabels,
+    }))
+  }, [])
+
   // Reset state
   const resetState = useCallback(() => {
     setState(DEFAULT_STATE)
@@ -193,6 +220,8 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHeatmapIntensity,
       setHeatmapSpread,
       setHighlightedPlanet,
+      setHighlightedCity,
+      toggleCityLabels,
       resetState,
     }),
     [
@@ -205,6 +234,8 @@ export function useGlobeState(initialState?: Partial<GlobeState>): UseGlobeState
       setHeatmapIntensity,
       setHeatmapSpread,
       setHighlightedPlanet,
+      setHighlightedCity,
+      toggleCityLabels,
       resetState,
     ],
   )

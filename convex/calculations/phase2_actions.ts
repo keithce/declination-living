@@ -3,7 +3,24 @@
 /**
  * Phase 2 Actions - Complete ACG, Zenith, Paran, and Scoring Grid calculations
  *
- * Provides integrated action for calculator that returns all Phase 2 visualization data.
+ * @deprecated This file is maintained for backward compatibility only.
+ * New code should use the domain-specific actions instead:
+ *
+ * - Zenith Lines: api.calculations.zenith.actions.calculateZenithLines
+ * - ACG Lines: api.calculations.acg.actions.calculateACGAndZenithPublic
+ * - Parans: api.calculations.parans.actions.calculateParansFromBirthData
+ * - Scoring Grid: api.calculations.geospatial.actions.calculateScoringGrid
+ * - All at once: api.calculations.batch.actions.calculateAllVisualizationData
+ *
+ * The domain-specific actions provide:
+ * - Progressive loading (render data as it arrives)
+ * - Better caching (individual cache keys per data type)
+ * - More granular error handling
+ *
+ * This file bundles all calculations into a single "phase2" action which:
+ * - Blocks UI until ALL data loads (slowest calculation wins)
+ * - Uses a single cache key for four different data types
+ * - Has arbitrary naming with no domain meaning
  */
 
 import { v } from 'convex/values'
@@ -14,9 +31,9 @@ import { calculateAllPositions, calculateDeclinations, dateToJulianDay } from '.
 import { PLANET_IDS } from './core/types'
 import { calculateAllParans } from './parans/solver'
 import { generateScoringGrid } from './geospatial/grid'
-import { planetWeightsValidator } from './validators'
+import { gridOptionsValidator, planetWeightsValidator } from './validators'
 import { eclipticToEquatorial } from './coordinates/transform'
-import { MEAN_OBLIQUITY_J2000 } from './core/constants'
+import { CACHE_TTL_30_DAYS_MS, MEAN_OBLIQUITY_J2000 } from './core/constants'
 import type { ACGLine, EquatorialCoordinates, PlanetId, ZenithLine } from './core/types'
 
 // =============================================================================
@@ -45,20 +62,6 @@ interface Phase2CompleteResult {
   declinations: ReturnType<typeof calculateDeclinations>
 }
 
-// Grid options validator for reuse
-const gridOptionsValidator = v.optional(
-  v.object({
-    latStep: v.optional(v.number()),
-    lonStep: v.optional(v.number()),
-    latMin: v.optional(v.number()),
-    latMax: v.optional(v.number()),
-    lonMin: v.optional(v.number()),
-    lonMax: v.optional(v.number()),
-    acgOrb: v.optional(v.number()),
-    paranOrb: v.optional(v.number()),
-  }),
-)
-
 // =============================================================================
 // Phase 2 Complete Calculation
 // =============================================================================
@@ -66,6 +69,7 @@ const gridOptionsValidator = v.optional(
 /**
  * Calculate complete Phase 2 dataset (uncached internal action).
  * @internal Used by ActionCache - do not call directly.
+ * @deprecated Use domain-specific actions for new code.
  *
  * Returns: ACG lines, zenith lines, parans, and scoring grid.
  */
@@ -168,19 +172,25 @@ export const calculatePhase2CompleteUncached = internalAction({
   },
 })
 
-// 30-day TTL in milliseconds
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
-
 /** Cache for Phase 2 complete calculations */
 const phase2CompleteCache = new ActionCache(components.actionCache, {
   action: internal.calculations.phase2_actions.calculatePhase2CompleteUncached,
   name: 'calculatePhase2Complete:v1',
-  ttl: THIRTY_DAYS_MS,
+  ttl: CACHE_TTL_30_DAYS_MS,
 })
 
 /**
  * Calculate complete Phase 2 dataset (cached, 30-day TTL).
  * Anonymous shared cache - same inputs return same cached result for any user.
+ *
+ * @deprecated Use domain-specific actions for progressive loading:
+ * - api.calculations.zenith.actions.calculateZenithLines
+ * - api.calculations.acg.actions.calculateACGAndZenithPublic
+ * - api.calculations.parans.actions.calculateParansFromBirthData
+ * - api.calculations.geospatial.actions.calculateScoringGrid
+ *
+ * Or use the batch action for all at once:
+ * - api.calculations.batch.actions.calculateAllVisualizationData
  *
  * Returns: ACG lines, zenith lines, parans, and scoring grid.
  */

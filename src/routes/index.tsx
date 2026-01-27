@@ -241,13 +241,13 @@ function HeroSection() {
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </span>
           </Link>
-          <a
-            href="#theory"
+          <Link
+            to="/why"
             className="px-8 py-4 text-slate-300 font-medium hover:text-white transition-colors flex items-center gap-2"
           >
             Learn More
             <ChevronDown className="w-4 h-4" />
-          </a>
+          </Link>
         </motion.div>
       </motion.div>
 
@@ -628,6 +628,9 @@ function Footer() {
         <div className="flex items-center gap-6 text-sm text-slate-400">
           <Link to="/calculator" className="hover:text-white transition-colors">
             Calculator
+          </Link>
+          <Link to="/why" className="hover:text-white transition-colors">
+            Why?
           </Link>
           <Link to="/dashboard" className="hover:text-white transition-colors">
             Dashboard
