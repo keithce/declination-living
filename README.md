@@ -1,320 +1,185 @@
-Welcome to your new TanStack app!
+# Declination Living
 
-# Getting Started
+**Find where the stars align for you.** Declination Living is an astrology-based location finder that uses planetary declinations to discover your optimal living locations on Earth.
 
-To run this application:
+![Landing Page](docs/images/landing-preview.png)
+
+## What is Declination?
+
+Just as Earth has latitude (north-south position), the celestial sphere has **declination**—measuring how far north or south a planet appears from the celestial equator.
+
+The key insight: **a planet's declination in degrees directly corresponds to latitude on Earth**. If your natal Sun is at 23°N declination, then at 23°N latitude, the Sun can pass directly overhead (at zenith). This creates a powerful resonance between your birth chart and geographic location.
+
+## Features
+
+### 🌍 Interactive 3D Globe
+
+Visualize your personalized astrological map on an interactive 3D globe showing:
+
+- **ACG Lines** (Astro*Carto*Graphy) — Where planets rise, set, culminate, and anti-culminate
+- **Zenith Bands** — Horizontal latitude bands where planets pass directly overhead
+- **Paran Points** — Locations where two planets are simultaneously angular
+
+### 📊 Calculation Engine
+
+- **Planetary Positions** — Precise ephemeris calculations using Swiss Ephemeris (SWISSEPH) + astronomia (VSOP87)
+- **Essential Dignities** — Traditional dignity scoring for each planet
+- **Out-of-Bounds Detection** — Identifies planets beyond the Sun's declination range (±23.44°)
+- **City Ranking** — Scores 10,000+ cities worldwide based on your chart
+
+### ⚖️ Customizable Planet Weights
+
+Prioritize what matters to you:
+
+- **Relationship Focus** — Boost Venus, Moon, Mars
+- **Career Focus** — Emphasize Sun, Saturn, Jupiter
+- **Creative Focus** — Highlight Neptune, Venus, Uranus
+- **Spiritual Focus** — Weight Neptune, Pluto, Jupiter
+
+### 💾 Save & Share
+
+- Save multiple charts to your dashboard
+- Generate shareable links for any chart
+- No account required for calculations (save requires sign-in)
+
+## How It Works
+
+1. **Enter Birth Data** — Date, time, and location of birth
+2. **Adjust Weights** — Customize planet importance (or use presets)
+3. **View Results** — Explore your personalized globe with ACG lines, zenith bands, and ranked cities
+4. **Save & Share** — Keep your chart or share it with others
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | [TanStack Start](https://tanstack.com/start) (React 19 + Vite) |
+| Routing | [TanStack Router](https://tanstack.com/router) (file-based) |
+| Backend | [Convex](https://convex.dev) (real-time database + serverless functions) |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com) |
+| 3D Visualization | [three-globe](https://github.com/vasturiano/three-globe) + Three.js |
+| Astronomy | [astronomia](https://www.npmjs.com/package/astronomia) (VSOP87) + [sweph-wasm](https://www.npmjs.com/package/sweph-wasm) (Swiss Ephemeris) |
+| Auth | [Convex Auth](https://convex.dev/auth) |
+| Animations | [Framer Motion](https://www.framer.com/motion/) |
+
+## Getting Started
+
+### Prerequisites
+
+- [Bun](https://bun.sh) (v1.0+)
+- [Convex account](https://convex.dev) (free tier available)
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/keithce/declination-living.git
+cd declination-living
+
+# Install dependencies
 bun install
-bun --bun run dev
+
+# Set up Convex (creates .env.local with VITE_CONVEX_URL)
+npx convex init
 ```
 
-# Building For Production
+### Development
 
-To build this application for production:
+Run both frontend and backend in parallel:
+
+```bash
+# Terminal 1: Frontend (port 3000)
+bun --bun run dev
+
+# Terminal 2: Convex backend
+npx convex dev
+```
+
+### Build
 
 ```bash
 bun --bun run build
 ```
 
-## Testing
+## Commands
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+| Command | Description |
+|---------|-------------|
+| `bun --bun run dev` | Start frontend dev server on :3000 |
+| `npx convex dev` | Start Convex backend (watch mode) |
+| `bun --bun run build` | Production build |
+| `bun --bun run test` | Run all tests |
+| `bun --bun run test <pattern>` | Run tests matching pattern |
+| `bun --bun run check` | Lint + format code |
+| `bun --bun run typecheck` | TypeScript type checking |
 
-```bash
-bun --bun run test
+## Project Structure
+
+```text
+src/
+├── routes/              # TanStack Router file-based routes
+│   ├── index.tsx        # Landing page
+│   ├── calculator.tsx   # Main calculation flow
+│   ├── dashboard.tsx    # Saved charts
+│   ├── why.tsx          # Educational content
+│   └── chart.$slug.tsx  # Shared chart view
+├── components/
+│   ├── calculator/      # Birth data form, weight editor
+│   ├── globe/           # 3D globe visualization
+│   ├── results/         # Results layout and data panels
+│   ├── why/             # Educational diagrams
+│   └── ui/              # shadcn/ui components
+└── lib/                 # Utilities and constants
+
+convex/
+├── calculations/        # Astronomical calculation engine
+│   ├── acg/             # ACG line generation
+│   ├── coordinates/     # Coordinate transforms
+│   ├── dignity/         # Essential dignities
+│   ├── ephemeris/       # Planetary positions
+│   ├── geospatial/      # Location scoring
+│   └── parans/          # Paran calculations
+├── charts/              # Chart CRUD operations
+├── cities/              # City database queries
+└── schema.ts            # Database schema
 ```
 
-## Styling
+## The Science
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+### Declination vs Longitude
 
-## Linting & Formatting
+Traditional astrology focuses on **zodiacal longitude** (what sign a planet is in). Declination adds the **second dimension**—how far north or south of the celestial equator.
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+### Types of Planetary Lines
 
-```bash
-bun --bun run lint
-bun --bun run format
-bun --bun run check
-```
+| Type | Description |
+|------|-------------|
+| **Zenith Bands** | Horizontal latitude bands where a planet can pass directly overhead |
+| **ACG Lines** | Curved lines showing where planets are angular (ASC/DSC/MC/IC) |
+| **Parans** | Latitudes where two planets are simultaneously angular |
 
-## Setting up Convex
+### Out of Bounds (OOB)
 
-- Set the `VITE_CONVEX_URL` and `CONVEX_DEPLOYMENT` environment variables in your `.env.local`. (Or run `npx convex init` to set them automatically.)
-- Run `npx convex dev` to start the Convex server.
+When a planet's declination exceeds ±23.44° (the Sun's maximum), it's "out of bounds." OOB planets often indicate exceptional abilities and don't correspond to any latitude where the Sun reaches zenith.
 
-## Shadcn
+## Environment Variables
 
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
+| Variable | Description |
+|----------|-------------|
+| `VITE_CONVEX_URL` | Convex deployment URL (created by `npx convex init`) |
+| `CONVEX_DEPLOYMENT` | Convex deployment name (CLI only) |
 
-```bash
-pnpm dlx shadcn@latest add button
-```
+## Learn More
 
-## T3Env
+- **[Why Page](https://living.rproj.art/why)** — In-depth explanation of declination theory
+- **[Convex Docs](https://docs.convex.dev)** — Backend documentation
+- **[TanStack Start](https://tanstack.com/start)** — Frontend framework
+- **[Swiss Ephemeris](https://www.astro.com/swisseph/)** — Astronomical calculations
 
-- You can use T3Env to add type safety to your environment variables.
-- Add Environment variables to the `src/env.mjs` file.
-- Use the environment variables in your code.
+## License
 
-### Usage
+MIT
 
-```ts
-import { env } from '@/env'
+---
 
-console.log(env.VITE_APP_TITLE)
-```
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from '@tanstack/react-router'
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/people',
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json() as Promise<{
-      results: {
-        name: string
-      }[]
-    }>
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData()
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    )
-  },
-})
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-bun install @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
-// ...
-
-const queryClient = new QueryClient()
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
-  )
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from '@tanstack/react-query'
-
-import './App.css'
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ['people'],
-    queryFn: () =>
-      fetch('https://swapi.dev/api/people')
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  })
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-export default App
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-bun install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from '@tanstack/react-store'
-import { Store } from '@tanstack/store'
-import './App.css'
-
-const countStore = new Store(0)
-
-function App() {
-  const count = useStore(countStore)
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>Increment - {count}</button>
-    </div>
-  )
-}
-
-export default App
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from '@tanstack/react-store'
-import { Store, Derived } from '@tanstack/store'
-import './App.css'
-
-const countStore = new Store(0)
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-})
-doubledStore.mount()
-
-function App() {
-  const count = useStore(countStore)
-  const doubledCount = useStore(doubledStore)
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>Increment - {count}</button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  )
-}
-
-export default App
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+*Celestial cartography for the modern seeker*
