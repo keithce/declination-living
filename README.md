@@ -171,7 +171,7 @@ When a planet's declination exceeds ±23.44° (the Sun's maximum), it's "out of 
 
 ## Learn More
 
-- **[Why Page](/why)** — In-depth explanation of declination theory
+- **[Why Page](https://living.rproj.art/why)** — In-depth explanation of declination theory
 - **[Convex Docs](https://docs.convex.dev)** — Backend documentation
 - **[TanStack Start](https://tanstack.com/start)** — Frontend framework
 - **[Swiss Ephemeris](https://www.astro.com/swisseph/)** — Astronomical calculations
