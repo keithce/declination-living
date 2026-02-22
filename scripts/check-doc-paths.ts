@@ -1,14 +1,43 @@
-import { execSync } from 'node:child_process'
-import { existsSync, readFileSync, statSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { dirname, relative, resolve } from 'node:path'
 
 const repoRoot = process.cwd()
-const repoTopLevel = new Set(execSync('ls -1', { encoding: 'utf8' }).trim().split('\n'))
+const repoTopLevel = new Set(readdirSync(repoRoot))
 
-const markdownFiles = execSync("rg --files -g '*.md'", { encoding: 'utf8' })
-  .split('\n')
-  .map((line) => line.trim())
-  .filter((line) => line.length > 0)
+const SKIP_DIRECTORIES = new Set([
+  '.git',
+  '.output',
+  '.tanstack',
+  '.vercel',
+  'node_modules',
+])
+
+function collectMarkdownFiles(rootDir: string): Array<string> {
+  const markdownFiles: Array<string> = []
+  const directoryQueue: Array<string> = [rootDir]
+
+  while (directoryQueue.length > 0) {
+    const currentDir = directoryQueue.pop()
+    if (!currentDir) continue
+
+    for (const entry of readdirSync(currentDir, { withFileTypes: true })) {
+      const absolutePath = resolve(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        if (SKIP_DIRECTORIES.has(entry.name)) continue
+        directoryQueue.push(absolutePath)
+        continue
+      }
+
+      if (!entry.isFile()) continue
+      if (!entry.name.endsWith('.md')) continue
+      markdownFiles.push(relative(repoRoot, absolutePath))
+    }
+  }
+
+  return markdownFiles
+}
+
+const markdownFiles = collectMarkdownFiles(repoRoot)
 
 interface MissingRef {
   file: string

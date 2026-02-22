@@ -15,5 +15,5 @@ _Last reconciled: February 22, 2026._
 ## Current Notes
 
 - Calculator flow uses the enhanced custom Three.js stack.
-- Saved/shared routes are not yet fully equivalent to calculator enhanced output.
+- Saved/shared routes are not yet fully equivalent to calculator-enhanced output.
 - UI behavior and performance are being iterated with emphasis on layer lifecycle correctness and rendering efficiency.

@@ -450,7 +450,11 @@ export function scoreLocationForACG(
  * Precompute latitude bounds for each ACG line to accelerate candidate filtering.
  */
 export function precomputeACGLatitudeBounds(acgLines: Array<ACGLine>): Array<ACGLatitudeBound> {
-  return acgLines.map((line) => {
+  const bounds: Array<ACGLatitudeBound> = []
+
+  for (const line of acgLines) {
+    if (line.points.length === 0) continue
+
     let minLatitude = Infinity
     let maxLatitude = -Infinity
 
@@ -459,8 +463,10 @@ export function precomputeACGLatitudeBounds(acgLines: Array<ACGLine>): Array<ACG
       if (point.latitude > maxLatitude) maxLatitude = point.latitude
     }
 
-    return { line, minLatitude, maxLatitude }
-  })
+    bounds.push({ line, minLatitude, maxLatitude })
+  }
+
+  return bounds
 }
 
 /**

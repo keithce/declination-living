@@ -77,6 +77,7 @@ export async function loadEarthTextures(maxAnisotropy = 8): Promise<EarthTexture
     const { key, colorSpace } = TEXTURE_ENTRIES[i]
     const result = results[i]
     if (result.status === 'fulfilled') {
+      textures[key].dispose()
       textures[key] = result.value
     } else {
       console.warn(`Failed to load texture "${key}" (${TEXTURE_ENTRIES[i].path}):`, result.reason)
