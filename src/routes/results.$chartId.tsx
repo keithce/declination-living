@@ -8,7 +8,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import { motion } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { AlertCircle, ArrowLeft, Calendar, Globe, Loader2, MapPin, Sparkles } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
@@ -21,12 +21,13 @@ import type { DignityScoreData } from '@/components/results/DignityScores'
 import { DeclinationTable } from '@/components/calculator/DeclinationTable'
 import { DignityScores } from '@/components/results/DignityScores'
 import { CityRankings } from '@/components/results/CityRankings'
-import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
 import { GlobeLayersPopover } from '@/components/results/GlobeLayersPopover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ParansTab } from '@/components/results/tabs/ParansTab'
 import { PLANET_COLORS, PLANET_SYMBOLS } from '@/lib/planet-constants'
+
+const EnhancedGlobeCanvas = lazy(() => import('@/components/globe/EnhancedGlobeCanvas'))
 
 // =============================================================================
 // Route Definition
@@ -236,18 +237,26 @@ function ResultsPage() {
                 <GlobeLayersPopover globeState={globeState} />
               </div>
               <div className="aspect-square md:aspect-video">
-                <EnhancedGlobeCanvas
-                  ref={globeRef}
-                  birthLocation={{
-                    latitude: chart.birthLatitude,
-                    longitude: chart.birthLongitude,
-                    city: chart.birthCity,
-                  }}
-                  declinations={declinations}
-                  acgLines={acgLines}
-                  parans={parans ?? []}
-                  globeState={globeState}
-                />
+                <Suspense
+                  fallback={
+                    <div className="w-full h-full bg-[#0a0f1f] flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                    </div>
+                  }
+                >
+                  <EnhancedGlobeCanvas
+                    ref={globeRef}
+                    birthLocation={{
+                      latitude: chart.birthLatitude,
+                      longitude: chart.birthLongitude,
+                      city: chart.birthCity,
+                    }}
+                    declinations={declinations}
+                    acgLines={acgLines}
+                    parans={parans ?? []}
+                    globeState={globeState}
+                  />
+                </Suspense>
               </div>
             </motion.div>
 

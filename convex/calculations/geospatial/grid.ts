@@ -6,7 +6,12 @@
  */
 
 import { DEFAULT_PARAN_STRENGTH } from '../core/constants'
-import { scoreLatitude, scoreLocationForACG, scoreParanProximity } from './search'
+import {
+  precomputeACGLatitudeBounds,
+  scoreLatitude,
+  scoreLocationForACG,
+  scoreParanProximity,
+} from './search'
 import type {
   ACGLine,
   ParanPoint,
@@ -98,15 +103,22 @@ export function generateScoringGrid(
   }
 
   const grid: Array<GridCell> = []
+  const acgLatitudeBounds = precomputeACGLatitudeBounds(acgLines)
 
   for (let lat = latMin; lat <= latMax; lat += latStep) {
     // Hoist latitude-only computations outside inner lon loop
     const zenithResult = scoreLatitude(lat, declinations, weights)
     const paranScore = scoreParanProximity(lat, parans, weights, paranOrb)
+    const candidateAcgLines = acgLatitudeBounds
+      .filter((lineBounds) => lat >= lineBounds.minLatitude - acgOrb && lat <= lineBounds.maxLatitude + acgOrb)
+      .map((lineBounds) => lineBounds.line)
 
     for (let lon = lonMin; lon <= lonMax; lon += lonStep) {
       // ACG proximity scoring (depends on both lat and lon)
-      const acgResult = scoreLocationForACG(lat, lon, acgLines, weights, acgOrb)
+      const acgResult =
+        candidateAcgLines.length > 0
+          ? scoreLocationForACG(lat, lon, candidateAcgLines, weights, acgOrb)
+          : { score: 0, contributions: [], dominantPlanet: undefined }
 
       // Determine dominant factor
       const scores = {

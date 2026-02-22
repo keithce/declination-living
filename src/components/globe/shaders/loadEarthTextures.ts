@@ -21,8 +21,8 @@ const TEXTURE_PATHS = {
 const TEXTURE_ENTRIES = [
   { key: 'day', path: TEXTURE_PATHS.day, colorSpace: THREE.SRGBColorSpace },
   { key: 'night', path: TEXTURE_PATHS.night, colorSpace: THREE.SRGBColorSpace },
-  { key: 'normal', path: TEXTURE_PATHS.normal, colorSpace: THREE.LinearSRGBColorSpace },
-  { key: 'specular', path: TEXTURE_PATHS.specular, colorSpace: THREE.LinearSRGBColorSpace },
+  { key: 'normal', path: TEXTURE_PATHS.normal, colorSpace: THREE.NoColorSpace },
+  { key: 'specular', path: TEXTURE_PATHS.specular, colorSpace: THREE.NoColorSpace },
 ] as const
 
 function createFallbackTexture(
@@ -66,19 +66,27 @@ export async function loadEarthTextures(maxAnisotropy = 8): Promise<EarthTexture
     ),
   )
 
-  const textures = {} as Record<string, THREE.Texture>
+  const textures: EarthTextures = {
+    day: createFallbackTexture(THREE.SRGBColorSpace, maxAnisotropy),
+    night: createFallbackTexture(THREE.SRGBColorSpace, maxAnisotropy),
+    normal: createFallbackTexture(THREE.NoColorSpace, maxAnisotropy),
+    specular: createFallbackTexture(THREE.NoColorSpace, maxAnisotropy),
+  }
+
   for (let i = 0; i < TEXTURE_ENTRIES.length; i++) {
     const { key, colorSpace } = TEXTURE_ENTRIES[i]
     const result = results[i]
     if (result.status === 'fulfilled') {
+      textures[key].dispose()
       textures[key] = result.value
     } else {
       console.warn(`Failed to load texture "${key}" (${TEXTURE_ENTRIES[i].path}):`, result.reason)
+      textures[key].dispose()
       textures[key] = createFallbackTexture(colorSpace, maxAnisotropy)
     }
   }
 
-  return textures as EarthTextures
+  return textures
 }
 
 export function disposeEarthTextures(textures: EarthTextures): void {

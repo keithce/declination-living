@@ -51,6 +51,7 @@ const atmosphereFragmentShader = /* glsl */ `
     float intensity = fresnel * mix(0.3, 1.0, dayFactor);
 
     gl_FragColor = vec4(glowColor, intensity * 0.6);
+    #include <colorspace_fragment>
   }
 `
 

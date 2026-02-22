@@ -50,6 +50,13 @@ export interface SearchBand {
   paranCount: number
 }
 
+/** Precomputed latitude bounds for an ACG line's sampled points. */
+export interface ACGLatitudeBound {
+  line: ACGLine
+  minLatitude: number
+  maxLatitude: number
+}
+
 // =============================================================================
 // Zenith-Based Search
 // =============================================================================
@@ -401,6 +408,10 @@ export function scoreLocationForACG(
 
     // Find closest point on this line
     for (const point of line.points) {
+      const latitudeDelta = Math.abs(latitude - point.latitude)
+      // Angular distance cannot be smaller than latitude separation.
+      if (latitudeDelta > orb) continue
+
       // Use great circle distance converted to angular degrees
       // Formula: angularDeg = (km / earthRadiusKm) * (180 / π)
       const distanceKm = greatCircleDistanceKm(latitude, longitude, point.latitude, point.longitude)
@@ -408,6 +419,7 @@ export function scoreLocationForACG(
 
       if (distance < minDistance) {
         minDistance = distance
+        if (distance === 0) break
       }
     }
 
@@ -432,6 +444,29 @@ export function scoreLocationForACG(
   }
 
   return { score: totalScore, contributions, dominantPlanet }
+}
+
+/**
+ * Precompute latitude bounds for each ACG line to accelerate candidate filtering.
+ */
+export function precomputeACGLatitudeBounds(acgLines: Array<ACGLine>): Array<ACGLatitudeBound> {
+  const bounds: Array<ACGLatitudeBound> = []
+
+  for (const line of acgLines) {
+    if (line.points.length === 0) continue
+
+    let minLatitude = Infinity
+    let maxLatitude = -Infinity
+
+    for (const point of line.points) {
+      if (point.latitude < minLatitude) minLatitude = point.latitude
+      if (point.latitude > maxLatitude) maxLatitude = point.latitude
+    }
+
+    bounds.push({ line, minLatitude, maxLatitude })
+  }
+
+  return bounds
 }
 
 /**

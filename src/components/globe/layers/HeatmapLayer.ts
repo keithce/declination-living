@@ -114,8 +114,48 @@ const fragmentShader = `
     float alpha = totalHeat * 0.7;
 
     gl_FragColor = vec4(color, alpha);
+    #include <colorspace_fragment>
   }
 `
+
+interface HeatmapState {
+  baseIntensity: number
+  hotLatitudes: Array<number>
+  hotColors: Array<number>
+  hotWeights: Array<number>
+}
+
+function fillHeatmapUniformArrays(
+  declinations: Partial<Record<PlanetId, number>>,
+  weights: Record<PlanetId, number>,
+  hotLatitudes: Array<number>,
+  hotColors: Array<number>,
+  hotWeights: Array<number>,
+): number {
+  hotLatitudes.length = 0
+  hotColors.length = 0
+  hotWeights.length = 0
+
+  for (const planet of PLANET_IDS) {
+    const lat = declinations[planet]
+    if (weights[planet] <= 0 || lat === undefined) continue
+
+    hotLatitudes.push(lat)
+
+    const hexColor = PLANET_COLORS_HEX[planet]
+    hotColors.push(((hexColor >> 16) & 0xff) / 255, ((hexColor >> 8) & 0xff) / 255, (hexColor & 0xff) / 255)
+    hotWeights.push(weights[planet] / 10)
+  }
+
+  const actualHotCount = hotLatitudes.length
+  while (hotLatitudes.length < MAX_HOT_LATITUDES) {
+    hotLatitudes.push(0)
+    hotColors.push(0, 0, 0)
+    hotWeights.push(0)
+  }
+
+  return actualHotCount
+}
 
 // =============================================================================
 // Layer Creation
@@ -144,33 +184,16 @@ export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
 
   const { declinations, weights, intensity = 1.0, sigma = 3.0 } = options
 
-  // Prepare uniform arrays
   const hotLatitudes: Array<number> = []
   const hotColors: Array<number> = []
   const hotWeights: Array<number> = []
-
-  for (const planet of PLANET_IDS) {
-    const lat = declinations[planet]
-    if (weights[planet] > 0 && lat !== undefined) {
-      hotLatitudes.push(lat)
-
-      // Convert hex color to RGB (0-1 range)
-      const hexColor = PLANET_COLORS_HEX[planet]
-      const r = ((hexColor >> 16) & 0xff) / 255
-      const g = ((hexColor >> 8) & 0xff) / 255
-      const b = (hexColor & 0xff) / 255
-      hotColors.push(r, g, b)
-
-      hotWeights.push(weights[planet] / 10) // Normalize weights
-    }
-  }
-
-  // Pad arrays to MAX_HOT_LATITUDES
-  while (hotLatitudes.length < MAX_HOT_LATITUDES) {
-    hotLatitudes.push(0)
-    hotColors.push(0, 0, 0)
-    hotWeights.push(0)
-  }
+  const actualHotCount = fillHeatmapUniformArrays(
+    declinations,
+    weights,
+    hotLatitudes,
+    hotColors,
+    hotWeights,
+  )
 
   // Create shader material
   const material = new THREE.ShaderMaterial({
@@ -178,9 +201,9 @@ export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
     fragmentShader,
     uniforms: {
       uHotLatitudes: { value: hotLatitudes },
-      uHotColors: { value: hotColors.slice(0, MAX_HOT_LATITUDES * 3) },
+      uHotColors: { value: hotColors },
       uHotWeights: { value: hotWeights },
-      uHotCount: { value: Math.min(PLANET_IDS.length, MAX_HOT_LATITUDES) },
+      uHotCount: { value: actualHotCount },
       uIntensity: { value: intensity },
       uSigma: { value: sigma },
     },
@@ -195,11 +218,19 @@ export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
   const mesh = new THREE.Mesh(geometry, material)
 
   group.add(mesh)
+  group.userData.heatmapState = {
+    baseIntensity: intensity,
+    hotLatitudes,
+    hotColors,
+    hotWeights,
+  } as HeatmapState
 
   // Update function to animate intensity
   const update = (time: number) => {
+    const state = group.userData.heatmapState as HeatmapState | undefined
+    const baseIntensity = state?.baseIntensity ?? intensity
     // Optional: subtle pulsing
-    const pulse = intensity * (0.9 + 0.1 * Math.sin(time * 0.5))
+    const pulse = baseIntensity * (0.9 + 0.1 * Math.sin(time * 0.5))
     material.uniforms.uIntensity.value = pulse
   }
 
@@ -226,43 +257,31 @@ export function updateHeatmap(group: THREE.Group, options: HeatmapOptions): void
   const material = mesh.material
   const { declinations, weights, intensity = 1.0, sigma = 3.0 } = options
 
-  // Rebuild uniform arrays
-  const hotLatitudes: Array<number> = []
-  const hotColors: Array<number> = []
-  const hotWeights: Array<number> = []
-
-  for (const planet of PLANET_IDS) {
-    const lat = declinations[planet]
-    if (weights[planet] > 0 && lat !== undefined) {
-      hotLatitudes.push(lat)
-
-      const hexColor = PLANET_COLORS_HEX[planet]
-      const r = ((hexColor >> 16) & 0xff) / 255
-      const g = ((hexColor >> 8) & 0xff) / 255
-      const b = (hexColor & 0xff) / 255
-      hotColors.push(r, g, b)
-
-      hotWeights.push(weights[planet] / 10)
-    }
+  const state = (group.userData.heatmapState as HeatmapState | undefined) ?? {
+    baseIntensity: intensity,
+    hotLatitudes: [],
+    hotColors: [],
+    hotWeights: [],
   }
-
-  // Track actual count before padding
-  const actualHotCount = hotLatitudes.length
-
-  while (hotLatitudes.length < MAX_HOT_LATITUDES) {
-    hotLatitudes.push(0)
-    hotColors.push(0, 0, 0)
-    hotWeights.push(0)
-  }
+  const actualHotCount = fillHeatmapUniformArrays(
+    declinations,
+    weights,
+    state.hotLatitudes,
+    state.hotColors,
+    state.hotWeights,
+  )
 
   // Update uniforms
-  material.uniforms.uHotLatitudes.value = hotLatitudes
-  material.uniforms.uHotColors.value = hotColors.slice(0, MAX_HOT_LATITUDES * 3)
-  material.uniforms.uHotWeights.value = hotWeights
+  material.uniforms.uHotLatitudes.value = state.hotLatitudes
+  material.uniforms.uHotColors.value = state.hotColors
+  material.uniforms.uHotWeights.value = state.hotWeights
   material.uniforms.uHotCount.value = actualHotCount
   material.uniforms.uIntensity.value = intensity
   material.uniforms.uSigma.value = sigma
-  material.needsUpdate = true
+  group.userData.heatmapState = {
+    ...state,
+    baseIntensity: intensity,
+  } satisfies HeatmapState
 }
 
 /**
@@ -272,6 +291,11 @@ export function setHeatmapIntensity(group: THREE.Group, intensity: number): void
   const mesh = group.children[0]
   if (mesh instanceof THREE.Mesh && mesh.material instanceof THREE.ShaderMaterial) {
     mesh.material.uniforms.uIntensity.value = intensity
+    const state = group.userData.heatmapState as HeatmapState | undefined
+    group.userData.heatmapState = {
+      ...(state ?? { hotLatitudes: [], hotColors: [], hotWeights: [] }),
+      baseIntensity: intensity,
+    } satisfies HeatmapState
   }
 }
 

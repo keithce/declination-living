@@ -87,14 +87,14 @@ interface ParanSummary {
 interface LatitudeResult {
   latitude: number
   score: number
-  dominantPlanet: string
+  dominantPlanet: PlanetId
 }
 
 /** Latitude band result */
 interface LatitudeBand {
   min: number
   max: number
-  dominantPlanet: string
+  dominantPlanet: PlanetId
 }
 
 /** Complete enhanced analysis result */
@@ -146,8 +146,8 @@ export const calculateEnhancedPositions = action({
     birthTime: v.string(),
     timezone: v.string(),
   },
-  handler: async (_ctx, { birthDate, birthTime }) => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone }) => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
     const obliquity = getMeanObliquity(jd)
@@ -216,8 +216,8 @@ export const calculateACGLinesUncached = internalAction({
     birthTime: v.string(),
     timezone: v.string(),
   },
-  handler: async (_ctx, { birthDate, birthTime }): Promise<ACGLinesResult> => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone }): Promise<ACGLinesResult> => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const obliquity = getMeanObliquity(jd)
 
@@ -282,8 +282,8 @@ export const findACGLinesNearLocationAction = action({
     longitude: v.number(),
     orb: v.optional(v.number()),
   },
-  handler: async (_ctx, { birthDate, birthTime, latitude, longitude, orb }) => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone, latitude, longitude, orb }) => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const obliquity = getMeanObliquity(jd)
 
@@ -354,8 +354,8 @@ export const calculateParansUncached = internalAction({
     timezone: v.string(),
     topN: v.optional(v.number()),
   },
-  handler: async (_ctx, { birthDate, birthTime, topN }): Promise<ParansActionResult> => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone, topN }): Promise<ParansActionResult> => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const obliquity = getMeanObliquity(jd)
 
@@ -419,8 +419,8 @@ export const calculateDignitiesAction = action({
     timezone: v.string(),
     ascendant: v.optional(v.number()), // For sect determination
   },
-  handler: async (_ctx, { birthDate, birthTime, ascendant }) => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone, ascendant }) => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
 
     // Build longitude map
@@ -462,8 +462,8 @@ export const searchByVibeAction = action({
     timezone: v.string(),
     vibeQuery: v.string(),
   },
-  handler: async (_ctx, { birthDate, birthTime, vibeQuery }) => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone, vibeQuery }) => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const declinations = calculateDeclinations(jd)
 
     // Match vibe from query
@@ -568,9 +568,9 @@ export const calculateCompleteEnhancedUncached = internalAction({
   },
   handler: async (
     _ctx,
-    { birthDate, birthTime, weights, ascendant },
+    { birthDate, birthTime, timezone, weights, ascendant },
   ): Promise<CompleteEnhancedResult> => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
     const obliquity = getMeanObliquity(jd)
@@ -721,8 +721,8 @@ export const generateSearchBandsAction = action({
     timezone: v.string(),
     weights: planetWeightsValidator,
   },
-  handler: async (_ctx, { birthDate, birthTime, weights }) => {
-    const jd = dateToJulianDay(birthDate, birthTime)
+  handler: async (_ctx, { birthDate, birthTime, timezone, weights }) => {
+    const jd = dateToJulianDay(birthDate, birthTime, timezone)
     const positions = calculateAllPositions(jd)
     const declinations = calculateDeclinations(jd)
     const obliquity = getMeanObliquity(jd)

@@ -92,14 +92,19 @@ const earthFragmentShader = /* glsl */ `
 `
 
 /** Placeholder 1×1 dark-blue texture for use before real textures load. */
-function createPlaceholderTexture(color: [number, number, number]): THREE.DataTexture {
+function createPlaceholderTexture(
+  color: [number, number, number],
+  colorSpace: THREE.ColorSpace,
+): THREE.DataTexture {
   const data = new Uint8Array([color[0], color[1], color[2], 255])
   const tex = new THREE.DataTexture(data, 1, 1, THREE.RGBAFormat)
+  tex.colorSpace = colorSpace
   tex.needsUpdate = true
   return tex
 }
 
 export interface EarthMaterialUniforms {
+  [uniform: string]: THREE.IUniform<unknown>
   uDayMap: THREE.IUniform<THREE.Texture>
   uNightMap: THREE.IUniform<THREE.Texture>
   uNormalMap: THREE.IUniform<THREE.Texture>
@@ -110,15 +115,16 @@ export interface EarthMaterialUniforms {
 }
 
 export function createEarthMaterial(): THREE.ShaderMaterial {
-  const placeholder = createPlaceholderTexture([30, 58, 95])
-  const blackPlaceholder = createPlaceholderTexture([0, 0, 0])
-  const flatNormal = createPlaceholderTexture([128, 128, 255]) // flat normal
+  const placeholder = createPlaceholderTexture([30, 58, 95], THREE.SRGBColorSpace)
+  const blackPlaceholder = createPlaceholderTexture([0, 0, 0], THREE.SRGBColorSpace)
+  const blackDataPlaceholder = createPlaceholderTexture([0, 0, 0], THREE.NoColorSpace)
+  const flatNormal = createPlaceholderTexture([128, 128, 255], THREE.NoColorSpace) // flat normal
 
   const uniforms: EarthMaterialUniforms = {
     uDayMap: { value: placeholder },
     uNightMap: { value: blackPlaceholder },
     uNormalMap: { value: flatNormal },
-    uSpecularMap: { value: blackPlaceholder },
+    uSpecularMap: { value: blackDataPlaceholder },
     uSunDirection: { value: new THREE.Vector3(5, 3, 5).normalize() },
     uNormalScale: { value: 1.0 },
     uAlwaysDay: { value: 0.0 },
@@ -130,7 +136,12 @@ export function createEarthMaterial(): THREE.ShaderMaterial {
     fragmentShader: earthFragmentShader,
   })
 
-  material.userData.placeholders = { placeholder, blackPlaceholder, flatNormal }
+  material.userData.placeholders = {
+    placeholder,
+    blackPlaceholder,
+    blackDataPlaceholder,
+    flatNormal,
+  }
 
   return material
 }

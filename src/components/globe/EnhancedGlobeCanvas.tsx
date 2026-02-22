@@ -30,7 +30,12 @@ import {
 import { PLANET_IDS } from './layers/types'
 import type { EarthTextures } from './shaders'
 import type { UseGlobeStateReturn } from './hooks/useGlobeState'
-import type { CityMarkerData, ExtendedGlobeCanvasProps, LayerGroup } from './layers/types'
+import type {
+  CityMarkerData,
+  ExtendedGlobeCanvasProps,
+  LayerGroup,
+  PlanetId,
+} from './layers/types'
 
 // =============================================================================
 // Types
@@ -86,6 +91,17 @@ function latLonToVector3(lat: number, lon: number, radius: number): THREE.Vector
     radius * Math.cos(phi),
     radius * Math.sin(phi) * Math.sin(theta),
   )
+}
+
+function buildHeatmapWeights(
+  planets: UseGlobeStateReturn['planets'],
+  activeWeight: number = 5,
+): Record<PlanetId, number> {
+  const weights = {} as Record<PlanetId, number>
+  for (const planet of PLANET_IDS) {
+    weights[planet] = planets[planet] ? activeWeight : 0
+  }
+  return weights
 }
 
 /**
@@ -325,6 +341,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
           if (placeholders) {
             placeholders.placeholder?.dispose()
             placeholders.blackPlaceholder?.dispose()
+            placeholders.blackDataPlaceholder?.dispose()
             placeholders.flatNormal?.dispose()
             earthMaterial.userData.placeholders = null
           }
@@ -620,13 +637,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       if (!globeState.layers.heatmap) return
 
       // Create weights from planet visibility using ref
-      const weights = PLANET_IDS.reduce(
-        (acc, planet) => ({
-          ...acc,
-          [planet]: planetsRef.current[planet] ? 5 : 0,
-        }),
-        {} as Record<string, number>,
-      )
+      const weights = buildHeatmapWeights(planetsRef.current)
 
       // Create new heatmap layer with current settings from refs
       const layer = createHeatmapLayer({
@@ -643,13 +654,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
     useEffect(() => {
       if (!sceneRef.current?.layers.heatmap || !declinations) return
 
-      const weights = PLANET_IDS.reduce(
-        (acc, planet) => ({
-          ...acc,
-          [planet]: globeState.planets[planet] ? 5 : 0,
-        }),
-        {} as Record<string, number>,
-      )
+      const weights = buildHeatmapWeights(globeState.planets)
 
       updateHeatmap(sceneRef.current.layers.heatmap.group, {
         declinations,
@@ -661,7 +666,7 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
 
     // Create/update city markers when DATA changes
     useEffect(() => {
-      if (!sceneRef.current || !rankedCities || rankedCities.length === 0) return
+      if (!sceneRef.current) return
 
       const { scene, layers } = sceneRef.current
 
@@ -669,6 +674,11 @@ export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGl
       if (layers.cityMarkers) {
         scene.remove(layers.cityMarkers.group)
         layers.cityMarkers.dispose()
+        layers.cityMarkers = undefined
+      }
+
+      if (!rankedCities || rankedCities.length === 0) {
+        return
       }
 
       // Create new layer with current settings
