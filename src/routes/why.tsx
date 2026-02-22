@@ -2,7 +2,6 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
-  BookOpen,
   Compass,
   Globe,
   Layers,

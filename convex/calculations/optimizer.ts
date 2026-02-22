@@ -5,6 +5,7 @@
 
 import { PLANET_IDS } from './core/types'
 import type { PlanetDeclinations } from './ephemeris'
+import type { PlanetId } from './core/types'
 
 export interface PlanetWeights {
   sun: number
@@ -22,9 +23,9 @@ export interface PlanetWeights {
 export interface LatitudeScore {
   latitude: number
   score: number
-  dominantPlanet: string
+  dominantPlanet: PlanetId
   alignments: Array<{
-    planet: string
+    planet: PlanetId
     declination: number
     distance: number
     contribution: number
@@ -35,7 +36,7 @@ export interface CityScore {
   cityId: string
   latitude: number
   score: number
-  dominantPlanet: string
+  dominantPlanet: PlanetId
 }
 
 // Use canonical PLANET_IDS from core/types
@@ -78,7 +79,7 @@ export function calculateLatitudeScore(
   const alignments: LatitudeScore['alignments'] = []
   let totalScore = 0
   let maxContribution = 0
-  let dominantPlanet = 'sun'
+  let dominantPlanet: PlanetId = 'sun'
 
   for (const planet of PLANET_IDS) {
     const declination = declinations[planet]
@@ -169,9 +170,9 @@ export function getOptimalLatitudeBands(
   declinations: PlanetDeclinations,
   weights: PlanetWeights,
   threshold: number = 50, // minimum score percentage
-): Array<{ min: number; max: number; dominantPlanet: string }> {
-  const bands: Array<{ min: number; max: number; dominantPlanet: string }> = []
-  let currentBand: { min: number; max: number; dominantPlanet: string } | null = null
+): Array<{ min: number; max: number; dominantPlanet: PlanetId }> {
+  const bands: Array<{ min: number; max: number; dominantPlanet: PlanetId }> = []
+  let currentBand: { min: number; max: number; dominantPlanet: PlanetId } | null = null
 
   for (let lat = -70; lat <= 70; lat += 0.5) {
     const score = calculateLatitudeScore(lat, declinations, weights)

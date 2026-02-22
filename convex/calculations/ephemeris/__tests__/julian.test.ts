@@ -124,6 +124,17 @@ describe('Julian Day Conversions', () => {
       const jd = dateToJulianDay('2000-01-01', '13:00', 'Europe/Paris')
       expect(jd).toBeCloseTo(2451545.0, 4)
     })
+
+    it('should differ for identical local times across timezones', () => {
+      const utcNoon = dateToJulianDay('2000-01-01', '12:00', 'UTC')
+      const laNoon = dateToJulianDay('2000-01-01', '12:00', 'America/Los_Angeles')
+      const tokyoNoon = dateToJulianDay('2000-01-01', '12:00', 'Asia/Tokyo')
+
+      // 12:00 local in Los Angeles is 8 hours after UTC noon.
+      expect(laNoon - utcNoon).toBeCloseTo(8 / 24, 4)
+      // 12:00 local in Tokyo is 9 hours before UTC noon.
+      expect(tokyoNoon - utcNoon).toBeCloseTo(-9 / 24, 4)
+    })
   })
 
   describe('dateObjectToJulianDay', () => {

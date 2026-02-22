@@ -14,6 +14,21 @@ const config = defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('/node_modules/three/') || id.includes('/node_modules/three/examples/')) {
+            return 'three-vendor'
+          }
+          if (id.includes('/src/components/globe/')) {
+            return 'globe'
+          }
+          return undefined
+        },
+      },
+    },
+  },
   plugins: [
     devtools(),
     nitro(),

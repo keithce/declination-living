@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAction, useConvexAuth, useMutation } from 'convex/react'
 import { toast } from 'sonner'
@@ -11,9 +11,10 @@ import { BirthDataForm } from '@/components/calculator/BirthDataForm'
 import { PlanetWeightsEditor } from '@/components/calculator/PlanetWeights'
 import { SaveChartModal } from '@/components/calculator/SaveChartModal'
 import { useCalculatorHydration, useCalculatorStore } from '@/stores/calculator-store'
-import { FullPageGlobeLayout } from '@/components/results/FullPageGlobeLayout'
 import { useGlobeState } from '@/components/globe/hooks/useGlobeState'
 import { useProgressiveVisualization } from '@/hooks/useProgressiveVisualization'
+
+const FullPageGlobeLayout = lazy(() => import('@/components/results/FullPageGlobeLayout'))
 
 export const Route = createFileRoute('/calculator')({
   component: CalculatorPage,
@@ -169,18 +170,20 @@ function CalculatorContent() {
   if (step === 'results' && result) {
     return (
       <>
-        <FullPageGlobeLayout
-          viz={viz}
-          birthData={birthData}
-          result={result}
-          weights={weights}
-          globeState={globeState}
-          onEditBirthData={() => setStep('birth-data')}
-          onModifyWeights={() => setStep('weights')}
-          onRecalculate={handleRecalculate}
-          onSaveChart={openSaveModal}
-          isCalculating={isCalculating}
-        />
+        <Suspense fallback={<CalculatorLoading />}>
+          <FullPageGlobeLayout
+            viz={viz}
+            birthData={birthData}
+            result={result}
+            weights={weights}
+            globeState={globeState}
+            onEditBirthData={() => setStep('birth-data')}
+            onModifyWeights={() => setStep('weights')}
+            onRecalculate={handleRecalculate}
+            onSaveChart={openSaveModal}
+            isCalculating={isCalculating}
+          />
+        </Suspense>
 
         <SaveChartModal
           isOpen={showSaveModal}

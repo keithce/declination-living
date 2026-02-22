@@ -5,7 +5,7 @@
  * Replaces the scrollable page layout when viewing calculation results.
  */
 
-import { useEffect, useMemo } from 'react'
+import { Suspense, lazy, useEffect, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Globe, Loader2 } from 'lucide-react'
@@ -18,9 +18,10 @@ import type { UseGlobeStateReturn } from '@/components/globe/hooks/useGlobeState
 import type { PlanetId } from '@/components/globe/layers/types'
 import type { ProgressiveVisualization } from '@/hooks/useProgressiveVisualization'
 import { PLANET_IDS } from '@/components/globe/layers/types'
-import { EnhancedGlobeCanvas } from '@/components/globe/EnhancedGlobeCanvas'
 import { transformACGLines, transformParans } from '@/components/globe/utils'
 import { useHeaderVisibility } from '@/contexts/HeaderContext'
+
+const EnhancedGlobeCanvas = lazy(() => import('@/components/globe/EnhancedGlobeCanvas'))
 
 // =============================================================================
 // Types
@@ -166,15 +167,23 @@ export function FullPageGlobeLayout({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <EnhancedGlobeCanvas
-          birthLocation={birthLocation}
-          declinations={declinationsForGlobe}
-          acgLines={transformedACGLines}
-          parans={transformedParans}
-          rankedCities={rankedCitiesForGlobe}
-          globeState={globeState}
-          className="w-full h-full"
-        />
+        <Suspense
+          fallback={
+            <div className="w-full h-full bg-[#0a0f1f] flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+            </div>
+          }
+        >
+          <EnhancedGlobeCanvas
+            birthLocation={birthLocation}
+            declinations={declinationsForGlobe}
+            acgLines={transformedACGLines}
+            parans={transformedParans}
+            rankedCities={rankedCitiesForGlobe}
+            globeState={globeState}
+            className="w-full h-full"
+          />
+        </Suspense>
       </motion.div>
 
       {/* Progressive loading indicator */}

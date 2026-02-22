@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "check": "prettier --write . && eslint . --fix",
     "typecheck": "tsc --noEmit",
+    "docs:check": "bun run scripts/check-doc-paths.ts",
     "format:ci": "prettier --check .",
     "lint:ci": "eslint . --max-warnings 0",
     "check:ci": "bun run format:ci && bun run lint:ci && bun run typecheck"
