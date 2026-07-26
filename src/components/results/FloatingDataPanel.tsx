@@ -135,7 +135,7 @@ function CompactDeclinations({
       </h3>
       <div className="grid grid-cols-5 gap-2">
         {PLANETS.map((planet) => {
-          const value = declinations[planet.key as keyof Declinations]
+          const value = declinations[planet.key]
           const enhanced = enhancedDeclinations?.[planet.key]
           const isOOB = enhanced?.isOOB ?? false
 

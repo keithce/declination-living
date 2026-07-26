@@ -1,1 +1,0 @@
-node node_modules/@typescript/native/bin/tsc --noEmit -p tsconfig.json >  2>&  2.00s user 0.43s system 473% cpu 0.511 total

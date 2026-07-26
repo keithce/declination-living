@@ -12,8 +12,7 @@ import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { AlertCircle, ArrowLeft, Calendar, Globe, Loader2, MapPin, Sparkles } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
-import type { Declinations, EnhancedDeclination } from '@/components/calculator/DeclinationTable'
-import type { ParanPoint, Sect } from '@convex/calculations/core/types'
+import type { ParanPoint } from '@convex/calculations/core/types'
 import type { ACGLineData } from '@/components/globe/layers/types'
 import type { RankedCity } from '@/components/results/CityRankings'
 import type { PlanetId } from '@/lib/planet-constants'
@@ -165,12 +164,10 @@ function ResultsPage() {
     weightEntries.length > 0 ? weightEntries.reduce((a, b) => (a[1] > b[1] ? a : b))[0] : 'sun'
 
   // Extract data for components
-  const declinations = chart.declinations as Declinations
-  const enhancedDeclinations = analysisCache?.enhancedDeclinations as
-    | Record<PlanetId, EnhancedDeclination>
-    | undefined
+  const declinations = chart.declinations
+  const enhancedDeclinations = analysisCache?.enhancedDeclinations
   const obliquity = analysisCache?.obliquity
-  const sect = (analysisCache?.sect ?? chart.sect ?? 'day') as Sect
+  const sect = analysisCache?.sect ?? chart.sect ?? 'day'
 
   // TODO: Compute ACG lines from chart data — see Phase 7 implementation
   const acgLines: Array<ACGLineData> = []

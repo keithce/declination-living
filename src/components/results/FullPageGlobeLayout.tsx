@@ -100,7 +100,7 @@ export function FullPageGlobeLayout({
     // Convert from Phase 1 Declinations type to Partial<Record<PlanetId, number>>
     const converted: Partial<Record<PlanetId, number>> = {}
     for (const planet of PLANET_IDS) {
-      const value = result.declinations[planet as keyof Declinations]
+      const value = result.declinations[planet]
       if (typeof value === 'number') {
         converted[planet] = value
       }

@@ -642,7 +642,7 @@ export const calculateCompleteEnhancedUncached = internalAction({
             oobDegrees: oobStatus[planet].oobDegrees,
           },
         ]),
-      ) as Record<string, EnhancedDeclination>,
+      ),
 
       // Optimization results
       optimalLatitudes,

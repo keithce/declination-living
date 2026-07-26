@@ -1,1 +1,0 @@
-node node_modules/@typescript/native/bin/tsc --noEmit -p convex/tsconfig.json  0.77s user 0.17s system 386% cpu 0.245 total
