@@ -21,7 +21,6 @@ import { gridOptionsValidator, planetWeightsValidator, validateGridOptions } fro
 import { generateScoringGrid } from './grid'
 import { rankCities } from './ranking'
 import type { GridCell, ScoringGridOptions } from './grid'
-import type { CityData } from './ranking'
 
 // =============================================================================
 // Types
@@ -193,7 +192,7 @@ export const rankTopCitiesUncached = internalAction({
 
     // 3. Run ranking pure function
     const ranked = rankCities(
-      cities as Array<CityData>,
+      cities,
       {
         declinations,
         positions: equatorialPositions,

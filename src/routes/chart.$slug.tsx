@@ -3,7 +3,6 @@ import { useQuery } from 'convex/react'
 import { motion } from 'framer-motion'
 import { AlertCircle, ArrowLeft, Calendar, Loader2, MapPin } from 'lucide-react'
 import { api } from '../../convex/_generated/api'
-import type { Declinations } from '@/components/calculator/DeclinationTable'
 import { DeclinationTable } from '@/components/calculator/DeclinationTable'
 import { ResultsPanel } from '@/components/calculator/ResultsPanel'
 import { GlobeView } from '@/components/globe'
@@ -127,7 +126,7 @@ function SharedChartPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <DeclinationTable declinations={chart.declinations as Declinations} />
+            <DeclinationTable declinations={chart.declinations} />
           </motion.div>
 
           {/* Globe */}

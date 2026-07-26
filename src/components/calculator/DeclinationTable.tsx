@@ -81,7 +81,7 @@ export const DeclinationTable = memo(function DeclinationTable({
 
         <div className="grid grid-cols-2 md:grid-cols-5">
           {PLANETS.map((planet, index) => {
-            const declination = declinations[planet.key as keyof Declinations]
+            const declination = declinations[planet.key]
             const oobInfo = getOOBInfo(planet.key)
 
             return (

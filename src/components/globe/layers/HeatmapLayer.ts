@@ -143,7 +143,11 @@ function fillHeatmapUniformArrays(
     hotLatitudes.push(lat)
 
     const hexColor = PLANET_COLORS_HEX[planet]
-    hotColors.push(((hexColor >> 16) & 0xff) / 255, ((hexColor >> 8) & 0xff) / 255, (hexColor & 0xff) / 255)
+    hotColors.push(
+      ((hexColor >> 16) & 0xff) / 255,
+      ((hexColor >> 8) & 0xff) / 255,
+      (hexColor & 0xff) / 255,
+    )
     hotWeights.push(weights[planet] / 10)
   }
 
@@ -223,7 +227,7 @@ export function createHeatmapLayer(options: HeatmapOptions): LayerGroup {
     hotLatitudes,
     hotColors,
     hotWeights,
-  } as HeatmapState
+  }
 
   // Update function to animate intensity
   const update = (time: number) => {
