@@ -253,12 +253,14 @@ function blobSizes(oids) {
 /**
  * Paths git itself treats as binary (numstat prints "-\t-" for them). This
  * honours .gitattributes (`binary`, `-diff`) and git's NUL-byte heuristic
- * without loading blobs into this process.
+ * without loading blobs into this process. We diff against the empty tree so
+ * only the new content decides: a normal diff reports "-\t-" when EITHER side
+ * is binary, which would exempt oversized text that replaced a binary file.
  */
 function binaryPaths(mode) {
   const args =
     mode === 'staged'
-      ? ['diff', '--cached', '--numstat', '-z', '--no-renames', '--diff-filter=ACMR']
+      ? ['diff', '--cached', '--numstat', '-z', '--no-renames', EMPTY_TREE]
       : ['diff', '--numstat', '-z', '--no-renames', EMPTY_TREE, 'HEAD']
   const binary = new Set()
   for (const record of git(args).split('\0')) {
