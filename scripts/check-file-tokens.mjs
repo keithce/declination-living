@@ -4,7 +4,8 @@
  *
  * Tokens are estimated as bytes / 4, so the limit is MAX_TOKENS * 4 bytes
  * (5,000 tokens = 20,000 bytes). Only STAGED files are checked, and the size
- * measured is the staged blob (`git cat-file -s :path`), not the working tree.
+ * measured is the staged blob in the index (its size via `git cat-file`), not
+ * the working-tree file.
  *
  * Dependency-free: runs under Node or Bun with only child_process.
  *
@@ -149,13 +150,24 @@ const IGNORE_PATTERNS = [
 
 // ---------------------------------------------------------------------------
 
-function git(args, opts = {}) {
+// Git's well-known empty tree object, used to diff HEAD against nothing for --all.
+const EMPTY_TREE = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+
+/**
+ * Run git and decode stdout as latin1, which maps each byte to one char. Paths
+ * therefore survive byte-for-byte even when they are not valid UTF-8; they are
+ * only decoded as UTF-8 for matching and display (see displayPath).
+ */
+function git(args, input) {
   return execFileSync('git', args, {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-    maxBuffer: 64 * 1024 * 1024,
-    ...opts,
-  })
+    input,
+    stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'],
+    maxBuffer: 256 * 1024 * 1024,
+  }).toString('latin1')
+}
+
+function displayPath(rawPath) {
+  return Buffer.from(rawPath, 'latin1').toString('utf8')
 }
 
 function escapeRegExp(s) {
@@ -190,53 +202,88 @@ function isIgnoredByPattern(path) {
   return matchers.some((m) => m(path))
 }
 
-/** Git's own notion of binary: `binary`/`-diff` attribute, or NUL in the first 8000 bytes. */
-function isBinary(path, rev) {
-  try {
-    const attr = git(['check-attr', 'diff', '--', path]).trim()
-    if (/: diff: unset$/.test(attr)) return true
-  } catch {
-    /* ignore */
+/**
+ * Blobs to check, as { rawPath, oid }. Staged mode lists added/copied/modified/
+ * renamed paths in the index (`git diff --cached --diff-filter=ACMR`, with
+ * --raw so we get the staged blob id directly). --all mode lists HEAD's tree.
+ * Submodules (gitlinks) are skipped: they have no blob.
+ */
+function listBlobs(mode) {
+  const blobs = []
+  if (mode === 'staged') {
+    // --raw -z records: ":<srcmode> <dstmode> <srcoid> <dstoid> <status>\0<path>\0"
+    const fields = git([
+      'diff',
+      '--cached',
+      '--raw',
+      '-z',
+      '--no-abbrev',
+      '--no-renames',
+      '--diff-filter=ACMR',
+    ]).split('\0')
+    for (let i = 0; i + 1 < fields.length; i += 2) {
+      const [, dstMode, , dstOid] = fields[i].split(' ')
+      if (dstMode === '160000') continue
+      blobs.push({ rawPath: fields[i + 1], oid: dstOid })
+    }
+  } else {
+    // ls-tree -z records: "<mode> <type> <oid>\t<path>\0"
+    for (const record of git(['ls-tree', '-r', '-z', '--full-tree', 'HEAD']).split('\0')) {
+      const tab = record.indexOf('\t')
+      if (tab === -1) continue
+      const [, type, oid] = record.slice(0, tab).split(' ')
+      if (type !== 'blob') continue
+      blobs.push({ rawPath: record.slice(tab + 1), oid })
+    }
   }
-  const head = execFileSync('git', ['cat-file', 'blob', `${rev}:${path}`], {
-    stdio: ['ignore', 'pipe', 'ignore'],
-    maxBuffer: 64 * 1024 * 1024,
-  }).subarray(0, 8000)
-  return head.includes(0)
+  return blobs
 }
 
-function blobSize(path, rev) {
-  return Number.parseInt(git(['cat-file', '-s', `${rev}:${path}`]).trim(), 10)
+/** Blob sizes in bytes, via one `git cat-file --batch-check` call (no content is read). */
+function blobSizes(oids) {
+  const sizes = new Map()
+  if (oids.length === 0) return sizes
+  for (const line of git(['cat-file', '--batch-check'], oids.join('\n') + '\n').split('\n')) {
+    const [oid, type, size] = line.split(' ')
+    if (type === 'blob') sizes.set(oid, Number.parseInt(size, 10))
+  }
+  return sizes
+}
+
+/**
+ * Paths git itself treats as binary (numstat prints "-\t-" for them). This
+ * honours .gitattributes (`binary`, `-diff`) and git's NUL-byte heuristic
+ * without loading blobs into this process.
+ */
+function binaryPaths(mode) {
+  const args =
+    mode === 'staged'
+      ? ['diff', '--cached', '--numstat', '-z', '--no-renames', '--diff-filter=ACMR']
+      : ['diff', '--numstat', '-z', '--no-renames', EMPTY_TREE, 'HEAD']
+  const binary = new Set()
+  for (const record of git(args).split('\0')) {
+    if (record.startsWith('-\t-\t')) binary.add(record.slice(4))
+  }
+  return binary
 }
 
 function estimateTokens(bytes) {
   return Math.ceil(bytes / BYTES_PER_TOKEN)
 }
 
-function stagedFiles() {
-  const out = git(['diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z'])
-  return out.split('\0').filter(Boolean)
-}
-
-function trackedFiles() {
-  return git(['ls-files', '-z']).split('\0').filter(Boolean)
-}
-
-function findOffenders(paths, rev) {
-  const offenders = []
-  for (const path of paths) {
-    if (isIgnoredByPattern(path)) continue
-    let bytes
-    try {
-      bytes = blobSize(path, rev)
-    } catch {
-      continue // e.g. submodule or gone between diff and cat-file
-    }
-    if (bytes <= MAX_BYTES) continue
-    if (isBinary(path, rev)) continue
-    offenders.push({ path, bytes, tokens: estimateTokens(bytes) })
-  }
-  return offenders.sort((a, b) => b.bytes - a.bytes)
+function findOffenders(mode) {
+  const candidates = listBlobs(mode).filter((b) => !isIgnoredByPattern(displayPath(b.rawPath)))
+  const sizes = blobSizes([...new Set(candidates.map((b) => b.oid))])
+  const oversized = candidates.filter((b) => (sizes.get(b.oid) ?? 0) > MAX_BYTES)
+  if (oversized.length === 0) return []
+  const binary = binaryPaths(mode)
+  return oversized
+    .filter((b) => !binary.has(b.rawPath))
+    .map((b) => {
+      const bytes = sizes.get(b.oid)
+      return { path: displayPath(b.rawPath), bytes, tokens: estimateTokens(bytes) }
+    })
+    .sort((a, b) => b.bytes - a.bytes)
 }
 
 function formatOffenders(offenders) {
@@ -291,7 +338,7 @@ function main() {
   }
 
   if (args.has('--all')) {
-    const offenders = findOffenders(trackedFiles(), 'HEAD')
+    const offenders = findOffenders('all')
     if (offenders.length === 0) {
       process.stdout.write(`All tracked files are under ${MAX_TOKENS.toLocaleString()} tokens.\n`)
       return 0
@@ -302,9 +349,7 @@ function main() {
     return 1
   }
 
-  const staged = stagedFiles()
-  if (staged.length === 0) return 0
-  const offenders = findOffenders(staged, '')
+  const offenders = findOffenders('staged')
   if (offenders.length === 0) return 0
   printBlockedMessage(offenders)
   return 1
