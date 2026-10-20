@@ -14,7 +14,9 @@
     "docs:check": "bun run scripts/check-doc-paths.ts",
     "format:ci": "prettier --check .",
     "lint:ci": "eslint . --max-warnings 0",
-    "check:ci": "bun run format:ci && bun run lint:ci && bun run typecheck"
+    "check:ci": "bun run format:ci && bun run lint:ci && bun run typecheck",
+    "check:file-tokens": "node scripts/check-file-tokens.mjs",
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
     "@auth/core": "0.41.1",
@@ -88,9 +90,13 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "jsdom": "^27.4.0",
     "prettier": "^3.8.1",
+    "simple-git-hooks": "^2.14.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vite": "^7.3.1",
     "vitest": "^3.2.4",
     "web-vitals": "^5.1.0"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "node scripts/check-file-tokens.mjs"
   }
 }

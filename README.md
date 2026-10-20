@@ -27,16 +27,16 @@ Known limitations (as of February 22, 2026):
 
 ## Tech Stack
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | TanStack Start (React 19 + Vite) |
-| Routing | TanStack Router (file-based routes) |
-| Backend | Convex (database + functions) |
-| Styling | Tailwind CSS v4 + shadcn/ui |
+| Layer            | Technology                               |
+| ---------------- | ---------------------------------------- |
+| Frontend         | TanStack Start (React 19 + Vite)         |
+| Routing          | TanStack Router (file-based routes)      |
+| Backend          | Convex (database + functions)            |
+| Styling          | Tailwind CSS v4 + shadcn/ui              |
 | 3D Visualization | Custom Three.js scene/layer/shader stack |
-| Astronomy | astronomia + sweph-wasm integration path |
-| Auth | Convex Auth |
-| Animation | Framer Motion |
+| Astronomy        | astronomia + sweph-wasm integration path |
+| Auth             | Convex Auth                              |
+| Animation        | Framer Motion                            |
 
 ## Key Paths
 
@@ -78,16 +78,21 @@ bun run test
 bun run build
 ```
 
+### File size limit (pre-commit hook)
+
+A pre-commit hook blocks committing any file over **5,000 estimated tokens** (bytes / 4, so 20,000 bytes). Large files are hard for people and coding agents to read and edit safely, so split them by responsibility instead. The hook is installed automatically by `bun install` (via `simple-git-hooks`); run `bunx simple-git-hooks` to reinstall it. It checks only staged files and skips lockfiles, generated code, binaries and other non-authored files listed in `scripts/check-file-tokens.mjs`. Use `bun run check:file-tokens -- --all` to list tracked files already over the limit, and `git commit --no-verify` only in an emergency.
+
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `bun run dev` | Start frontend on port 3000 |
-| `npx convex dev` | Start Convex backend |
-| `bun run test` | Run tests |
-| `bun run typecheck` | Type-check project |
-| `bun run build` | Production build |
-| `bun run docs:check` | Validate markdown file-path references |
+| Command                              | Description                                   |
+| ------------------------------------ | --------------------------------------------- |
+| `bun run dev`                        | Start frontend on port 3000                   |
+| `npx convex dev`                     | Start Convex backend                          |
+| `bun run test`                       | Run tests                                     |
+| `bun run typecheck`                  | Type-check project                            |
+| `bun run build`                      | Production build                              |
+| `bun run docs:check`                 | Validate markdown file-path references        |
+| `bun run check:file-tokens -- --all` | List tracked files over the 5,000-token limit |
 
 ## License
 
