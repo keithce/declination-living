@@ -30,12 +30,7 @@ import {
 import { PLANET_IDS } from './layers/types'
 import type { EarthTextures } from './shaders'
 import type { UseGlobeStateReturn } from './hooks/useGlobeState'
-import type {
-  CityMarkerData,
-  ExtendedGlobeCanvasProps,
-  LayerGroup,
-  PlanetId,
-} from './layers/types'
+import type { CityMarkerData, ExtendedGlobeCanvasProps, LayerGroup, PlanetId } from './layers/types'
 
 // =============================================================================
 // Types
@@ -138,7 +133,7 @@ function createStars(): THREE.Points {
 // =============================================================================
 
 export const EnhancedGlobeCanvas = forwardRef<EnhancedGlobeCanvasRef, EnhancedGlobeCanvasProps>(
-  function EnhancedGlobeCanvas(
+  function EnhancedGlobeCanvasInner(
     {
       birthLocation,
       declinations,

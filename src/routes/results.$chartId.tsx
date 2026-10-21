@@ -78,8 +78,7 @@ function ResultsPage() {
 
   // Extract data early so we can reference it in tab reset effect
   const dignities = (analysisCache?.dignities ?? chart?.dignities) as
-    | Record<PlanetId, DignityScoreData>
-    | undefined
+    Record<PlanetId, DignityScoreData> | undefined
   const parans = analysisCache?.topParans as Array<ParanPoint> | undefined
 
   // Reset tab to overview if current tab's data becomes unavailable

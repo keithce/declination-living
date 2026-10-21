@@ -110,7 +110,10 @@ export function generateScoringGrid(
     const zenithResult = scoreLatitude(lat, declinations, weights)
     const paranScore = scoreParanProximity(lat, parans, weights, paranOrb)
     const candidateAcgLines = acgLatitudeBounds
-      .filter((lineBounds) => lat >= lineBounds.minLatitude - acgOrb && lat <= lineBounds.maxLatitude + acgOrb)
+      .filter(
+        (lineBounds) =>
+          lat >= lineBounds.minLatitude - acgOrb && lat <= lineBounds.maxLatitude + acgOrb,
+      )
       .map((lineBounds) => lineBounds.line)
 
     for (let lon = lonMin; lon <= lonMax; lon += lonStep) {

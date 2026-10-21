@@ -9,22 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WhyRouteImport } from './routes/why'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ResultsChartIdRouteImport } from './routes/results.$chartId'
-import { Route as ChartSlugRouteImport } from './routes/chart.$slug'
+import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as WhyRouteImport } from './routes/why'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as ChartSlugRouteImport } from './routes/chart.$slug'
+import { Route as ResultsChartIdRouteImport } from './routes/results.$chartId'
 
-const WhyRoute = WhyRouteImport.update({
-  id: '/why',
-  path: '/why',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CalculatorRoute = CalculatorRouteImport.update({
@@ -32,14 +27,19 @@ const CalculatorRoute = CalculatorRouteImport.update({
   path: '/calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResultsChartIdRoute = ResultsChartIdRouteImport.update({
-  id: '/results/$chartId',
-  path: '/results/$chartId',
+const WhyRoute = WhyRouteImport.update({
+  id: '/why',
+  path: '/why',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSigninRoute = AuthSigninRouteImport.update({
+  id: '/auth/signin',
+  path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChartSlugRoute = ChartSlugRouteImport.update({
@@ -47,9 +47,9 @@ const ChartSlugRoute = ChartSlugRouteImport.update({
   path: '/chart/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthSigninRoute = AuthSigninRouteImport.update({
-  id: '/auth/signin',
-  path: '/auth/signin',
+const ResultsChartIdRoute = ResultsChartIdRouteImport.update({
+  id: '/results/$chartId',
+  path: '/results/$chartId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -123,18 +123,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/why': {
-      id: '/why'
-      path: '/why'
-      fullPath: '/why'
-      preLoaderRoute: typeof WhyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/calculator': {
@@ -144,18 +137,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/results/$chartId': {
-      id: '/results/$chartId'
-      path: '/results/$chartId'
-      fullPath: '/results/$chartId'
-      preLoaderRoute: typeof ResultsChartIdRouteImport
+    '/why': {
+      id: '/why'
+      path: '/why'
+      fullPath: '/why'
+      preLoaderRoute: typeof WhyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signin': {
+      id: '/auth/signin'
+      path: '/auth/signin'
+      fullPath: '/auth/signin'
+      preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chart/$slug': {
@@ -165,11 +165,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChartSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/signin': {
-      id: '/auth/signin'
-      path: '/auth/signin'
-      fullPath: '/auth/signin'
-      preLoaderRoute: typeof AuthSigninRouteImport
+    '/results/$chartId': {
+      id: '/results/$chartId'
+      path: '/results/$chartId'
+      fullPath: '/results/$chartId'
+      preLoaderRoute: typeof ResultsChartIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

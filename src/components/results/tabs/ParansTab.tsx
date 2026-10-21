@@ -53,7 +53,7 @@ function matchesEventFilter(paran: ParanPoint, filter: EventTypeFilter): boolean
 // Main Component
 // =============================================================================
 
-export const ParansTab = memo(function ParansTab({
+export const ParansTab = memo(function ParansTabInner({
   parans,
   displayLimit = 100,
   compact = false,

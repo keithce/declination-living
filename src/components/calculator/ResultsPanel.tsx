@@ -20,7 +20,7 @@ interface ResultsPanelProps {
   latitudeBands: Array<LatitudeBand>
 }
 
-export const ResultsPanel = memo(function ResultsPanel({
+export const ResultsPanel = memo(function ResultsPanelInner({
   optimalLatitudes,
   latitudeBands,
 }: ResultsPanelProps) {

@@ -2,7 +2,8 @@ import { URL, fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact from '@vitejs/plugin-react'
+import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -15,16 +16,13 @@ const config = defineConfig({
     },
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('/node_modules/three/')) {
-            return 'three-vendor'
-          }
-          if (id.includes('/src/components/globe/')) {
-            return 'globe'
-          }
-          return undefined
+        codeSplitting: {
+          groups: [
+            { name: 'three-vendor', test: /[\\/]node_modules[\\/]three[\\/]/ },
+            { name: 'globe', test: /[\\/]src[\\/]components[\\/]globe[\\/]/ },
+          ],
         },
       },
     },
@@ -38,10 +36,10 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
-    viteReact({
-      babel: {
-        plugins: ['babel-plugin-react-compiler'],
-      },
+    viteReact(),
+    // @vitejs/plugin-react 6 dropped its Babel integration; React Compiler now runs via @rolldown/plugin-babel
+    babel({
+      presets: [reactCompilerPreset()],
     }),
   ],
 })

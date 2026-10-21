@@ -31,7 +31,7 @@ export interface OverviewTabProps {
 // Main Component
 // =============================================================================
 
-export const OverviewTab = memo(function OverviewTab({
+export const OverviewTab = memo(function OverviewTabInner({
   scoringGrid,
   topN = 10,
   compact = false,

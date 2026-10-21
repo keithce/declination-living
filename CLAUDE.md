@@ -26,18 +26,21 @@ bun --bun run typecheck        # TypeScript only
 **Stack:** TanStack Start (Vite + React 19) + Convex + Tailwind v4 + shadcn/ui
 
 **Frontend (`src/`):**
+
 - File-based routing via TanStack Router in `src/routes/`
 - Main flow: `/calculator` → birth data → planet weights → results with 3D globe
 - Globe visualization using `three-globe` with ACG lines, zenith bands
 - Planet constants centralized in `src/lib/planet-constants.ts`
 
 **Backend (`convex/`):**
+
 - All calculations server-side in Convex actions
 - Two-phase pipeline: Phase 1 (core positions/declinations) → Phase 2 (ACG/Parans/Grid)
 - Astronomical calculations use `astronomia` (VSOP87) + `sweph-wasm` (Swiss Ephemeris)
 - Aggressive caching via `@convex-dev/action-cache` (30-day TTL for most results)
 
 **Calculation modules:**
+
 - `convex/calculations/ephemeris/` - Planetary positions, Julian Day, OOB detection
 - `convex/calculations/acg/` - ACG line generation, zenith lines
 - `convex/calculations/parans/` - Paran point calculation
