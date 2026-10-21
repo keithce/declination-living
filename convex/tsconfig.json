@@ -11,6 +11,10 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    /* TypeScript 6+ no longer auto-includes every @types package, and `npx convex deploy`
+     * typechecks with the TypeScript 7 compiler. Declare Node types explicitly so
+     * `process.env` (Convex system variables, Vitest's `process.env.CI`) typechecks. */
+    "types": ["node"],
 
     /* These compiler options are required by Convex */
     "target": "ESNext",

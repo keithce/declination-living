@@ -4,13 +4,7 @@ import { dirname, relative, resolve } from 'node:path'
 const repoRoot = process.cwd()
 const repoTopLevel = new Set(readdirSync(repoRoot))
 
-const SKIP_DIRECTORIES = new Set([
-  '.git',
-  '.output',
-  '.tanstack',
-  '.vercel',
-  'node_modules',
-])
+const SKIP_DIRECTORIES = new Set(['.git', '.output', '.tanstack', '.vercel', 'node_modules'])
 
 function collectMarkdownFiles(rootDir: string): Array<string> {
   const markdownFiles: Array<string> = []
@@ -159,4 +153,6 @@ if (missing.length > 0) {
   process.exit(1)
 }
 
-console.log(`Checked ${markdownFiles.length} markdown files: no missing file-path references found.`)
+console.log(
+  `Checked ${markdownFiles.length} markdown files: no missing file-path references found.`,
+)

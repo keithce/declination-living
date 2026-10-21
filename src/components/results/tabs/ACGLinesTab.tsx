@@ -49,7 +49,7 @@ function groupLinesByPlanet(lines: Array<ACGLine>): Partial<Record<PlanetId, Arr
 // Main Component
 // =============================================================================
 
-export const ACGLinesTab = memo(function ACGLinesTab({
+export const ACGLinesTab = memo(function ACGLinesTabInner({
   acgLines,
   compact = false,
 }: ACGLinesTabProps) {

@@ -114,7 +114,7 @@ function formatDeclination(dec: number): string {
 // Section Components
 // =============================================================================
 
-const DeclinationsSection = memo(function DeclinationsSection({
+const DeclinationsSection = memo(function DeclinationsSectionInner({
   declinations,
   obliquity,
 }: {
@@ -178,7 +178,7 @@ const DeclinationsSection = memo(function DeclinationsSection({
   )
 })
 
-const DignitiesSection = memo(function DignitiesSection({
+const DignitiesSection = memo(function DignitiesSectionInner({
   dignities,
   sect,
 }: {
@@ -231,7 +231,7 @@ const DignitiesSection = memo(function DignitiesSection({
   )
 })
 
-const ZenithSection = memo(function ZenithSection({
+const ZenithSection = memo(function ZenithSectionInner({
   zenithLines,
 }: {
   zenithLines: Array<ZenithLine>
@@ -270,7 +270,7 @@ const ZenithSection = memo(function ZenithSection({
   )
 })
 
-const ParansSection = memo(function ParansSection({
+const ParansSection = memo(function ParansSectionInner({
   parans,
   summary,
 }: {
@@ -338,7 +338,7 @@ const ParansSection = memo(function ParansSection({
   )
 })
 
-const LocationsSection = memo(function LocationsSection({
+const LocationsSection = memo(function LocationsSectionInner({
   optimalLatitudes,
 }: {
   optimalLatitudes: Array<LatitudeResult>
@@ -403,7 +403,9 @@ const LocationsSection = memo(function LocationsSection({
 // Main Component
 // =============================================================================
 
-export const ResultsSections = memo(function ResultsSections({ results }: ResultsSectionsProps) {
+export const ResultsSections = memo(function ResultsSectionsInner({
+  results,
+}: ResultsSectionsProps) {
   const oobCount = Object.values(results.declinations).filter((d) => d.isOOB).length
 
   return (

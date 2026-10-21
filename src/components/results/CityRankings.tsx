@@ -245,7 +245,7 @@ function CityCard({
 // Main Component
 // =============================================================================
 
-export const CityRankings = memo(function CityRankings({
+export const CityRankings = memo(function CityRankingsInner({
   cities,
   onCityClick,
   compact = false,

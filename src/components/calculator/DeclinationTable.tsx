@@ -32,7 +32,7 @@ interface DeclinationTableProps {
   enhancedDeclinations?: Record<PlanetId, EnhancedDeclination>
 }
 
-export const DeclinationTable = memo(function DeclinationTable({
+export const DeclinationTable = memo(function DeclinationTableInner({
   declinations,
   obliquity,
   enhancedDeclinations,

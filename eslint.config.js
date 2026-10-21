@@ -44,6 +44,15 @@ export default [
     },
   },
 
+  // Vitest files under convex/ run in Node, not the Convex runtime, so the typed
+  // `env` object from `_generated/server` does not apply (e.g. `process.env.CI`).
+  {
+    files: ['convex/**/__tests__/**/*.ts'],
+    rules: {
+      '@convex-dev/no-process-env': 'off',
+    },
+  },
+
   // Allow redirect throws (TanStack Router pattern)
   {
     rules: {

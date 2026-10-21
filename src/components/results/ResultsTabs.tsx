@@ -73,7 +73,7 @@ function isValidTabValue(v: string): v is TabValue {
  * 4. Scoring - Grid cells with score breakdowns
  * 5. Parans - Paran aspects filtered by type
  */
-export const ResultsTabs = memo(function ResultsTabs({
+export const ResultsTabs = memo(function ResultsTabsInner({
   acgLines,
   zenithLines,
   parans,

@@ -29,14 +29,14 @@ function Tooltip({
 const TooltipTrigger = React.forwardRef<
   React.ComponentRef<typeof TooltipPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
->(function TooltipTrigger(props, ref) {
+>(function TooltipTriggerInner(props, ref) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" ref={ref} {...props} />
 })
 
 const TooltipContent = React.forwardRef<
   React.ComponentRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(function TooltipContent({ className, sideOffset = 0, children, ...props }, ref) {
+>(function TooltipContentInner({ className, sideOffset = 0, children, ...props }, ref) {
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content

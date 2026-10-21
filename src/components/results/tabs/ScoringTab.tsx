@@ -34,7 +34,7 @@ type SortField = 'score' | 'zenith' | 'acg' | 'paran'
 // Main Component
 // =============================================================================
 
-export const ScoringTab = memo(function ScoringTab({
+export const ScoringTab = memo(function ScoringTabInner({
   scoringGrid,
   displayLimit = 50,
   compact = false,

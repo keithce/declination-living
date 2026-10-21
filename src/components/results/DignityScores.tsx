@@ -153,7 +153,7 @@ function IndicatorBadge({
 // Main Component
 // =============================================================================
 
-export const DignityScores = memo(function DignityScores({
+export const DignityScores = memo(function DignityScoresInner({
   dignities,
   sect,
   compact = false,

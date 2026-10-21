@@ -32,7 +32,7 @@ export interface ZenithTabProps {
 // Main Component
 // =============================================================================
 
-export const ZenithTab = memo(function ZenithTab({
+export const ZenithTab = memo(function ZenithTabInner({
   zenithLines,
   initialOrb = 1.0,
   compact = false,
