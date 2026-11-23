@@ -1,0 +1,84 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":dependencyDashboard",
+    ":enableVulnerabilityAlerts",
+    ":semanticCommits"
+  ],
+  "ignorePresets": [":pinDevDependencies"],
+  "timezone": "America/New_York",
+  "schedule": ["before 6am on monday"],
+  "dependencyDashboard": {
+    "enabled": true,
+    "autoclose": false,
+    "labels": ["dependencies"],
+    "osvVulnerabilitySummary": "all",
+    "reportAbandonment": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "description": "Security PRs skip the schedule and the release-age wait (Renovate forces minimumReleaseAge: null), so never automerge them. addLabels keeps the top-level \"dependencies\" label; labels would replace it.",
+    "automerge": false,
+    "addLabels": ["security"]
+  },
+  "labels": ["dependencies"],
+  "assignees": ["keithce"],
+  "reviewers": ["keithce"],
+  "automerge": false,
+  "separateMinorPatch": true,
+  "packageRules": [
+    {
+      "description": "Renovate cannot do lockfile-only updates for bun, and the default range strategy (replace) skips every release inside a ^ range. Bump the package.json range so in-range patches and minors are proposed and bun.lock is regenerated with them.",
+      "matchManagers": ["bun"],
+      "rangeStrategy": "bump"
+    },
+    {
+      "description": "Require dashboard approval before opening breaking major upgrade PRs.",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Every patch update arrives in one weekly PR (renovate/patch-all). separateMinorPatch keeps a patch here even when the package also has a newer minor, which goes to the minor PR.",
+      "matchUpdateTypes": ["patch"],
+      "groupName": "patch updates",
+      "groupSlug": "all"
+    },
+    {
+      "description": "0.x patches can break, so they go to their own weekly PR (renovate/patch-all-0.x) for a person to merge. A branch automerges only when every upgrade in it does, so one 0.x patch in renovate/patch-all would hold every other patch.",
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "/^[~^=v]*0\\./",
+      "groupName": "0.x patch updates",
+      "groupSlug": "all-0.x"
+    },
+    {
+      "description": "npm patches on 1.x and later automerge once every check on the PR is green and the release is 3 days old. Repo-level GitHub auto-merge is off and main is unprotected, so Renovate merges the PR itself (platformAutomerge: false) after the CI workflow passes.",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "!/^[~^=v]*0\\./",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false,
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Every minor update arrives in one weekly PR (renovate/all-minor), merged by a person.",
+      "matchUpdateTypes": ["minor"],
+      "groupName": "minor updates",
+      "groupSlug": "all-minor"
+    },
+    {
+      "description": "Keep Actions patch and minor bumps on one branch instead of splitting them.",
+      "matchManagers": ["github-actions"],
+      "separateMinorPatch": false
+    },
+    {
+      "description": "Batch routine action bumps and digest pins into one weekly PR, merged by a person. Actions changes alter the CI gate itself, so they never automerge.",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions",
+      "automerge": false
+    }
+  ]
+}
